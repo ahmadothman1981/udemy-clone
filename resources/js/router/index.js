@@ -29,7 +29,13 @@ const routes = [
     { path: '/instructor', component: InstructorDashboard, meta: { requiresAuth: true, requiresInstructor: true } },
     { path: '/course/:slug', component: CourseDetail, props: true },
     {
-        path: '/learn/course/:courseId/lecture/:lectureId?',
+        path: '/learn/course/:courseSlug',
+        component: LearningPlayer,
+        props: true,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/learn/course/:courseSlug/lecture/:lectureId?',
         component: LearningPlayer,
         props: true,
         meta: { requiresAuth: true }

@@ -16,7 +16,15 @@ class LectureResource extends JsonResource
             'order' => $this->order,
             'preview' => $this->preview,
             // Only show content if enrolled or it's a preview? Logic handled in controller/query usually, but here we can hide if not loaded
-            'video_url' => $this->when($this->preview || $request->user()?->owns($this->section->course), $this->video_url), // Simplified logic
+            // Only show content if enrolled or it's a preview or owner
+            'video_url' => $this->when(
+                $this->preview || 
+                ($request->user() && (
+                    $request->user()->owns($this->section->course) || 
+                    $this->section->course->isEnrolledBy($request->user())
+                )), 
+                $this->video_url
+            ),
             'duration_minutes' => $this->duration_minutes,
         ];
     }

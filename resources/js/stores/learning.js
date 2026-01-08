@@ -17,7 +17,7 @@ export const useLearningStore = defineStore('learning', {
         },
         async fetchProgress(courseId) {
             const response = await axios.get(`/api/courses/${courseId}/progress`);
-            this.currentProgress = response.data.completed_lectures;
+            this.currentProgress = response.data.completed_lectures || [];
         },
         async markComplete(lectureId, completed = true) {
             await axios.post(`/api/lectures/${lectureId}/progress`, { completed });

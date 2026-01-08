@@ -2,8 +2,8 @@
     <div class="flex flex-col h-screen overflow-hidden bg-gray-900 text-white">
         <!-- Top Bar -->
         <header class="h-14 bg-gray-800 flex items-center px-4 border-b border-gray-700 shadow-md z-10 flex-shrink-0">
-            <router-link :to="`/course/${course?.slug || courseId}`" class="mr-4 text-gray-400 hover:text-white">
-                &larr; Back
+            <router-link to="/dashboard" class="mr-4 text-gray-400 hover:text-white">
+                &larr; Back to Dashboard
             </router-link>
             <h1 class="text-sm font-bold truncate flex-1">{{ currentLecture?.title || 'Loading...' }}</h1>
              <div class="ml-4">
@@ -44,7 +44,7 @@
                      <ul>
                          <li v-for="lecture in section.lectures" :key="lecture.id">
                              <router-link 
-                                :to="`/learn/course/${course?.slug || courseId}/lecture/${lecture.id}`"
+                                :to="`/learn/course/${course?.slug || courseSlug}/lecture/${lecture.id}`"
                                 class="block px-4 py-3 text-sm hover:bg-gray-700 border-b border-gray-700 flex items-start"
                                 :class="{ 'bg-gray-900 border-l-4 border-l-purple-500': lecture.id == currentLectureId }"
                              >
@@ -74,7 +74,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '../stores/course';
 import { useLearningStore } from '../stores/learning';
 
-const props = defineProps(['courseId', 'lectureId']);
+const props = defineProps(['courseSlug', 'lectureId']);
 const route = useRoute();
 const router = useRouter(); // Import router if needed
 const courseStore = useCourseStore();
@@ -84,7 +84,7 @@ const course = computed(() => courseStore.currentCourse);
 const currentLectureId = computed(() => parseInt(props.lectureId) || course.value?.sections?.[0]?.lectures?.[0]?.id);
 
 const currentLecture = computed(() => {
-    if (!course.value) return null;
+    if (!course.value || !course.value.sections) return null;
     for (const section of course.value.sections) {
         const found = section.lectures.find(l => l.id === currentLectureId.value);
         if (found) return found;
@@ -98,12 +98,24 @@ const progressPercent = computed(() => {
 });
 
 onMounted(async () => {
-    await courseStore.fetchCourseDetail(props.courseId);
-    await learningStore.fetchProgress(props.courseId);
-    
-    // Redirect to first lecture if no lecture ID
-    if (!props.lectureId && course.value?.sections?.[0]?.lectures?.[0]) {
-         // This logic inside script setup with props sometimes tricky with router lifecycle
+    try {
+        // Fetch using slug
+        await courseStore.fetchCourseDetail(props.courseSlug);
+        // Note: Learning store might need course ID for specific tracking if not using slug, 
+        // but usually we need the course object first to get the ID if the store requires ID.
+        // If learningStore.fetchProgress expects ID, we should wait for course to load.
+        
+        if (course.value) {
+            await learningStore.fetchProgress(course.value.id);
+        }
+        
+        // Redirect to first lecture if no lecture ID
+        if (!props.lectureId && course.value?.sections?.[0]?.lectures?.[0]) {
+             // Ideally replace URL
+             router.replace(`/learn/course/${props.courseSlug}/lecture/${course.value.sections[0].lectures[0].id}`);
+        }
+    } catch (e) {
+        console.error("Error loading course content", e);
     }
 });
 
