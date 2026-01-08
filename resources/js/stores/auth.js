@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import { useCartStore } from './cart';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -59,7 +60,12 @@ export const useAuthStore = defineStore('auth', {
             this.token = null;
             this.user = null;
             localStorage.removeItem('token');
-            // call api logout if needed
+
+            // Clear cart
+            const cartStore = useCartStore();
+            cartStore.clear();
+
+            // call api logout if needed (optional)
         }
     }
 });

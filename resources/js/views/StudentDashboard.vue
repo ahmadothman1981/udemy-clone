@@ -227,6 +227,19 @@ const courseStore = useCourseStore();
 const loading = ref(true);
 const enrolledCourses = ref([]);
 const learningStreak = ref(7);
+const statsData = ref({
+  enrolled: 0,
+  hours: 0,
+  completed: 0,
+  certificates: 0
+});
+
+const achievements = ref([
+  { id: 1, name: 'First Course', icon: '🎓', unlocked: false },
+  { id: 2, name: '7 Day Streak', icon: '🔥', unlocked: false },
+  { id: 3, name: 'Fast Learner', icon: '⚡', unlocked: false },
+  { id: 4, name: 'Master', icon: '👑', unlocked: false },
+]);
 
 // Icon Components
 const CoursesIcon = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'w-6 h-6', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
@@ -253,25 +266,25 @@ const userName = computed(() => {
 const statsCards = computed(() => [
   {
     title: 'Enrolled Courses',
-    value: enrolledCourses.value.length,
+    value: statsData.value.enrolled,
     icon: CoursesIcon,
     bgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600',
   },
   {
     title: 'Hours Learned',
-    value: '24.5',
+    value: statsData.value.hours,
     icon: ClockIcon,
     bgClass: 'bg-gradient-to-br from-purple-500 to-pink-600',
   },
   {
     title: 'Certificates',
-    value: 2,
+    value: statsData.value.certificates,
     icon: TrophyIcon,
     bgClass: 'bg-gradient-to-br from-amber-500 to-orange-600',
   },
   {
     title: 'Completed',
-    value: 1,
+    value: statsData.value.completed,
     icon: CheckIcon,
     bgClass: 'bg-gradient-to-br from-green-500 to-emerald-600',
   },
@@ -281,29 +294,50 @@ const recommendedCourses = computed(() => {
   return courseStore.courses.slice(0, 4);
 });
 
-const achievements = ref([
-  { id: 1, name: 'First Course', icon: '🎓', unlocked: true },
-  { id: 2, name: '7 Day Streak', icon: '🔥', unlocked: true },
-  { id: 3, name: 'Fast Learner', icon: '⚡', unlocked: true },
-  { id: 4, name: 'Night Owl', icon: '🦉', unlocked: false },
-  { id: 5, name: 'Perfectionist', icon: '💯', unlocked: false },
-  { id: 6, name: 'Master', icon: '👑', unlocked: false },
-]);
-
 // Methods
 const continueCourse = (course) => {
   router.push(`/learn/course/${course.slug || course.id}`);
 };
 
-// Load data
+// Load data - Updated for dynamic stats
 onMounted(async () => {
   try {
-    // Fetch enrolled courses
-    const response = await axios.get('/api/my-courses');
-    enrolledCourses.value = response.data.map(enrollment => ({
-      ...enrollment.course,
-      progress: Math.floor(Math.random() * 80) + 10, // Mock progress
-    }));
+    loading.value = true;
+    
+    // Fetch dashboard stats
+    const statsResponse = await axios.get('/api/student/dashboard-stats');
+    const stats = statsResponse.data;
+    
+    // Update simple stats
+    learningStreak.value = stats.learning_streak;
+    
+    // Update achievements only if they are returned, otherwise keep defaults or merge
+    if (stats.achievements) {
+        achievements.value = stats.achievements;
+    }
+    
+    // Update stats cards keys
+    statsData.value = {
+      enrolled: stats.enrolled_courses_count,
+      hours: stats.hours_learned,
+      completed: stats.completed_courses_count,
+      certificates: stats.certificates_count
+    };
+
+    // Fetch enrolled courses (now includes progress from backend)
+    const coursesResponse = await axios.get('/api/my-courses');
+    // Handle paginated response: response.data.data
+    const coursesData = coursesResponse.data.data || coursesResponse.data; // graceful fallback if structure changes
+    
+    if (Array.isArray(coursesData)) {
+        enrolledCourses.value = coursesData.map(course => ({
+          ...course,
+          progress: course.progress || 0,
+        }));
+    } else {
+        console.error('Unexpected courses response format', coursesResponse.data);
+        enrolledCourses.value = [];
+    }
     
     // Fetch recommended courses
     if (courseStore.courses.length === 0) {

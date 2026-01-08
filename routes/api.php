@@ -89,6 +89,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/courses/{course}/quizzes/{quiz}/questions', [\App\Http\Controllers\QuizController::class, 'storeQuestion']);
 
     // Learning Flow (Student)
+    Route::get('/student/dashboard-stats', [\App\Http\Controllers\EnrollmentController::class, 'dashboardStats']);
     Route::post('/courses/{course}/enroll', [\App\Http\Controllers\EnrollmentController::class, 'store']);
     Route::get('/my-courses', [\App\Http\Controllers\EnrollmentController::class, 'index']);
     Route::post('/lectures/{lecture}/progress', [\App\Http\Controllers\ProgressController::class, 'update']); // Toggle complete

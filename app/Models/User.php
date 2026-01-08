@@ -56,4 +56,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(SavedPaymentMethod::class);
     }
+
+    public function owns(Course $course)
+    {
+        return $this->id === $course->instructor_id;
+    }
 }
