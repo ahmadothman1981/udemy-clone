@@ -1,0 +1,13 @@
+{
+    "nav": {
+        "login": "تسجيل الدخول",
+        "signup": "اشترك",
+        "my_learning": "تعليمي",
+        "instructor": "المحاضر"
+    },
+    "catalog": {
+        "search_placeholder": "ابحث عن أي شيء",
+        "filter": "تصفية",
+        "sort": "ترتيب حسب"
+    }
+}

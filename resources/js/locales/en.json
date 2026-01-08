@@ -1,0 +1,13 @@
+{
+    "nav": {
+        "login": "Log In",
+        "signup": "Sign Up",
+        "my_learning": "My Learning",
+        "instructor": "Instructor"
+    },
+    "catalog": {
+        "search_placeholder": "Search for anything",
+        "filter": "Filter",
+        "sort": "Sort by"
+    }
+}
