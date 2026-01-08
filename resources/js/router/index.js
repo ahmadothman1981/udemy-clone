@@ -23,6 +23,7 @@ const routes = [
     { path: '/payment-methods', component: () => import('../views/PaymentMethods.vue'), meta: { requiresAuth: true } },
     { path: '/messages', component: () => import('../views/Messages.vue'), meta: { requiresAuth: true } },
     { path: '/admin', component: AdminDashboard, meta: { requiresAuth: true } },
+    { path: '/dashboard', component: () => import('../views/StudentDashboard.vue'), meta: { requiresAuth: true } },
     { path: '/instructor', component: InstructorDashboard, meta: { requiresAuth: true } },
     { path: '/course/:slug', component: CourseDetail, props: true },
     {

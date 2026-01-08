@@ -75,7 +75,10 @@
            {{ $t('nav.instructor') }}
         </router-link>
         
-        <router-link to="/my-courses" class="text-gray-600 hover:text-gray-900 text-sm">
+        <router-link v-if="auth.isAuthenticated" to="/dashboard" class="text-gray-600 hover:text-gray-900 text-sm">
+           My Dashboard
+        </router-link>
+        <router-link v-else to="/my-courses" class="text-gray-600 hover:text-gray-900 text-sm">
            {{ $t('nav.my_learning') }}
         </router-link>
 
@@ -111,6 +114,9 @@
 
                <!-- Menu Links -->
                <div class="py-2">
+                   <router-link to="/dashboard" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
+                       My Dashboard
+                   </router-link>
                    <router-link to="/my-courses" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
                        {{ $t('nav.my_learning') || 'My learning' }}
                    </router-link>
