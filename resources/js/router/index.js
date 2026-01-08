@@ -35,6 +35,16 @@ const routes = [
         path: '/my-courses',
         component: MyCourses,
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/checkout',
+        component: () => import('../views/Checkout.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/checkout/success',
+        component: () => import('../views/CheckoutSuccess.vue'),
+        meta: { requiresAuth: true }
     }
 ];
 

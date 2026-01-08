@@ -119,3 +119,9 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 // Payment
 Route::post('/courses/{course}/payment-intent', [\App\Http\Controllers\PaymentController::class, 'createIntent']);
 
+// Checkout
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/checkout/preview', [\App\Http\Controllers\CheckoutController::class, 'preview']);
+    Route::post('/checkout', [\App\Http\Controllers\CheckoutController::class, 'processOrder']);
+});
+

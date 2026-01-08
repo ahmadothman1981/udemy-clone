@@ -74,8 +74,10 @@
 <script setup>
 import { useCartStore } from '../stores/cart';
 import { useWishlistStore } from '../stores/wishlist';
+import { useRouter } from 'vue-router';
 import Navbar from '../components/Navbar.vue';
 
+const router = useRouter();
 const cartStore = useCartStore();
 const wishlistStore = useWishlistStore();
 
@@ -89,7 +91,6 @@ const moveToWishlist = (item) => {
 };
 
 const checkout = () => {
-    alert('Checkout feature coming soon!');
-    // Redirect to payment gateway or checkout process
+    router.push('/checkout');
 };
 </script>
