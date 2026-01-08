@@ -66,7 +66,7 @@
         <!-- Main Content -->
         <div class="flex-1 min-w-0">
           <!-- Stats Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div v-if="['dashboard', 'performance'].includes(activeTab)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div v-for="stat in statsCards" :key="stat.title" class="stat-card group">
               <div class="stat-icon" :class="stat.bgClass">
                 <component :is="stat.icon" class="w-6 h-6 text-white" />
@@ -82,7 +82,7 @@
           </div>
 
           <!-- Courses Section -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div v-if="activeTab === 'courses'" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h2 class="text-xl font-bold text-gray-900">Your Courses</h2>
@@ -205,7 +205,7 @@
           </div>
 
           <!-- Recent Activity / Reviews Section -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <div v-if="['dashboard', 'communication'].includes(activeTab)" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
             <!-- Recent Reviews -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div class="p-6 border-b border-gray-100">
@@ -418,7 +418,7 @@ const filteredCourses = computed(() => {
   return courses.value;
 });
 
-const unansweredCount = computed(() => recentQuestions.value.filter(q => !q.answered).length);
+const unansweredCount = computed(() => stats.value?.unanswered_questions_count || 0);
 
 // Methods
 const formatDate = (date) => {
@@ -468,15 +468,12 @@ onMounted(async () => {
     stats.value = statsRes.data;
     courses.value = coursesRes.data;
     
-    // Mock recent reviews and questions for demo
-    recentReviews.value = [
-      { id: 1, user: { name: 'John Doe' }, rating: 5, comment: 'Excellent course! Very well explained.', course: { title: 'Python Masterclass' } },
-      { id: 2, user: { name: 'Sarah Smith' }, rating: 4, comment: 'Good content but could use more examples.', course: { title: 'Web Development' } },
-    ];
-    recentQuestions.value = [
-      { id: 1, user: { name: 'Mike Johnson' }, title: 'How to fix this error?', body: 'I am getting a TypeError when...', course: { title: 'Python Masterclass' }, answered: false, created_at: new Date() },
-      { id: 2, user: { name: 'Emily Brown' }, title: 'Best practices question', body: 'What is the recommended way to...', course: { title: 'Web Development' }, answered: true, created_at: new Date() },
-    ];
+    // Assign real data from backend
+    recentReviews.value = statsRes.data.recent_reviews || [];
+    recentQuestions.value = statsRes.data.recent_questions || [];
+    
+    // Fallback if empty for demo feeling (optional, maybe remove for production)
+    // If we want real empty state, just leave as is.
   } catch (e) {
     console.error("Error loading instructor data", e);
   } finally {

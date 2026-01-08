@@ -22,10 +22,9 @@ class InstructorController extends Controller implements HasMiddleware
     {
         $user = $request->user();
 
-        // Get courses where user is instructor - using 'courses' relationship
-        $courses = $user->courses; // This is hasMany(Course::class, 'instructor_id')
+        // Get courses where user is instructor
+        $courses = $user->courses;
 
-        // Don't return 403 if no courses - instructor can have 0 courses
         $totalStudents = 0;
         $totalRevenue = 0;
         $totalReviews = 0;
@@ -40,6 +39,47 @@ class InstructorController extends Controller implements HasMiddleware
         }
 
         $avgRating = $courseCount > 0 ? $globalRatingSum / $courseCount : 0;
+        
+        // Recent Reviews (limit 5)
+        $courseIds = $courses->pluck('id');
+        $recentReviews = \App\Models\Review::whereIn('course_id', $courseIds)
+            ->with(['user:id,name', 'course:id,title'])
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'id' => $review->id,
+                    'user' => $review->user,
+                    'course' => $review->course,
+                    'rating' => $review->rating,
+                    'comment' => $review->content, // Map content to comment
+                    'created_at' => $review->created_at,
+                ];
+            });
+            
+        // Recent Questions (limit 5)
+        $recentQuestions = \App\Models\CourseQuestion::whereIn('course_id', $courseIds)
+            ->with(['user:id,name', 'course:id,title'])
+            ->withCount('answers')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($q) {
+                return [
+                    'id' => $q->id,
+                    'user' => $q->user,
+                    'course' => $q->course,
+                    'title' => \Illuminate\Support\Str::limit($q->question, 50), // Generate title from question
+                    'body' => $q->question,
+                    'answered' => $q->answers_count > 0,
+                    'created_at' => $q->created_at, // Use created_at or asked_at if exists
+                ];
+            });
+            
+        $unansweredCount = \App\Models\CourseQuestion::whereIn('course_id', $courseIds)
+            ->whereDoesntHave('answers') // Assuming 'answers' relation exists
+            ->count();
 
         return response()->json([
             'total_students' => $totalStudents,
@@ -50,6 +90,9 @@ class InstructorController extends Controller implements HasMiddleware
             'monthly_students' => rand(5, 30), // Mock for now
             'monthly_revenue' => number_format(rand(100, 2000), 2),
             'monthly_reviews' => rand(1, 15),
+            'recent_reviews' => $recentReviews,
+            'recent_questions' => $recentQuestions,
+            'unanswered_questions_count' => $unansweredCount
         ]);
     }
 
