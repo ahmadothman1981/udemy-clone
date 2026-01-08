@@ -17,6 +17,7 @@ const routes = [
     { path: '/signup', component: Signup },
     { path: '/forgot-password', component: () => import('../views/ForgotPassword.vue') },
     { path: '/password-reset/:token', component: () => import('../views/ResetPassword.vue') },
+    { path: '/instructor/signup', component: () => import('../views/InstructorSignup.vue') },
     { path: '/cart', component: () => import('../views/Cart.vue') },
     { path: '/wishlist', component: () => import('../views/Wishlist.vue') },
     { path: '/account-settings', component: () => import('../views/AccountSettings.vue'), meta: { requiresAuth: true } },
