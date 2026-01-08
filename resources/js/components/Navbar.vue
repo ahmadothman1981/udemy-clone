@@ -71,7 +71,7 @@
              </span>
          </router-link>
 
-        <router-link to="/instructor" class="text-gray-600 hover:text-gray-900 hidden lg:block text-sm">
+        <router-link v-if="auth.isInstructor" to="/instructor" class="text-gray-600 hover:text-gray-900 hidden lg:block text-sm">
            {{ $t('nav.instructor') }}
         </router-link>
         
@@ -126,7 +126,7 @@
                     <router-link to="/wishlist" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50 md:hidden" @click="isUserMenuOpen = false">
                        My wishlist
                    </router-link>
-                   <router-link to="/instructor" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
+                   <router-link v-if="auth.isInstructor" to="/instructor" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
                        {{ $t('nav.instructor') || 'Instructor Dashboard' }}
                    </router-link>
                </div>

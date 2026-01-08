@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
 // Lazy load views
 const Home = () => import('../views/CourseCatalog.vue');
@@ -22,9 +23,9 @@ const routes = [
     { path: '/notifications', component: () => import('../views/Notifications.vue'), meta: { requiresAuth: true } },
     { path: '/payment-methods', component: () => import('../views/PaymentMethods.vue'), meta: { requiresAuth: true } },
     { path: '/messages', component: () => import('../views/Messages.vue'), meta: { requiresAuth: true } },
-    { path: '/admin', component: AdminDashboard, meta: { requiresAuth: true } },
+    { path: '/admin', component: AdminDashboard, meta: { requiresAuth: true, requiresAdmin: true } },
     { path: '/dashboard', component: () => import('../views/StudentDashboard.vue'), meta: { requiresAuth: true } },
-    { path: '/instructor', component: InstructorDashboard, meta: { requiresAuth: true } },
+    { path: '/instructor', component: InstructorDashboard, meta: { requiresAuth: true, requiresInstructor: true } },
     { path: '/course/:slug', component: CourseDetail, props: true },
     {
         path: '/learn/course/:courseId/lecture/:lectureId?',
@@ -54,9 +55,41 @@ const router = createRouter({
     routes
 });
 
-// Mock Auth Guard
-router.beforeEach((to, from, next) => {
-    // In real app check pinia auth store
+// Auth & Role Guard
+router.beforeEach(async (to, from, next) => {
+    const authStore = useAuthStore();
+
+    // Check if route requires auth
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+        next('/login');
+        return;
+    }
+
+    // Role checks
+    if (authStore.isAuthenticated) {
+        // Ensure user data is loaded for role check
+        if (!authStore.user) {
+            try {
+                await authStore.fetchUser();
+            } catch (e) {
+                next('/login');
+                return;
+            }
+        }
+
+        // Check Instructor role
+        if (to.meta.requiresInstructor && !authStore.isInstructor) {
+            next('/dashboard'); // Redirect unauthorized access to student dashboard
+            return;
+        }
+
+        // Check Admin role
+        if (to.meta.requiresAdmin && !authStore.isAdmin) {
+            next('/dashboard');
+            return;
+        }
+    }
+
     next();
 });
 

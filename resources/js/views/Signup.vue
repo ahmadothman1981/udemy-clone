@@ -100,13 +100,23 @@ const form = ref({
 const error = ref('');
 const loading = ref(false);
 
+// Determine redirect path based on user role
+const getRedirectPath = (user) => {
+    if (!user) return '/dashboard';
+    const role = user.role?.toLowerCase();
+    if (role === 'instructor') return '/instructor';
+    if (role === 'admin') return '/admin';
+    return '/dashboard'; // Default for students (new registrations)
+};
+
 const handleSignup = async () => {
     loading.value = true;
     error.value = '';
     
     try {
         await authStore.register(form.value);
-        router.push('/');
+        const redirectPath = getRedirectPath(authStore.user);
+        router.push(redirectPath);
     } catch (e) {
         if (e.response && e.response.status === 422) {
              const errors = e.response.data.errors;

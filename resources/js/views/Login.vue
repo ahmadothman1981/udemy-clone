@@ -84,10 +84,20 @@ const password = ref('');
 const auth = useAuthStore();
 const router = useRouter();
 
+// Determine redirect path based on user role
+const getRedirectPath = (user) => {
+    if (!user) return '/';
+    const role = user.role?.toLowerCase();
+    if (role === 'instructor') return '/instructor';
+    if (role === 'admin') return '/admin';
+    return '/dashboard'; // Default for students and other users
+};
+
 const handleLogin = async () => {
     try {
         await auth.login(email.value, password.value);
-        router.push('/');
+        const redirectPath = getRedirectPath(auth.user);
+        router.push(redirectPath);
     } catch (e) {
         alert('Login failed');
     }
@@ -99,7 +109,8 @@ onMounted(async () => {
         auth.token = route.query.token;
         localStorage.setItem('token', auth.token);
         await auth.fetchUser();
-        router.replace('/'); // Remove token from URL
+        const redirectPath = getRedirectPath(auth.user);
+        router.replace(redirectPath);
     }
 });
 </script>
