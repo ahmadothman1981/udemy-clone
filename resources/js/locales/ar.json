@@ -1,13 +1,161 @@
 {
+    "common": {
+        "welcome": "أهلاً بك",
+        "loading": "جاري التحميل...",
+        "error": "حدث خطأ ما",
+        "view_all": "عرض الكل",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "actions": "إجراءات",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "newsletter": {
+            "title": "ابق على اطلاع",
+            "subtitle": "اشترك في نشرتنا الإخبارية لتكون أول من يعلم عن الدورات الجديدة والعروض الحصرية ونصائح التعلم.",
+            "placeholder": "أدخل بريدك الإلكتروني",
+            "subscribe": "إشتراك"
+        },
+        "footer": {
+            "company": "الشركة",
+            "about": "معلومات عنا",
+            "careers": "وظائف",
+            "blog": "المدونة",
+            "community": "المجتمع",
+            "become_instructor": "كن مدرساً",
+            "affiliate": "برنامج التسويق بالعمولة",
+            "partners": "الشركاء",
+            "support": "الدعم",
+            "help": "مركز المساعدة",
+            "contact": "اتصل بنا",
+            "faq": "الأسئلة الشائعة",
+            "legal": "قانوني",
+            "terms": "شروط الاستخدام",
+            "privacy": "سياسة الخصوصية",
+            "cookie": "سياسة ملفات تعريف الارتباط",
+            "rights": "جميع الحقوق محفوظة."
+        }
+    },
     "nav": {
+        "home": "الرئيسية",
+        "courses": "الدورات",
         "login": "تسجيل الدخول",
-        "signup": "اشترك",
+        "signup": "اشتراك",
         "my_learning": "تعليمي",
-        "instructor": "المحاضر"
+        "instructor": "المحاضر",
+        "cart": "السلة",
+        "wishlist": "المفضلة",
+        "logout": "تسجيل الخروج",
+        "profile": "الملف الشخصي",
+        "dashboard": "لوحة تحكمي",
+        "notifications": "الإشعارات",
+        "messages": "الرسائل",
+        "account_settings": "إعدادات الحساب",
+        "payment_methods": "طرق الدفع",
+        "teach": "درّس على يوديمي",
+        "categories": "التصنيفات",
+        "settings": "الإعدادات"
     },
     "catalog": {
-        "search_placeholder": "ابحث عن أي شيء",
-        "filter": "تصفية",
-        "sort": "ترتيب حسب"
+        "search_placeholder": "ماذا تريد أن تتعلم؟"
+    },
+    "home": {
+        "hero_title": "تعلم بلا حدود",
+        "hero_subtitle": "ابدأ، غيّر، أو طور مسارك المهني مع أكثر من 5000 دورة وشهادة احترافية ودرجة علمية من جامعات وشركات عالمية.",
+        "search_placeholder": "ماذا تريد أن تتعلم؟",
+        "explore_top_subcategories": "استكشف أفضل الفئات الفرعية",
+        "trusted_by": "موثوق به من قبل أكثر من 15000 شركة وملايين المتعلمين حول العالم",
+        "become_instructor_title": "كن مدرساً",
+        "become_instructor_text": "المدرسون من جميع أنحاء العالم يعلمون ملايين الطلاب على يوديمي. نحن نقدم الأدوات والمهارات لتدريس ما تحب.",
+        "start_teaching": "ابدأ التدريس اليوم",
+        "all_courses": "جميع الدورات",
+        "explore_library": "استكشف مكتبتنا الواسعة من الدورات",
+        "no_courses": "لا توجد دورات",
+        "adjust_filters": "جرب تعديل معايير البحث أو التصفية",
+        "clear_filters": "مسح التصفية",
+        "filters": {
+            "all_categories": "جميع الفئات",
+            "sort_by": "ترتيب حسب",
+            "most_popular": "الأكثر شعبية",
+            "newest": "الأحدث",
+            "highest_rated": "الأعلى تقييماً",
+            "price_low": "السعر: من الأقل إلى الأعلى",
+            "price_high": "السعر: من الأعلى إلى الأقل"
+        },
+        "hero": {
+            "learn_without": "تعلم بلا",
+            "limits": "حدود",
+            "subtitle": "ابدأ، غيّر، أو طور مسارك المهني مع آلاف الدورات التي يدرسها خبراء حقيقيون.",
+            "courses_count_suffix": "+ دورة"
+        },
+        "categories": {
+            "development": "تطوير الويب",
+            "data_science": "علوم البيانات",
+            "design": "التصميم",
+            "business": "الأعمال",
+            "photography": "التصوير الفوتوغرافي",
+            "music": "الموسيقى"
+        },
+        "stats": {
+            "students": "طالب",
+            "courses": "دورة",
+            "avg_rating": "متوسط التقييم"
+        },
+        "featured": {
+            "title": "أفضل الفئات",
+            "subtitle": "استكشف الفئات الأكثر شعبية لدينا واعثر على الدورة المثالية لتعزيز مهاراتك"
+        },
+        "trending": {
+            "title": "رائج الآن",
+            "subtitle": "الدورات التي يحبها الطلاب حالياً",
+            "badge": "رائج"
+        }
+    },
+    "student_dashboard": {
+        "title": "لوحة تحكم الطالب",
+        "quick_actions": "إجراءات سريعة",
+        "stats": {
+            "enrolled_courses": "الدورات المسجلة",
+            "hours_learned": "ساعات التعلم",
+            "certificates": "الشهادات",
+            "completed": "المكتملة"
+        },
+        "tabs": {
+            "overview": "نظرة عامة",
+            "my_courses": "دوراتي",
+            "achievements": "الإنجازات",
+            "wishlist": "قائمة الرغبات"
+        },
+        "continue_learning": "متابعة التعلم",
+        "learning_streak": "سلسلة التعلم",
+        "no_courses": "لم تسجل في أي دورات بعد.",
+        "browse_courses": "تصفح الدورات"
+    },
+    "instructor_dashboard": {
+        "title": "لوحة تحكم المعلم",
+        "stats": {
+            "total_students": "إجمالي الطلاب",
+            "total_revenue": "إجمالي الأرباح",
+            "average_rating": "متوسط التقييم",
+            "total_reviews": "إجمالي المراجعات"
+        },
+        "sidebar": {
+            "dashboard": "لوحة التحكم",
+            "courses": "الدورات",
+            "communication": "التواصل",
+            "performance": "الأداء",
+            "create_course": "إنشاء دورة جديدة"
+        },
+        "recent_reviews": "أحدث المراجعات",
+        "student_questions": "أسئلة الطلاب",
+        "your_courses": "دوراتك",
+        "course_table": {
+            "course": "الدورة",
+            "students": "الطلاب",
+            "rating": "التقييم",
+            "revenue": "الأرباح",
+            "status": "الحالة"
+        }
     }
 }

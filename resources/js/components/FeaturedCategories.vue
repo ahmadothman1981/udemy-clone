@@ -2,8 +2,8 @@
   <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Top Categories</h2>
-        <p class="text-gray-600 max-w-2xl mx-auto">Explore our most popular categories and find the perfect course to boost your skills</p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ $t('home.featured.title') }}</h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">{{ $t('home.featured.subtitle') }}</p>
       </div>
       
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -30,7 +30,9 @@
 <script setup>
 import { computed, h } from 'vue';
 import { useCourseStore } from '../stores/course';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const courseStore = useCourseStore();
 
 // Icon components as functional components
@@ -95,14 +97,14 @@ const MusicIcon = () => h('svg', {
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' })
 ]);
 
-const categories = [
-  { name: 'Development', slug: 'development', count: '1,200+ courses', icon: CodeIcon, bgClass: 'bg-gradient-to-br from-blue-500 to-blue-700' },
-  { name: 'Data Science', slug: 'data-science', count: '800+ courses', icon: ChartIcon, bgClass: 'bg-gradient-to-br from-green-500 to-emerald-700' },
-  { name: 'Design', slug: 'design', count: '650+ courses', icon: PaletteIcon, bgClass: 'bg-gradient-to-br from-pink-500 to-rose-700' },
-  { name: 'Business', slug: 'business', count: '900+ courses', icon: BriefcaseIcon, bgClass: 'bg-gradient-to-br from-amber-500 to-orange-700' },
-  { name: 'Photography', slug: 'photography', count: '400+ courses', icon: CameraIcon, bgClass: 'bg-gradient-to-br from-purple-500 to-violet-700' },
-  { name: 'Music', slug: 'music', count: '350+ courses', icon: MusicIcon, bgClass: 'bg-gradient-to-br from-red-500 to-rose-700' },
-];
+const categories = computed(() => [
+  { name: t('home.categories.development'), slug: 'development', count: `1,200+ ${t('home.hero.courses_count_suffix')}`, icon: CodeIcon, bgClass: 'bg-gradient-to-br from-blue-500 to-blue-700' },
+  { name: t('home.categories.data_science'), slug: 'data-science', count: `800+ ${t('home.hero.courses_count_suffix')}`, icon: ChartIcon, bgClass: 'bg-gradient-to-br from-green-500 to-emerald-700' },
+  { name: t('home.categories.design'), slug: 'design', count: `650+ ${t('home.hero.courses_count_suffix')}`, icon: PaletteIcon, bgClass: 'bg-gradient-to-br from-pink-500 to-rose-700' },
+  { name: t('home.categories.business'), slug: 'business', count: `900+ ${t('home.hero.courses_count_suffix')}`, icon: BriefcaseIcon, bgClass: 'bg-gradient-to-br from-amber-500 to-orange-700' },
+  { name: t('home.categories.photography'), slug: 'photography', count: `400+ ${t('home.hero.courses_count_suffix')}`, icon: CameraIcon, bgClass: 'bg-gradient-to-br from-purple-500 to-violet-700' },
+  { name: t('home.categories.music'), slug: 'music', count: `350+ ${t('home.hero.courses_count_suffix')}`, icon: MusicIcon, bgClass: 'bg-gradient-to-br from-red-500 to-rose-700' },
+]);
 </script>
 
 <style scoped>

@@ -15,13 +15,13 @@
         <!-- Left content -->
         <div class="text-center lg:text-left">
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-            <span class="block">Learn Without</span>
+            <span class="block">{{ $t('home.hero.learn_without') }}</span>
             <span class="block bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
-              Limits
+              {{ $t('home.hero.limits') }}
             </span>
           </h1>
           <p class="text-lg sm:text-xl text-purple-100 mb-8 max-w-xl mx-auto lg:mx-0">
-            Start, switch, or advance your career with thousands of courses taught by real-world experts.
+            {{ $t('home.hero.subtitle') }}
           </p>
           
           <!-- Search bar -->
@@ -31,11 +31,11 @@
                 type="text" 
                 v-model="searchQuery"
                 @keyup.enter="handleSearch"
-                placeholder="What do you want to learn?"
+                :placeholder="$t('home.search_placeholder')"
                 class="hero-search-input"
               >
               <button @click="handleSearch" class="hero-search-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rtl:mirror" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
@@ -46,15 +46,15 @@
           <div class="flex flex-wrap justify-center lg:justify-start gap-8 text-center">
             <div class="stat-item">
               <div class="text-3xl font-bold text-white">15M+</div>
-              <div class="text-sm text-purple-200">Students</div>
+              <div class="text-sm text-purple-200">{{ $t('home.stats.students') }}</div>
             </div>
             <div class="stat-item">
               <div class="text-3xl font-bold text-white">2,500+</div>
-              <div class="text-sm text-purple-200">Courses</div>
+              <div class="text-sm text-purple-200">{{ $t('home.stats.courses') }}</div>
             </div>
             <div class="stat-item">
               <div class="text-3xl font-bold text-white">4.8</div>
-              <div class="text-sm text-purple-200">Avg Rating</div>
+              <div class="text-sm text-purple-200">{{ $t('home.stats.avg_rating') }}</div>
             </div>
           </div>
         </div>
@@ -67,8 +67,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
             </div>
-            <div class="font-semibold text-gray-800">Web Development</div>
-            <div class="text-sm text-gray-500">1,200+ courses</div>
+            <div class="font-semibold text-gray-800">{{ $t('home.categories.development') }}</div>
+            <div class="text-sm text-gray-500">1,200+ {{ $t('home.hero.courses_count_suffix') }}</div>
           </div>
           
           <div class="floating-card floating-card-2">
@@ -77,8 +77,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
-            <div class="font-semibold text-gray-800">Data Science</div>
-            <div class="text-sm text-gray-500">800+ courses</div>
+            <div class="font-semibold text-gray-800">{{ $t('home.categories.data_science') }}</div>
+            <div class="text-sm text-gray-500">800+ {{ $t('home.hero.courses_count_suffix') }}</div>
           </div>
           
           <div class="floating-card floating-card-3">
@@ -87,8 +87,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </div>
-            <div class="font-semibold text-gray-800">Design</div>
-            <div class="text-sm text-gray-500">650+ courses</div>
+            <div class="font-semibold text-gray-800">{{ $t('home.categories.design') }}</div>
+            <div class="text-sm text-gray-500">650+ {{ $t('home.hero.courses_count_suffix') }}</div>
           </div>
         </div>
       </div>
@@ -106,7 +106,9 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const router = useRouter();
 const searchQuery = ref('');
 

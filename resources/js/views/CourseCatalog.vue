@@ -16,8 +16,8 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
           <div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-2">All Courses</h2>
-            <p class="text-gray-600">Explore our extensive library of courses</p>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('home.all_courses') }}</h2>
+            <p class="text-gray-600">{{ $t('home.explore_library') }}</p>
           </div>
           
           <!-- Filters -->
@@ -27,7 +27,7 @@
               @change="applyFilters"
               class="filter-select"
             >
-              <option value="">All Categories</option>
+              <option value="">{{ $t('home.filters.all_categories') }}</option>
               <option v-for="cat in courseStore.categories" :key="cat.id" :value="cat.slug">
                 {{ cat.name }}
               </option>
@@ -38,12 +38,12 @@
               @change="applyFilters"
               class="filter-select"
             >
-              <option value="">Sort By</option>
-              <option value="popular">Most Popular</option>
-              <option value="newest">Newest</option>
-              <option value="rating">Highest Rated</option>
-              <option value="price_low">Price: Low to High</option>
-              <option value="price_high">Price: High to Low</option>
+              <option value="">{{ $t('home.filters.sort_by') }}</option>
+              <option value="popular">{{ $t('home.filters.most_popular') }}</option>
+              <option value="newest">{{ $t('home.filters.newest') }}</option>
+              <option value="rating">{{ $t('home.filters.highest_rated') }}</option>
+              <option value="price_low">{{ $t('home.filters.price_low') }}</option>
+              <option value="price_high">{{ $t('home.filters.price_high') }}</option>
             </select>
           </div>
         </div>
@@ -60,10 +60,10 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">No courses found</h3>
-          <p class="text-gray-500 mb-6">Try adjusting your search or filter criteria</p>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $t('home.no_courses') }}</h3>
+          <p class="text-gray-500 mb-6">{{ $t('home.adjust_filters') }}</p>
           <button @click="clearFilters" class="btn-primary">
-            Clear filters
+            {{ $t('home.clear_filters') }}
           </button>
         </div>
         
@@ -83,18 +83,18 @@
     <!-- Newsletter Section -->
     <section class="py-20 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
       <div class="max-w-4xl mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-4">Stay Updated</h2>
+        <h2 class="text-3xl font-bold mb-4">{{ $t('common.newsletter.title') }}</h2>
         <p class="text-purple-100 mb-8 max-w-2xl mx-auto">
-          Subscribe to our newsletter and be the first to know about new courses, exclusive offers, and learning tips.
+          {{ $t('common.newsletter.subtitle') }}
         </p>
         <form @submit.prevent class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
           <input 
             type="email" 
-            placeholder="Enter your email"
+            :placeholder="$t('common.newsletter.placeholder')"
             class="flex-1 px-6 py-3 rounded-full text-gray-900 focus:outline-none focus:ring-4 focus:ring-purple-300"
           >
           <button type="submit" class="px-8 py-3 bg-white text-purple-600 font-bold rounded-full hover:bg-gray-100 transition-colors">
-            Subscribe
+            {{ $t('common.newsletter.subscribe') }}
           </button>
         </form>
       </div>
@@ -105,41 +105,41 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h4 class="text-white font-semibold mb-4">Company</h4>
+            <h4 class="text-white font-semibold mb-4">{{ $t('common.footer.company') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="hover:text-white transition-colors">About us</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.about') }}</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.careers') }}</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.blog') }}</a></li>
             </ul>
           </div>
           <div>
-            <h4 class="text-white font-semibold mb-4">Community</h4>
+            <h4 class="text-white font-semibold mb-4">{{ $t('common.footer.community') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="hover:text-white transition-colors">Become an instructor</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Affiliate program</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Partners</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.become_instructor') }}</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.affiliate') }}</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.partners') }}</a></li>
             </ul>
           </div>
           <div>
-            <h4 class="text-white font-semibold mb-4">Support</h4>
+            <h4 class="text-white font-semibold mb-4">{{ $t('common.footer.support') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="hover:text-white transition-colors">Help center</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Contact us</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.help') }}</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.contact') }}</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.faq') }}</a></li>
             </ul>
           </div>
           <div>
-            <h4 class="text-white font-semibold mb-4">Legal</h4>
+            <h4 class="text-white font-semibold mb-4">{{ $t('common.footer.legal') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="hover:text-white transition-colors">Terms of use</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Privacy policy</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">Cookie policy</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.terms') }}</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.privacy') }}</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.cookie') }}</a></li>
             </ul>
           </div>
         </div>
         <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div class="text-2xl font-bold text-white">UdemyClone</div>
-          <p class="text-sm">© 2026 UdemyClone. All rights reserved.</p>
+          <p class="text-sm">© 2026 UdemyClone. {{ $t('common.footer.rights') }}</p>
         </div>
       </div>
     </footer>
@@ -155,7 +155,9 @@ import CourseCard from '../components/CourseCard.vue';
 import HeroSection from '../components/HeroSection.vue';
 import FeaturedCategories from '../components/FeaturedCategories.vue';
 import TrendingCourses from '../components/TrendingCourses.vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const courseStore = useCourseStore();
 const route = useRoute();
 const router = useRouter();

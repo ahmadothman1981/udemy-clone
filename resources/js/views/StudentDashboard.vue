@@ -7,14 +7,14 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 class="text-3xl font-bold mb-2">Welcome back, {{ userName }}! 👋</h1>
+            <h1 class="text-3xl font-bold mb-2">{{ $t('common.welcome') }}, {{ userName }}! 👋</h1>
             <p class="text-purple-100">Continue your learning journey</p>
           </div>
           <router-link to="/" class="browse-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rtl:mirror" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            Browse Courses
+            {{ $t('student_dashboard.browse_courses') }}
           </router-link>
         </div>
       </div>
@@ -40,9 +40,9 @@
           <!-- Continue Learning Section -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 class="text-xl font-bold text-gray-900">Continue Learning</h2>
-              <router-link to="/my-courses" class="text-purple-600 hover:text-purple-700 text-sm font-semibold">
-                View All →
+              <h2 class="text-xl font-bold text-gray-900">{{ $t('student_dashboard.continue_learning') }}</h2>
+              <router-link to="/my-courses" class="text-purple-600 hover:text-purple-700 text-sm font-semibold flex items-center gap-1">
+                {{ $t('common.view_all') }} <span class="rtl:rotate-180">→</span>
               </router-link>
             </div>
 
@@ -59,9 +59,9 @@
                 </svg>
               </div>
               <h3 class="text-lg font-bold text-gray-900 mb-2">Start Your Learning Journey</h3>
-              <p class="text-gray-500 mb-6">Explore our courses and find something you love.</p>
+              <p class="text-gray-500 mb-6">{{ $t('student_dashboard.no_courses') }}</p>
               <router-link to="/" class="btn-primary">
-                Browse Courses
+                {{ $t('student_dashboard.browse_courses') }}
               </router-link>
             </div>
 
@@ -96,7 +96,7 @@
                       <span class="text-sm font-semibold text-gray-600">{{ course.progress || 0 }}%</span>
                     </div>
                   </div>
-                  <button class="play-btn flex-shrink-0">
+                  <button class="play-btn flex-shrink-0 rtl:rotate-180">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
@@ -152,7 +152,7 @@
                 </svg>
               </div>
               <div>
-                <p class="text-sm text-white/80">Learning Streak</p>
+                <p class="text-sm text-white/80">{{ $t('student_dashboard.learning_streak') }}</p>
                 <p class="text-2xl font-bold">{{ learningStreak }} days 🔥</p>
               </div>
             </div>
@@ -162,7 +162,7 @@
           <!-- Achievements -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-4 border-b border-gray-100">
-              <h3 class="font-bold text-gray-900">Achievements</h3>
+              <h3 class="font-bold text-gray-900">{{ $t('student_dashboard.tabs.achievements') }}</h3>
             </div>
             <div class="p-4 grid grid-cols-3 gap-3">
               <div v-for="achievement in achievements" :key="achievement.id" class="achievement" :class="{ 'locked': !achievement.unlocked }">
@@ -175,33 +175,28 @@
           <!-- Quick Actions -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-4 border-b border-gray-100">
-              <h3 class="font-bold text-gray-900">Quick Actions</h3>
+              <h3 class="font-bold text-gray-900">{{ $t('student_dashboard.quick_actions') }}</h3>
             </div>
             <div class="p-2">
               <router-link to="/wishlist" class="quick-action-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                My Wishlist
+                {{ $t('nav.wishlist') }}
               </router-link>
               <router-link to="/cart" class="quick-action-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                My Cart
+                {{ $t('nav.cart') }}
               </router-link>
-              <router-link to="/notifications" class="quick-action-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                Notifications
-              </router-link>
+              
               <router-link to="/account-settings" class="quick-action-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                Settings
+                {{ $t('nav.settings') }}
               </router-link>
             </div>
           </div>
@@ -218,7 +213,9 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useCourseStore } from '../stores/course';
 import Navbar from '../components/Navbar.vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
 const courseStore = useCourseStore();
@@ -265,25 +262,25 @@ const userName = computed(() => {
 
 const statsCards = computed(() => [
   {
-    title: 'Enrolled Courses',
+    title: t('student_dashboard.stats.enrolled_courses'),
     value: statsData.value.enrolled,
     icon: CoursesIcon,
     bgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600',
   },
   {
-    title: 'Hours Learned',
+    title: t('student_dashboard.stats.hours_learned'),
     value: statsData.value.hours,
     icon: ClockIcon,
     bgClass: 'bg-gradient-to-br from-purple-500 to-pink-600',
   },
   {
-    title: 'Certificates',
+    title: t('student_dashboard.stats.certificates'),
     value: statsData.value.certificates,
     icon: TrophyIcon,
     bgClass: 'bg-gradient-to-br from-amber-500 to-orange-600',
   },
   {
-    title: 'Completed',
+    title: t('student_dashboard.stats.completed'),
     value: statsData.value.completed,
     icon: CheckIcon,
     bgClass: 'bg-gradient-to-br from-green-500 to-emerald-600',

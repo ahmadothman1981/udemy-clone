@@ -1,13 +1,161 @@
 {
+    "common": {
+        "welcome": "Welcome back",
+        "loading": "Loading...",
+        "error": "Something went wrong",
+        "view_all": "View All",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "actions": "Actions",
+        "status": "Status",
+        "date": "Date",
+        "newsletter": {
+            "title": "Stay Updated",
+            "subtitle": "Subscribe to our newsletter and be the first to know about new courses, exclusive offers, and learning tips.",
+            "placeholder": "Enter your email",
+            "subscribe": "Subscribe"
+        },
+        "footer": {
+            "company": "Company",
+            "about": "About us",
+            "careers": "Careers",
+            "blog": "Blog",
+            "community": "Community",
+            "become_instructor": "Become an instructor",
+            "affiliate": "Affiliate program",
+            "partners": "Partners",
+            "support": "Support",
+            "help": "Help center",
+            "contact": "Contact us",
+            "faq": "FAQ",
+            "legal": "Legal",
+            "terms": "Terms of use",
+            "privacy": "Privacy policy",
+            "cookie": "Cookie policy",
+            "rights": "All rights reserved."
+        }
+    },
     "nav": {
+        "home": "Home",
+        "courses": "Courses",
         "login": "Log In",
         "signup": "Sign Up",
         "my_learning": "My Learning",
-        "instructor": "Instructor"
+        "instructor": "Instructor",
+        "cart": "Cart",
+        "wishlist": "Wishlist",
+        "logout": "Log Out",
+        "profile": "Profile",
+        "dashboard": "My Dashboard",
+        "notifications": "Notifications",
+        "messages": "Messages",
+        "account_settings": "Account settings",
+        "payment_methods": "Payment methods",
+        "teach": "Teach on Udemy",
+        "categories": "Categories",
+        "settings": "Settings"
     },
     "catalog": {
-        "search_placeholder": "Search for anything",
-        "filter": "Filter",
-        "sort": "Sort by"
+        "search_placeholder": "What do you want to learn?"
+    },
+    "home": {
+        "hero_title": "Learn without limits",
+        "hero_subtitle": "Start, switch, or advance your career with more than 5,000 courses, Professional Certificates, and degrees from world-class universities and companies.",
+        "search_placeholder": "What do you want to learn?",
+        "explore_top_subcategories": "Explore Top Categories",
+        "trusted_by": "Trusted by over 15,000 companies and millions of learners around the world",
+        "become_instructor_title": "Become an instructor",
+        "become_instructor_text": "Instructors from around the world teach millions of students on Udemy. We provide the tools and skills to teach what you love.",
+        "start_teaching": "Start teaching today",
+        "all_courses": "All Courses",
+        "explore_library": "Explore our extensive library of courses",
+        "no_courses": "No courses found",
+        "adjust_filters": "Try adjusting your search or filter criteria",
+        "clear_filters": "Clear filters",
+        "filters": {
+            "all_categories": "All Categories",
+            "sort_by": "Sort By",
+            "most_popular": "Most Popular",
+            "newest": "Newest",
+            "highest_rated": "Highest Rated",
+            "price_low": "Price: Low to High",
+            "price_high": "Price: High to Low"
+        },
+        "hero": {
+            "learn_without": "Learn Without",
+            "limits": "Limits",
+            "subtitle": "Start, switch, or advance your career with thousands of courses taught by real-world experts.",
+            "courses_count_suffix": "+ courses"
+        },
+        "categories": {
+            "development": "Development",
+            "data_science": "Data Science",
+            "design": "Design",
+            "business": "Business",
+            "photography": "Photography",
+            "music": "Music"
+        },
+        "stats": {
+            "students": "Students",
+            "courses": "Courses",
+            "avg_rating": "Avg Rating"
+        },
+        "featured": {
+            "title": "Top Categories",
+            "subtitle": "Explore our most popular categories and find the perfect course to boost your skills"
+        },
+        "trending": {
+            "title": "Trending Now",
+            "subtitle": "Courses students are loving right now",
+            "badge": "Trending"
+        }
+    },
+    "student_dashboard": {
+        "title": "Student Dashboard",
+        "quick_actions": "Quick Actions",
+        "stats": {
+            "enrolled_courses": "Enrolled Courses",
+            "hours_learned": "Hours Learned",
+            "certificates": "Certificates",
+            "completed": "Completed"
+        },
+        "tabs": {
+            "overview": "Overview",
+            "my_courses": "My Courses",
+            "achievements": "Achievements",
+            "wishlist": "Wishlist"
+        },
+        "continue_learning": "Continue Learning",
+        "learning_streak": "Learning Streak",
+        "no_courses": "You haven't enrolled in any courses yet.",
+        "browse_courses": "Browse Courses"
+    },
+    "instructor_dashboard": {
+        "title": "Instructor Dashboard",
+        "stats": {
+            "total_students": "Total Students",
+            "total_revenue": "Total Revenue",
+            "average_rating": "Average Rating",
+            "total_reviews": "Total Reviews"
+        },
+        "sidebar": {
+            "dashboard": "Dashboard",
+            "courses": "Courses",
+            "communication": "Communication",
+            "performance": "Performance",
+            "create_course": "Create New Course"
+        },
+        "recent_reviews": "Recent Reviews",
+        "student_questions": "Student Questions",
+        "your_courses": "Your Courses",
+        "course_table": {
+            "course": "Course",
+            "students": "Students",
+            "rating": "Rating",
+            "revenue": "Revenue",
+            "status": "Status"
+        }
     }
 }

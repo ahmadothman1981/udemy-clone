@@ -8,10 +8,10 @@
 
           <!-- Categories -->
           <div class="relative group hidden md:block">
-              <button class="text-sm font-medium text-gray-700 hover:text-purple-600 px-2 py-4">Categories</button>
+              <button class="text-sm font-medium text-gray-700 hover:text-purple-600 px-2 py-4">{{ $t('nav.categories') }}</button>
               <!-- Dropdown code unchanged, just ensuring parent visibility -->
               <div class="absolute top-14 left-0 w-64 bg-white border border-gray-200 shadow-xl hidden group-hover:block z-50 rounded-sm">
-                   <div v-if="courseStore.categories.length === 0" class="p-4 text-gray-500 text-sm">Loading...</div>
+                   <div v-if="courseStore.categories.length === 0" class="p-4 text-gray-500 text-sm">{{ $t('common.loading') }}</div>
                    <ul v-else class="py-2">
                        <li v-for="cat in courseStore.categories" :key="cat.id" class="px-4 py-2 hover:bg-gray-100 relative group/sub">
                            <router-link :to="`/?category=${cat.slug}`" class="block text-sm text-gray-700 flex justify-between items-center">
@@ -51,6 +51,11 @@
 
       <!-- Right Side Links -->
       <div class="flex items-center space-x-4">
+         <!-- Language Toggle -->
+         <button @click="toggleLang" class="text-sm font-semibold text-gray-700 hover:text-purple-600 uppercase">
+             {{ locale === 'en' ? 'AR' : 'EN' }}
+         </button>
+
          <!-- Wishlist -->
          <router-link to="/wishlist" class="text-gray-600 hover:text-purple-600 relative group hidden sm:block">
              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,7 +81,7 @@
         </router-link>
         
         <router-link v-if="auth.isAuthenticated" to="/dashboard" class="text-gray-600 hover:text-gray-900 text-sm">
-           My Dashboard
+           {{ $t('student_dashboard.title') }}
         </router-link>
         <router-link v-else to="/my-courses" class="text-gray-600 hover:text-gray-900 text-sm">
            {{ $t('nav.my_learning') }}
@@ -84,7 +89,7 @@
 
         <div v-if="!auth.isAuthenticated" class="flex items-center space-x-2">
             <router-link to="/instructor/signup" class="text-sm font-medium text-gray-700 hover:text-purple-600 px-4 hidden lg:block">
-                Teach on Udemy
+                {{ $t('nav.teach') }}
             </router-link>
             <router-link to="/login" class="px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-sm">
                 {{ $t('nav.login') }}
@@ -118,44 +123,44 @@
                <!-- Menu Links -->
                <div class="py-2">
                    <router-link to="/dashboard" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
-                       My Dashboard
+                       {{ $t('nav.dashboard') }}
                    </router-link>
                    <router-link to="/my-courses" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
-                       {{ $t('nav.my_learning') || 'My learning' }}
+                       {{ $t('nav.my_learning') }}
                    </router-link>
                    <router-link to="/cart" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50 md:hidden" @click="isUserMenuOpen = false">
-                       My cart
+                       {{ $t('nav.cart') }}
                    </router-link>
                     <router-link to="/wishlist" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50 md:hidden" @click="isUserMenuOpen = false">
-                       My wishlist
+                       {{ $t('nav.wishlist') }}
                    </router-link>
                    <router-link v-if="auth.isInstructor" to="/instructor" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
-                       {{ $t('nav.instructor') || 'Instructor Dashboard' }}
+                       {{ $t('nav.instructor') }}
                    </router-link>
                </div>
                
                 <div class="border-t border-gray-100 py-2">
                     <router-link to="/notifications" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
-                        Notifications
+                        {{ $t('nav.notifications') }}
                     </router-link>
                     <router-link to="/messages" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
-                        Messages
+                        {{ $t('nav.messages') }}
                     </router-link>
                 </div>
 
                 <div class="border-t border-gray-100 py-2">
                     <router-link to="/account-settings" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
-                        Account settings
+                        {{ $t('nav.account_settings') }}
                     </router-link>
                     <router-link to="/payment-methods" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
-                       Payment methods
+                       {{ $t('nav.payment_methods') }}
                     </router-link>
                 </div>
 
                <!-- Logout -->
                <div class="border-t border-gray-100 py-2">
                    <button @click="handleLogout" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50">
-                       Log out
+                       {{ $t('nav.logout') }}
                    </button>
                </div>
            </div>
@@ -222,7 +227,11 @@ const handleSearch = () => {
 };
 
 const toggleLang = () => {
-  locale.value = locale.value === 'en' ? 'ar' : 'en';
+    const newLocale = locale.value === 'en' ? 'ar' : 'en';
+    locale.value = newLocale;
+    localStorage.setItem('locale', newLocale);
+    document.documentElement.lang = newLocale;
+    document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr';
 };
 
 const handleLogout = () => {

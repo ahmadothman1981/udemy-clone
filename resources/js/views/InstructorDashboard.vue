@@ -7,14 +7,14 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 class="text-3xl font-bold mb-2">Instructor Dashboard</h1>
+            <h1 class="text-3xl font-bold mb-2">{{ $t('instructor_dashboard.title') }}</h1>
             <p class="text-purple-100">Welcome back! Here's what's happening with your courses.</p>
           </div>
           <button @click="showCreateCourse = true" class="create-course-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rtl:ms-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            Create New Course
+            {{ $t('instructor_dashboard.sidebar.create_course') }}
           </button>
         </div>
       </div>
@@ -26,7 +26,7 @@
         <aside class="w-64 flex-shrink-0 hidden lg:block">
           <nav class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-4 border-b border-gray-100">
-              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Menu</h3>
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">{{ $t('common.actions') }}</h3>
             </div>
             <ul class="py-2">
               <li v-for="item in menuItems" :key="item.name">
@@ -36,8 +36,8 @@
                   class="sidebar-item"
                   :class="{ 'active': activeTab === item.id }"
                 >
-                  <component :is="item.icon" class="w-5 h-5" />
-                  {{ item.name }}
+                  <component :is="item.icon" class="w-5 h-5 rtl:ms-2" />
+                  {{ item.label }}
                 </a>
               </li>
             </ul>
@@ -85,7 +85,7 @@
           <div v-if="activeTab === 'courses'" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h2 class="text-xl font-bold text-gray-900">Your Courses</h2>
+                <h2 class="text-xl font-bold text-gray-900">{{ $t('instructor_dashboard.your_courses') }}</h2>
                 <p class="text-sm text-gray-500">Manage and monitor your course performance</p>
               </div>
               <div class="flex gap-2">
@@ -113,7 +113,7 @@
               <h3 class="text-lg font-bold text-gray-900 mb-2">No courses yet</h3>
               <p class="text-gray-500 mb-6">Start creating your first course and share your knowledge with the world.</p>
               <button @click="showCreateCourse = true" class="btn-primary">
-                Create Your First Course
+                {{ $t('instructor_dashboard.sidebar.create_course') }}
               </button>
             </div>
 
@@ -122,12 +122,12 @@
               <table class="w-full">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Course</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Students</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Rating</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Revenue</th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('instructor_dashboard.course_table.course') }}</th>
+                    <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('instructor_dashboard.course_table.students') }}</th>
+                    <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('instructor_dashboard.course_table.rating') }}</th>
+                    <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('instructor_dashboard.course_table.revenue') }}</th>
+                    <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('instructor_dashboard.course_table.status') }}</th>
+                    <th class="px-6 py-4 text-end text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('common.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -177,7 +177,7 @@
                     </td>
                     <td class="px-6 py-4">
                       <div class="flex justify-end gap-2">
-                        <button @click="editCourse(course)" class="action-btn" title="Edit Course">
+                        <button @click="editCourse(course)" class="action-btn" :title="$t('common.edit')">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
@@ -209,7 +209,7 @@
             <!-- Recent Reviews -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div class="p-6 border-b border-gray-100">
-                <h3 class="font-bold text-gray-900">Recent Reviews</h3>
+                <h3 class="font-bold text-gray-900">{{ $t('instructor_dashboard.recent_reviews') }}</h3>
               </div>
               <div class="divide-y divide-gray-100">
                 <div v-for="review in recentReviews" :key="review.id" class="p-4 hover:bg-gray-50 transition-colors">
@@ -240,7 +240,7 @@
             <!-- Recent Questions -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h3 class="font-bold text-gray-900">Student Questions</h3>
+                <h3 class="font-bold text-gray-900">{{ $t('instructor_dashboard.student_questions') }}</h3>
                 <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-semibold">{{ unansweredCount }} unanswered</span>
               </div>
               <div class="divide-y divide-gray-100">
@@ -318,8 +318,10 @@
 import { ref, computed, onMounted, h } from 'vue';
 import axios from 'axios';
 import Navbar from '../components/Navbar.vue';
+import { useI18n } from 'vue-i18n';
 
 // State
+const { t } = useI18n();
 const loading = ref(true);
 const stats = ref(null);
 const courses = ref([]);
@@ -365,12 +367,12 @@ const CoursesCountIcon = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', c
 ]);
 
 // Menu items
-const menuItems = [
-  { id: 'dashboard', name: 'Dashboard', icon: DashboardIcon },
-  { id: 'courses', name: 'Courses', icon: CoursesIcon },
-  { id: 'communication', name: 'Communication', icon: CommunicationIcon },
-  { id: 'performance', name: 'Performance', icon: PerformanceIcon },
-];
+const menuItems = computed(() => [
+  { id: 'dashboard', label: t('instructor_dashboard.sidebar.dashboard'), icon: DashboardIcon },
+  { id: 'courses', label: t('instructor_dashboard.sidebar.courses'), icon: CoursesIcon },
+  { id: 'communication', label: t('instructor_dashboard.sidebar.communication'), icon: CommunicationIcon },
+  { id: 'performance', label: t('instructor_dashboard.sidebar.performance'), icon: PerformanceIcon },
+]);
 
 // Computed
 const monthlyStats = computed(() => ({
@@ -381,7 +383,7 @@ const monthlyStats = computed(() => ({
 
 const statsCards = computed(() => [
   {
-    title: 'Total Revenue',
+    title: t('instructor_dashboard.stats.total_revenue'),
     value: `$${stats.value?.total_revenue || '0'}`,
     icon: RevenueIcon,
     bgClass: 'bg-gradient-to-br from-green-500 to-emerald-600',
@@ -389,7 +391,7 @@ const statsCards = computed(() => [
     changePositive: true,
   },
   {
-    title: 'Total Students',
+    title: t('instructor_dashboard.stats.total_students'),
     value: stats.value?.total_students || 0,
     icon: StudentsIcon,
     bgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600',
@@ -397,7 +399,7 @@ const statsCards = computed(() => [
     changePositive: true,
   },
   {
-    title: 'Average Rating',
+    title: t('instructor_dashboard.stats.average_rating'),
     value: `${stats.value?.average_rating || '0'} / 5.0`,
     icon: RatingIcon,
     bgClass: 'bg-gradient-to-br from-amber-500 to-orange-600',
@@ -405,7 +407,7 @@ const statsCards = computed(() => [
     changePositive: true,
   },
   {
-    title: 'Active Courses',
+    title: t('instructor_dashboard.sidebar.courses'),
     value: courses.value.filter(c => c.published).length,
     icon: CoursesCountIcon,
     bgClass: 'bg-gradient-to-br from-purple-500 to-pink-600',

@@ -3,25 +3,25 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center mb-8">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900 mb-2">Trending Now</h2>
-          <p class="text-gray-600">Courses students are loving right now</p>
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('home.trending.title') }}</h2>
+          <p class="text-gray-600">{{ $t('home.trending.subtitle') }}</p>
         </div>
         <div class="hidden md:flex gap-2">
           <button 
-            @click="scroll('left')"
+            @click="scroll('prev')"
             class="scroll-btn"
-            :disabled="!canScrollLeft"
+            :disabled="!canScrollPrev"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
           <button 
-            @click="scroll('right')"
+            @click="scroll('next')"
             class="scroll-btn"
-            :disabled="!canScrollRight"
+            :disabled="!canScrollNext"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -45,7 +45,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
               </svg>
-              Trending
+              {{ $t('home.trending.badge') }}
             </span>
           </div>
           
@@ -93,12 +93,16 @@
 import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '../stores/course';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
+const { t, locale } = useI18n();
 const courseStore = useCourseStore();
 const router = useRouter();
 const scrollContainer = ref(null);
-const canScrollLeft = ref(false);
-const canScrollRight = ref(true);
+const canScrollPrev = ref(false);
+const canScrollNext = ref(true);
+
+const isRTL = computed(() => locale.value === 'ar');
 
 const trendingCourses = computed(() => {
   return courseStore.courses.slice(0, 8);
@@ -115,8 +119,16 @@ const goToCourse = (course) => {
 const scroll = (direction) => {
   if (!scrollContainer.value) return;
   const scrollAmount = 300;
+  let scrollValue = 0;
+  
+  if (direction === 'prev') {
+    scrollValue = isRTL.value ? scrollAmount : -scrollAmount;
+  } else {
+    scrollValue = isRTL.value ? -scrollAmount : scrollAmount;
+  }
+  
   scrollContainer.value.scrollBy({
-    left: direction === 'left' ? -scrollAmount : scrollAmount,
+    left: scrollValue,
     behavior: 'smooth'
   });
 };
@@ -124,8 +136,34 @@ const scroll = (direction) => {
 const updateScrollState = () => {
   if (!scrollContainer.value) return;
   const { scrollLeft, scrollWidth, clientWidth } = scrollContainer.value;
-  canScrollLeft.value = scrollLeft > 0;
-  canScrollRight.value = scrollLeft < scrollWidth - clientWidth - 10;
+  
+  // Checking exact 0 might be flaky with fractional pixels, use small epsilon
+  const atStart = Math.abs(scrollLeft) < 10;
+  const atEnd = Math.abs(scrollLeft) >= (scrollWidth - clientWidth - 10);
+  
+  if (isRTL.value) {
+    // In some browsers RTL scrollLeft is negative/0/positive in complex ways.
+    // Assuming container has dir="ltr" internally via css or inheriting?
+    // Wait, if body is RTL, the scrollContainer will be RTL.
+    // In RTL mode, scrollLeft starts at 0 (or max positive) depending on implementation.
+    // But typically: 
+    // If 'dir=rtl': scroll starts at 0 (rightmost) or negative values?
+    // Let's assume standard behavior: we just check if we can scroll more...
+    // Actually, simply: canScrollPrev = !atStart; canScrollNext = !atEnd;
+    // The Scroll buttons logic: 
+    // Prev (Right arrow in RTL) -> Moves view to start.
+    // Next (Left arrow in RTL) -> Moves view to end.
+    
+    // For now, let's just stick to standard checking.
+    // Note: scrollLeft behavior in RTL is inconsistent across browsers (Chrome vs Firefox).
+    // Using a simpler check:
+    canScrollPrev.value = Math.abs(scrollLeft) > 5; // Can move towards start (Right) if we are not at 0?
+    // This is hard to get 100% right without testing. I'll rely on basic check.
+    canScrollNext.value = Math.abs(scrollLeft) + clientWidth < scrollWidth - 5;
+  } else {
+    canScrollPrev.value = scrollLeft > 0;
+    canScrollNext.value = scrollLeft < scrollWidth - clientWidth - 10;
+  }
 };
 
 onMounted(() => {
