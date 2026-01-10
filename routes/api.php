@@ -12,11 +12,11 @@ use App\Http\Controllers\CourseController;
 |--------------------------------------------------------------------------
 */
 
-// Public Auth
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgot-password', [App\Http\Controllers\NewPasswordController::class, 'forgotPassword']);
-Route::post('/reset-password', [App\Http\Controllers\NewPasswordController::class, 'resetPassword'])->name('password.reset');
+// Public Auth (with rate limiting)
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:registration');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
+Route::post('/forgot-password', [App\Http\Controllers\NewPasswordController::class, 'forgotPassword'])->middleware('throttle:password-reset');
+Route::post('/reset-password', [App\Http\Controllers\NewPasswordController::class, 'resetPassword'])->name('password.reset')->middleware('throttle:password-reset');
 
 // Social Auth
 Route::group(['middleware' => ['web']], function () {
