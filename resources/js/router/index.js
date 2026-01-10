@@ -59,6 +59,11 @@ const routes = [
         path: '/checkout/success',
         component: () => import('../views/CheckoutSuccess.vue'),
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/course/:courseId/quiz/:quizId',
+        component: () => import('../views/QuizPlayer.vue'),
+        meta: { requiresAuth: true }
     }
 ];
 

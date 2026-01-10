@@ -92,6 +92,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/courses/{course}/lectures/{lecture}/quiz', [\App\Http\Controllers\QuizController::class, 'store']);
     Route::post('/courses/{course}/quizzes/{quiz}/questions', [\App\Http\Controllers\QuizController::class, 'storeQuestion']);
 
+    // Quizzes (Student)
+    Route::get('/courses/{course}/quizzes/{quiz}', [\App\Http\Controllers\QuizController::class, 'show']);
+    Route::post('/courses/{course}/quizzes/{quiz}/submit', [\App\Http\Controllers\QuizController::class, 'submit']);
+    Route::get('/courses/{course}/quizzes/{quiz}/attempts', [\App\Http\Controllers\QuizController::class, 'attempts']);
+
     // Learning Flow (Student)
     Route::get('/student/dashboard-stats', [\App\Http\Controllers\EnrollmentController::class, 'dashboardStats']);
     Route::post('/courses/{course}/enroll', [\App\Http\Controllers\EnrollmentController::class, 'store']);
@@ -132,3 +137,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 // Stripe Webhook (no auth - verified by signature)
 Route::post('/webhooks/stripe', [\App\Http\Controllers\StripeWebhookController::class, 'handleWebhook']);
+
+// Certificates
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/certificates', [\App\Http\Controllers\CertificateController::class, 'index']);
+    Route::post('/courses/{course}/certificate', [\App\Http\Controllers\CertificateController::class, 'generate']);
+    Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\CertificateController::class, 'download']);
+});
+
+// Public certificate verification
+Route::get('/verify/{certificateNumber}', [\App\Http\Controllers\CertificateController::class, 'verify']);
