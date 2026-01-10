@@ -18,6 +18,8 @@ class User extends Authenticatable
         'email',
         'password',
         'avatar',
+        'bio',
+        'headline',
         'email_verified',
         'preferences',
         'google_id',
@@ -57,8 +59,21 @@ class User extends Authenticatable
         return $this->hasMany(SavedPaymentMethod::class);
     }
 
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+            ->withPivot('earned_at')
+            ->withTimestamps();
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function owns(Course $course)
     {
         return $this->id === $course->instructor_id;
     }
 }
+

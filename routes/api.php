@@ -157,3 +157,32 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 // Public certificate verification
 Route::get('/verify/{certificateNumber}', [\App\Http\Controllers\CertificateController::class, 'verify']);
+
+// Public Profiles
+Route::get('/profile/{identifier}', [\App\Http\Controllers\ProfileController::class, 'show']);
+
+// Bundles
+Route::get('/bundles', [\App\Http\Controllers\BundleController::class, 'index']);
+Route::get('/bundles/{bundle}', [\App\Http\Controllers\BundleController::class, 'show']);
+
+// Authenticated Profile & Gifts
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update']);
+    Route::get('/my-badges', [\App\Http\Controllers\ProfileController::class, 'badges']);
+
+    // Gifts
+    Route::post('/gifts', [\App\Http\Controllers\GiftController::class, 'create']);
+    Route::post('/gifts/redeem', [\App\Http\Controllers\GiftController::class, 'redeem']);
+    Route::get('/gifts/sent', [\App\Http\Controllers\GiftController::class, 'sentGifts']);
+    Route::get('/gifts/received', [\App\Http\Controllers\GiftController::class, 'receivedGifts']);
+
+    // Referrals (Affiliate)
+    Route::get('/referral/code', [\App\Http\Controllers\ReferralController::class, 'getCode']);
+    Route::get('/referral/stats', [\App\Http\Controllers\ReferralController::class, 'stats']);
+
+    // Assignments
+    Route::get('/courses/{course}/assignments/{assignment}', [\App\Http\Controllers\AssignmentController::class, 'show']);
+    Route::post('/courses/{course}/assignments/{assignment}/submit', [\App\Http\Controllers\AssignmentController::class, 'submit']);
+    Route::post('/courses/{course}/submissions/{submission}/grade', [\App\Http\Controllers\AssignmentController::class, 'grade']);
+    Route::get('/courses/{course}/assignments/{assignment}/submissions', [\App\Http\Controllers\AssignmentController::class, 'submissions']);
+});

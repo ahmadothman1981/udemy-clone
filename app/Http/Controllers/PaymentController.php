@@ -21,7 +21,7 @@ class PaymentController extends Controller implements HasMiddleware
     public function createIntent(Request $request, Course $course)
     {
         // Integration with Stripe
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
         $paymentIntent = PaymentIntent::create([
             'amount' => $course->price * 100, // cents
