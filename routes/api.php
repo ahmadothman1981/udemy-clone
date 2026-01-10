@@ -38,6 +38,10 @@ Route::get('/courses', [CourseController::class, 'index']); // Search, Filter, S
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
+Route::get('/levels', function () {
+    return \App\Models\CourseLevel::all();
+});
+
 
 // Protected Routes
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
@@ -46,7 +50,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
-    
+
     // Notifications
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
@@ -126,3 +130,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/checkout', [\App\Http\Controllers\CheckoutController::class, 'processOrder']);
 });
 
+// Stripe Webhook (no auth - verified by signature)
+Route::post('/webhooks/stripe', [\App\Http\Controllers\StripeWebhookController::class, 'handleWebhook']);

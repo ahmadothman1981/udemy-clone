@@ -21,7 +21,7 @@
           </div>
           
           <!-- Filters -->
-          <div class="flex flex-wrap gap-3">
+          <div class="flex flex-wrap gap-3 items-center">
             <select 
               v-model="selectedCategory" 
               @change="applyFilters"
@@ -32,6 +32,37 @@
                 {{ cat.name }}
               </option>
             </select>
+            
+            <select 
+              v-model="selectedLevel" 
+              @change="applyFilters"
+              class="filter-select"
+            >
+              <option value="">All Levels</option>
+              <option v-for="level in courseStore.levels" :key="level.id" :value="level.slug || level.id">
+                {{ level.name }}
+              </option>
+            </select>
+            
+            <div class="flex items-center gap-2">
+              <input 
+                v-model="priceMin" 
+                type="number" 
+                placeholder="Min $" 
+                min="0"
+                class="filter-input w-20"
+                @change="applyFilters"
+              >
+              <span class="text-gray-400">-</span>
+              <input 
+                v-model="priceMax" 
+                type="number" 
+                placeholder="Max $" 
+                min="0"
+                class="filter-input w-20"
+                @change="applyFilters"
+              >
+            </div>
             
             <select 
               v-model="sortBy" 
@@ -163,6 +194,9 @@ const route = useRoute();
 const router = useRouter();
 
 const selectedCategory = ref('');
+const selectedLevel = ref('');
+const priceMin = ref('');
+const priceMax = ref('');
 const sortBy = ref('');
 
 const loadCourses = () => {
@@ -171,29 +205,69 @@ const loadCourses = () => {
 
 const applyFilters = () => {
   const query = { ...route.query };
+  
+  // Category filter
   if (selectedCategory.value) {
     query.category = selectedCategory.value;
   } else {
     delete query.category;
   }
+  
+  // Level filter
+  if (selectedLevel.value) {
+    query.level = selectedLevel.value;
+  } else {
+    delete query.level;
+  }
+  
+  // Price range filters
+  if (priceMin.value) {
+    query.price_min = priceMin.value;
+  } else {
+    delete query.price_min;
+  }
+  
+  if (priceMax.value) {
+    query.price_max = priceMax.value;
+  } else {
+    delete query.price_max;
+  }
+  
+  // Sort
   if (sortBy.value) {
     query.sort = sortBy.value;
   } else {
     delete query.sort;
   }
+  
   router.push({ path: '/', query });
 };
 
 const clearFilters = () => {
   selectedCategory.value = '';
+  selectedLevel.value = '';
+  priceMin.value = '';
+  priceMax.value = '';
   sortBy.value = '';
   router.push({ path: '/' });
 };
 
 onMounted(() => {
   loadCourses();
+  courseStore.fetchLevels();
+  
+  // Initialize filters from URL query params
   if (route.query.category) {
     selectedCategory.value = route.query.category;
+  }
+  if (route.query.level) {
+    selectedLevel.value = route.query.level;
+  }
+  if (route.query.price_min) {
+    priceMin.value = route.query.price_min;
+  }
+  if (route.query.price_max) {
+    priceMax.value = route.query.price_max;
   }
   if (route.query.sort) {
     sortBy.value = route.query.sort;
@@ -225,6 +299,30 @@ watch(() => route.query, () => {
   outline: none;
   border-color: #a855f7;
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.filter-input {
+  padding: 0.625rem 0.75rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  color: #374151;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.filter-input:hover {
+  border-color: #a855f7;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.filter-input::placeholder {
+  color: #9ca3af;
 }
 
 .loading-spinner {

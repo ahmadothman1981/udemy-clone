@@ -23,6 +23,30 @@ class LectureController extends Controller implements HasMiddleware
         ];
     }
 
+    /**
+     * Get the storage disk for videos (s3 or public)
+     */
+    private function getVideoDisk(): string
+    {
+        return config('filesystems.default') === 's3' ? 's3' : 'public';
+    }
+
+    /**
+     * Generate a video URL (signed for S3, public URL for local)
+     */
+    private function getVideoUrl(string $path): string
+    {
+        $disk = $this->getVideoDisk();
+
+        if ($disk === 's3') {
+            // Generate a temporary signed URL valid for 2 hours
+            return Storage::disk('s3')->temporaryUrl($path, now()->addHours(2));
+        }
+
+        // For local storage, return public URL
+        return Storage::disk('public')->url($path);
+    }
+
     public function store(Request $request, Course $course, Section $section)
     {
         if ($section->course_id !== $course->id)
@@ -33,7 +57,7 @@ class LectureController extends Controller implements HasMiddleware
             'title' => 'required|string|max:255',
             'type' => 'required|in:video,article,quiz,resource',
             'content' => 'nullable|string', // Text content for articles
-            'video' => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:102400', // 100MB limit for demo
+            'video' => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:512000', // 500MB limit
             'duration_minutes' => 'nullable|integer',
             'preview' => 'boolean',
         ]);
@@ -42,9 +66,12 @@ class LectureController extends Controller implements HasMiddleware
 
         // Handle Video Upload
         if ($request->hasFile('video') && $request->file('video')->isValid()) {
-            $path = $request->file('video')->store('lectures', 'public');
-            $lectureData['video_url'] = Storage::url($path);
-            // In a real app, we'd process duration here or use a service like Vimeo/AWS MediaConvert
+            $disk = $this->getVideoDisk();
+            $path = $request->file('video')->store('lectures/' . $course->id, $disk);
+
+            // Store the path (not URL) so we can generate signed URLs later
+            $lectureData['video_path'] = $path;
+            $lectureData['video_url'] = $this->getVideoUrl($path);
         }
 
         $lecture = $section->lectures()->create($lectureData);
@@ -61,7 +88,7 @@ class LectureController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'content' => 'nullable|string',
-            'video' => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:102400',
+            'video' => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:512000',
             'duration_minutes' => 'nullable|integer',
             'preview' => 'boolean',
             'order' => 'integer',
@@ -70,11 +97,16 @@ class LectureController extends Controller implements HasMiddleware
         $lectureData = $request->except('video');
 
         if ($request->hasFile('video') && $request->file('video')->isValid()) {
-            // Delete old video if exists?
-            // if ($lecture->video_url) ...
+            $disk = $this->getVideoDisk();
 
-            $path = $request->file('video')->store('lectures', 'public');
-            $lectureData['video_url'] = Storage::url($path);
+            // Delete old video if exists
+            if ($lecture->video_path) {
+                Storage::disk($disk)->delete($lecture->video_path);
+            }
+
+            $path = $request->file('video')->store('lectures/' . $course->id, $disk);
+            $lectureData['video_path'] = $path;
+            $lectureData['video_url'] = $this->getVideoUrl($path);
         }
 
         $lecture->update($lectureData);
@@ -87,6 +119,12 @@ class LectureController extends Controller implements HasMiddleware
         if ($section->course_id !== $course->id || $lecture->section_id !== $section->id)
             abort(404);
         $this->authorize('update', $course);
+
+        // Delete video file if exists
+        if ($lecture->video_path) {
+            $disk = $this->getVideoDisk();
+            Storage::disk($disk)->delete($lecture->video_path);
+        }
 
         $lecture->delete();
         return response()->noContent();

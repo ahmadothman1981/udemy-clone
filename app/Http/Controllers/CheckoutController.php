@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
 
 class CheckoutController extends Controller implements HasMiddleware
 {
@@ -66,14 +68,13 @@ class CheckoutController extends Controller implements HasMiddleware
     }
 
     /**
-     * Process checkout - create order, mock payment, create enrollments
+     * Create Stripe PaymentIntent and pending order
      */
     public function processOrder(Request $request)
     {
         $request->validate([
             'course_ids' => 'required|array|min:1',
             'course_ids.*' => 'integer|exists:courses,id',
-            'payment_method_id' => 'nullable|integer|exists:saved_payment_methods,id',
         ]);
 
         $user = $request->user();
@@ -96,13 +97,18 @@ class CheckoutController extends Controller implements HasMiddleware
 
         $total = $courses->sum('price');
 
-        // Create order
+        // Handle free courses (no payment needed)
+        if ($total <= 0) {
+            return $this->handleFreeEnrollment($user, $courses);
+        }
+
+        // Create pending order
         $order = Order::create([
             'user_id' => $user->id,
             'order_number' => 'ORD-' . strtoupper(Str::random(10)),
             'total' => $total,
             'status' => 'pending',
-            'payment_method' => $request->payment_method_id ? 'saved_card' : 'new_card',
+            'payment_method' => 'stripe',
         ]);
 
         // Create order items
@@ -115,48 +121,85 @@ class CheckoutController extends Controller implements HasMiddleware
             ]);
         }
 
-        // Mock payment processing (in real app, use Stripe PaymentIntent)
-        // For demonstration, we'll simulate success
-        $paymentSuccess = true;
+        // Create Stripe PaymentIntent
+        Stripe::setApiKey(config('services.stripe.secret'));
 
-        if ($paymentSuccess) {
-            // Update order status
-            $order->update(['status' => 'paid']);
-
-            // Create enrollments for each course
-            foreach ($courses as $course) {
-                Enrollment::create([
-                    'user_id' => $user->id,
-                    'course_id' => $course->id,
-                    'amount_paid' => $course->price,
-                    'enrolled_at' => now(),
-                ]);
-
-                // Increment enrollment count
-                $course->increment('enrollment_count');
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Order completed successfully!',
-                'order' => [
-                    'id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'total' => $order->total,
-                    'courses' => $courses->map(fn($c) => [
-                        'id' => $c->id,
-                        'title' => $c->title,
-                        'slug' => $c->slug,
-                    ]),
+        try {
+            $paymentIntent = PaymentIntent::create([
+                'amount' => (int) ($total * 100), // Convert to cents
+                'currency' => 'usd',
+                'automatic_payment_methods' => [
+                    'enabled' => true,
                 ],
-            ], 201);
-        } else {
-            $order->update(['status' => 'failed']);
+                'metadata' => [
+                    'order_id' => $order->id,
+                    'user_id' => $user->id,
+                    'course_ids' => implode(',', $courses->pluck('id')->toArray()),
+                ],
+            ]);
+
+            // Store payment intent ID in order
+            $order->update(['payment_intent_id' => $paymentIntent->id]);
 
             return response()->json([
-                'success' => false,
-                'message' => 'Payment failed. Please try again.',
-            ], 400);
+                'clientSecret' => $paymentIntent->client_secret,
+                'order_id' => $order->id,
+                'total' => $total,
+            ]);
+        } catch (\Exception $e) {
+            // Clean up failed order
+            $order->delete();
+
+            return response()->json([
+                'message' => 'Failed to create payment intent: ' . $e->getMessage(),
+            ], 500);
         }
+    }
+
+    /**
+     * Handle free course enrollment (no payment required)
+     */
+    private function handleFreeEnrollment($user, $courses)
+    {
+        $order = Order::create([
+            'user_id' => $user->id,
+            'order_number' => 'ORD-' . strtoupper(Str::random(10)),
+            'total' => 0,
+            'status' => 'paid',
+            'payment_method' => 'free',
+        ]);
+
+        foreach ($courses as $course) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'course_id' => $course->id,
+                'price_snapshot' => 0,
+                'price' => 0,
+            ]);
+
+            Enrollment::create([
+                'user_id' => $user->id,
+                'course_id' => $course->id,
+                'amount_paid' => 0,
+                'enrolled_at' => now(),
+            ]);
+
+            $course->increment('enrollment_count');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Enrolled successfully!',
+            'order' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'total' => 0,
+                'courses' => $courses->map(fn($c) => [
+                    'id' => $c->id,
+                    'title' => $c->title,
+                    'slug' => $c->slug,
+                ]),
+            ],
+        ], 201);
     }
 }

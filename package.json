@@ -24,6 +24,7 @@
     "dependencies": {
         "laravel-echo": "^2.2.7",
         "lodash": "^4.17.21",
-        "pusher-js": "^8.4.0"
+        "pusher-js": "^8.4.0",
+        "vuedraggable": "^4.1.0"
     }
 }

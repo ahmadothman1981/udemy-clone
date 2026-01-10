@@ -45,7 +45,7 @@
                                         <p class="text-sm text-gray-500">By {{ item.instructor_name }}</p>
                                     </div>
                                     <div class="text-right flex-shrink-0">
-                                        <div class="font-bold text-purple-600">£{{ parseFloat(item.price).toFixed(2) }}</div>
+                                        <div class="font-bold text-purple-600">${{ parseFloat(item.price).toFixed(2) }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -65,73 +65,25 @@
                             </div>
                         </div>
 
-                        <!-- Payment Method Selection -->
+                        <!-- Payment Section -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                             <div class="px-6 py-4 border-b border-gray-100">
-                                <h2 class="text-lg font-bold text-gray-900">Payment Method</h2>
+                                <h2 class="text-lg font-bold text-gray-900">Payment Details</h2>
+                                <p class="text-sm text-gray-500">Secure payment powered by Stripe</p>
                             </div>
                             
                             <div class="p-6">
-                                <!-- Loading payment methods -->
-                                <div v-if="paymentStore.loading" class="flex justify-center py-4">
-                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                                <!-- Stripe Payment Element Container -->
+                                <div id="payment-element" class="min-h-[120px]">
+                                    <!-- Stripe Elements will be mounted here -->
+                                    <div v-if="!stripeReady" class="flex justify-center py-8">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                                    </div>
                                 </div>
 
-                                <!-- Payment Methods List -->
-                                <div v-else class="space-y-3">
-                                    <!-- Saved Payment Methods -->
-                                    <label v-for="method in paymentStore.paymentMethods" :key="method.id" 
-                                           class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
-                                           :class="selectedPaymentMethod === method.id ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'">
-                                        <input type="radio" :value="method.id" v-model="selectedPaymentMethod" class="sr-only">
-                                        <div class="flex-shrink-0 w-12 h-8 bg-gradient-to-br from-gray-700 to-gray-900 rounded flex items-center justify-center text-white text-xs font-bold">
-                                            <span v-if="method.type === 'paypal'">PP</span>
-                                            <span v-else>{{ method.brand?.substring(0, 4).toUpperCase() || 'CARD' }}</span>
-                                        </div>
-                                        <div class="ml-4 flex-1">
-                                            <template v-if="method.type === 'paypal'">
-                                                <p class="font-medium text-gray-900">PayPal</p>
-                                                <p class="text-sm text-gray-500">{{ method.email }}</p>
-                                            </template>
-                                            <template v-else>
-                                                <p class="font-medium text-gray-900">{{ method.brand }} •••• {{ method.last4 }}</p>
-                                                <p class="text-sm text-gray-500">Expires {{ method.exp_month }}/{{ method.exp_year }}</p>
-                                            </template>
-                                        </div>
-                                        <div v-if="selectedPaymentMethod === method.id" class="text-purple-600">
-                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    </label>
-
-                                    <!-- New Payment Method Option -->
-                                    <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
-                                           :class="selectedPaymentMethod === 'new' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'">
-                                        <input type="radio" value="new" v-model="selectedPaymentMethod" class="sr-only">
-                                        <div class="flex-shrink-0 w-12 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded flex items-center justify-center text-white">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                            </svg>
-                                        </div>
-                                        <div class="ml-4 flex-1">
-                                            <p class="font-medium text-gray-900">Use a new payment method</p>
-                                            <p class="text-sm text-gray-500">Credit/Debit card or PayPal</p>
-                                        </div>
-                                        <div v-if="selectedPaymentMethod === 'new'" class="text-purple-600">
-                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    </label>
-
-                                    <!-- No Saved Methods -->
-                                    <div v-if="paymentStore.paymentMethods.length === 0 && !paymentStore.loading" class="text-center py-4 text-gray-500">
-                                        <p class="text-sm">No saved payment methods</p>
-                                        <router-link to="/payment-methods" class="text-purple-600 hover:underline text-sm font-medium">
-                                            Add a payment method
-                                        </router-link>
-                                    </div>
+                                <!-- Payment Errors -->
+                                <div v-if="paymentError" class="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+                                    {{ paymentError }}
                                 </div>
                             </div>
                         </div>
@@ -147,23 +99,23 @@
                             <div class="p-6 space-y-4">
                                 <div class="flex justify-between text-gray-600">
                                     <span>Subtotal</span>
-                                    <span>£{{ checkoutStore.subtotal.toFixed(2) }}</span>
+                                    <span>${{ checkoutStore.subtotal.toFixed(2) }}</span>
                                 </div>
                                 
                                 <div class="flex justify-between text-gray-400 text-sm">
                                     <span>Original Price</span>
-                                    <span class="line-through">£{{ (checkoutStore.subtotal * 1.5).toFixed(2) }}</span>
+                                    <span class="line-through">${{ (checkoutStore.subtotal * 1.5).toFixed(2) }}</span>
                                 </div>
 
                                 <div class="flex justify-between text-green-600 text-sm">
                                     <span>Discount</span>
-                                    <span>-£{{ (checkoutStore.subtotal * 0.5).toFixed(2) }}</span>
+                                    <span>-${{ (checkoutStore.subtotal * 0.5).toFixed(2) }}</span>
                                 </div>
                                 
                                 <div class="border-t border-gray-200 pt-4">
                                     <div class="flex justify-between items-center">
                                         <span class="text-xl font-bold text-gray-900">Total</span>
-                                        <span class="text-3xl font-bold text-purple-600">£{{ checkoutStore.total.toFixed(2) }}</span>
+                                        <span class="text-3xl font-bold text-purple-600">${{ checkoutStore.total.toFixed(2) }}</span>
                                     </div>
                                 </div>
 
@@ -173,30 +125,32 @@
                                 </div>
 
                                 <!-- Complete Order Button -->
-                                <button @click="completeOrder" 
-                                        :disabled="!canCheckout"
+                                <button @click="handlePayment" 
+                                        :disabled="!canCheckout || processing"
                                         class="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]">
-                                    <span v-if="checkoutStore.processing" class="flex items-center justify-center gap-2">
+                                    <span v-if="processing" class="flex items-center justify-center gap-2">
                                         <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Processing...
+                                        Processing Payment...
                                     </span>
-                                    <span v-else>Complete Order</span>
+                                    <span v-else>Pay ${{ checkoutStore.total.toFixed(2) }}</span>
                                 </button>
-
-                                <!-- Validation Message -->
-                                <div v-if="!selectedPaymentMethod && !paymentStore.loading" class="text-center text-amber-600 text-sm font-medium">
-                                    ⚠️ Please select a payment method above
-                                </div>
 
                                 <!-- Security Badge -->
                                 <div class="flex items-center justify-center gap-2 text-gray-400 text-sm">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                     </svg>
-                                    <span>Secure checkout</span>
+                                    <span>Secure payment with Stripe</span>
+                                </div>
+
+                                <!-- Test Card Info -->
+                                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                                    <p class="text-xs text-blue-600 font-medium">Test Mode</p>
+                                    <p class="text-xs text-blue-500 mt-1">Use card: 4242 4242 4242 4242</p>
+                                    <p class="text-xs text-blue-400">Any future date, any CVC</p>
                                 </div>
 
                                 <!-- Money Back Guarantee -->
@@ -214,38 +168,96 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '../stores/cart';
 import { useCheckoutStore } from '../stores/checkout';
-import { usePaymentMethodStore } from '../stores/paymentMethod';
 import Navbar from '../components/Navbar.vue';
 
 const router = useRouter();
 const cartStore = useCartStore();
 const checkoutStore = useCheckoutStore();
-const paymentStore = usePaymentMethodStore();
 
-const selectedPaymentMethod = ref(null);
+// Stripe state
+const stripe = ref(null);
+const elements = ref(null);
+const paymentElement = ref(null);
+const stripeReady = ref(false);
+const processing = ref(false);
+const paymentError = ref(null);
 
-// Check if payment method selection is valid
-const isPaymentMethodValid = computed(() => {
-    // Must have a selection
-    if (!selectedPaymentMethod.value) return false;
-    
-    // If 'new' is selected, we consider it valid (mock payment)
-    if (selectedPaymentMethod.value === 'new') return true;
-    
-    // If a saved method is selected, verify it exists
-    return paymentStore.paymentMethods.some(m => m.id === selectedPaymentMethod.value);
-});
+// Get Stripe publishable key from env
+const stripeKey = import.meta.env.VITE_STRIPE_KEY || 'pk_test_placeholder';
 
 // Check if checkout can proceed
 const canCheckout = computed(() => {
-    return isPaymentMethodValid.value && 
-           !checkoutStore.processing && 
+    return stripeReady.value && 
+           !processing.value && 
            checkoutStore.items.length > 0;
 });
+
+// Load Stripe.js dynamically
+const loadStripe = async () => {
+    if (window.Stripe) {
+        return window.Stripe;
+    }
+    
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://js.stripe.com/v3/';
+        script.async = true;
+        script.onload = () => resolve(window.Stripe);
+        script.onerror = () => reject(new Error('Failed to load Stripe.js'));
+        document.head.appendChild(script);
+    });
+};
+
+// Initialize Stripe and Payment Element
+const initializeStripe = async (clientSecret) => {
+    try {
+        const Stripe = await loadStripe();
+        stripe.value = Stripe(stripeKey);
+        
+        // Create Elements instance with the client secret
+        elements.value = stripe.value.elements({
+            clientSecret,
+            appearance: {
+                theme: 'stripe',
+                variables: {
+                    colorPrimary: '#9333ea',
+                    colorBackground: '#ffffff',
+                    colorText: '#1f2937',
+                    colorDanger: '#dc2626',
+                    fontFamily: 'system-ui, sans-serif',
+                    spacingUnit: '4px',
+                    borderRadius: '8px',
+                },
+            },
+        });
+        
+        // Create and mount Payment Element
+        paymentElement.value = elements.value.create('payment', {
+            layout: 'tabs',
+        });
+        
+        paymentElement.value.mount('#payment-element');
+        
+        paymentElement.value.on('ready', () => {
+            stripeReady.value = true;
+        });
+        
+        paymentElement.value.on('change', (event) => {
+            if (event.error) {
+                paymentError.value = event.error.message;
+            } else {
+                paymentError.value = null;
+            }
+        });
+    } catch (error) {
+        console.error('Failed to initialize Stripe:', error);
+        paymentError.value = 'Failed to load payment form. Please refresh the page.';
+    }
+};
 
 onMounted(async () => {
     // Get course IDs from cart
@@ -255,39 +267,91 @@ onMounted(async () => {
         return;
     }
 
-    // Fetch checkout preview and payment methods
-    await Promise.all([
-        checkoutStore.fetchPreview(courseIds),
-        paymentStore.fetchPaymentMethods()
-    ]);
-
-    // Auto-select first saved payment method if available
-    // Don't auto-select 'new' - user must explicitly choose
-    if (paymentStore.paymentMethods.length > 0) {
-        selectedPaymentMethod.value = paymentStore.paymentMethods[0].id;
+    // Fetch checkout preview first
+    await checkoutStore.fetchPreview(courseIds);
+    
+    // If there are items to purchase, create PaymentIntent
+    if (checkoutStore.items.length > 0 && checkoutStore.total > 0) {
+        try {
+            const result = await checkoutStore.createPaymentIntent(courseIds);
+            
+            // Check if it was a free enrollment
+            if (result.success) {
+                cartStore.clear();
+                router.push('/checkout/success');
+                return;
+            }
+            
+            // Initialize Stripe with clientSecret
+            if (result.clientSecret) {
+                await initializeStripe(result.clientSecret);
+            }
+        } catch (error) {
+            console.error('Failed to create payment intent:', error);
+        }
+    } else if (checkoutStore.items.length > 0 && checkoutStore.total === 0) {
+        // Free courses - enroll directly
+        try {
+            const result = await checkoutStore.createPaymentIntent(courseIds);
+            if (result.success) {
+                cartStore.clear();
+                router.push('/checkout/success');
+            }
+        } catch (error) {
+            console.error('Failed to enroll in free courses:', error);
+        }
     }
-    // Leave selectedPaymentMethod as null if no saved methods
 });
 
-const completeOrder = async () => {
-    if (!isPaymentMethodValid.value) {
-        alert('Please select a valid payment method');
+onUnmounted(() => {
+    // Cleanup Stripe elements
+    if (paymentElement.value) {
+        paymentElement.value.unmount();
+    }
+});
+
+const handlePayment = async () => {
+    if (!stripe.value || !elements.value) {
+        paymentError.value = 'Payment form not ready. Please wait or refresh.';
         return;
     }
-
-    checkoutStore.selectedPaymentMethodId = selectedPaymentMethod.value === 'new' ? null : selectedPaymentMethod.value;
+    
+    processing.value = true;
+    paymentError.value = null;
 
     try {
-        const courseIds = cartStore.items.map(item => item.id);
-        await checkoutStore.processCheckout(courseIds);
-        
-        // Clear cart on success
-        cartStore.clear();
-        
-        // Navigate to success page
-        router.push('/checkout/success');
-    } catch (error) {
-        console.error('Checkout failed:', error);
+        const { error, paymentIntent } = await stripe.value.confirmPayment({
+            elements: elements.value,
+            confirmParams: {
+                return_url: `${window.location.origin}/checkout/success`,
+            },
+            redirect: 'if_required',
+        });
+
+        if (error) {
+            // Show error to customer
+            paymentError.value = error.message;
+            processing.value = false;
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            // Payment succeeded
+            checkoutStore.setPaymentSuccess({
+                orderId: checkoutStore.orderId,
+                status: 'paid',
+            });
+            cartStore.clear();
+            router.push('/checkout/success');
+        } else if (paymentIntent && paymentIntent.status === 'requires_action') {
+            // 3D Secure or other action required - Stripe will handle redirect
+            paymentError.value = 'Additional authentication required...';
+        } else {
+            // Unexpected status
+            paymentError.value = 'Payment processing. Please check your order status.';
+            processing.value = false;
+        }
+    } catch (err) {
+        console.error('Payment error:', err);
+        paymentError.value = 'An unexpected error occurred. Please try again.';
+        processing.value = false;
     }
 };
 </script>

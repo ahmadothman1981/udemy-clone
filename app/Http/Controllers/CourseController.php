@@ -51,20 +51,50 @@ class CourseController extends Controller implements HasMiddleware
             $query->where('level_id', $request->level_id);
         }
 
+        // Level filter by slug
+        if ($request->has('level')) {
+            $levelSlug = $request->level;
+            $query->whereHas('level', function ($q) use ($levelSlug) {
+                $q->where('slug', $levelSlug);
+            });
+        }
+
+        // Price range filters
+        if ($request->has('price_min')) {
+            $query->where('price', '>=', (float) $request->price_min);
+        }
+
+        if ($request->has('price_max')) {
+            $query->where('price', '<=', (float) $request->price_max);
+        }
+
         if ($request->has('min_rating')) {
             $query->where('rating_avg', '>=', $request->min_rating);
         }
 
-        // Sorting
-        $sort = $request->input('sort', 'created_at'); // default
-        $direction = $request->input('direction', 'desc');
+        // Sorting - map frontend values to database columns
+        $sortParam = $request->input('sort', 'newest');
 
-        $allowedSorts = ['price', 'rating_avg', 'created_at', 'enrollment_count'];
-        if (in_array($sort, $allowedSorts)) {
-            $query->orderBy($sort, $direction);
+        $sortMapping = [
+            'popular' => ['column' => 'enrollment_count', 'direction' => 'desc'],
+            'newest' => ['column' => 'created_at', 'direction' => 'desc'],
+            'rating' => ['column' => 'rating_avg', 'direction' => 'desc'],
+            'price_low' => ['column' => 'price', 'direction' => 'asc'],
+            'price_high' => ['column' => 'price', 'direction' => 'desc'],
+            // Legacy support for direct column names
+            'price' => ['column' => 'price', 'direction' => $request->input('direction', 'asc')],
+            'rating_avg' => ['column' => 'rating_avg', 'direction' => 'desc'],
+            'created_at' => ['column' => 'created_at', 'direction' => 'desc'],
+            'enrollment_count' => ['column' => 'enrollment_count', 'direction' => 'desc'],
+        ];
+
+        if (isset($sortMapping[$sortParam])) {
+            $query->orderBy($sortMapping[$sortParam]['column'], $sortMapping[$sortParam]['direction']);
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
-        $courses = $query->with(['instructor', 'category'])->paginate(15);
+        $courses = $query->with(['instructor', 'category', 'level'])->paginate(15);
 
         return CourseResource::collection($courses);
     }

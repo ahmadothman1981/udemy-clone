@@ -20,7 +20,7 @@
                         controls 
                         autoplay
                         class="w-full h-full"
-                        @ended="markComplete"
+                        @ended="onVideoEnded"
                         :src="currentLecture.video_url"
                     ></video>
                     <div v-else class="flex flex-col items-center justify-center h-full text-gray-500">
@@ -30,7 +30,24 @@
                  <div v-else class="p-8 prose prose-invert mx-auto">
                      <h2>{{ currentLecture?.title }}</h2>
                      <div v-html="currentLecture?.content"></div>
-                     <button @click="markComplete" class="mt-8 bg-purple-600 px-6 py-2 rounded">Mark Complete</button>
+                     <div class="mt-8 flex gap-4">
+                        <button @click="markComplete" class="bg-purple-600 text-white px-6 py-2 rounded font-bold hover:bg-purple-700">
+                            {{ isCompleted(currentLecture?.id) ? 'Mark Incomplete' : 'Mark Complete' }}
+                        </button>
+                        <button v-if="nextLecture" @click="goToLecture(nextLecture.id)" class="bg-gray-700 text-white px-6 py-2 rounded font-bold hover:bg-gray-600">
+                            Next Lecture &rarr;
+                        </button>
+                     </div>
+                 </div>
+                 
+                 <!-- Video Navigation Overlay (Optional, or below video) -->
+                 <div v-if="currentLecture?.type === 'video'" class="absolute bottom-4 right-4 flex gap-2 z-20">
+                    <button v-if="prevLecture" @click="goToLecture(prevLecture.id)" class="bg-gray-800/80 text-white px-4 py-2 rounded hover:bg-gray-700 backdrop-blur-sm">
+                        &larr; Previous
+                    </button>
+                    <button v-if="nextLecture" @click="goToLecture(nextLecture.id)" class="bg-purple-600/90 text-white px-4 py-2 rounded hover:bg-purple-700 backdrop-blur-sm shadow-lg">
+                        Next &rarr;
+                    </button>
                  </div>
             </main>
 
@@ -93,9 +110,46 @@ const currentLecture = computed(() => {
 });
 
 const progressPercent = computed(() => {
-    // simplified calc
-    return 0; 
+    if (!course.value?.sections) return 0;
+    
+    let totalLectures = 0;
+    course.value.sections.forEach(s => totalLectures += s.lectures.length);
+    
+    if (totalLectures === 0) return 0;
+    
+    return Math.round((learningStore.currentProgress.length / totalLectures) * 100);
 });
+
+const allLectures = computed(() => {
+    if (!course.value?.sections) return [];
+    return course.value.sections.flatMap(s => s.lectures);
+});
+
+const nextLecture = computed(() => {
+    const list = allLectures.value;
+    const idx = list.findIndex(l => l.id === currentLectureId.value);
+    return (idx !== -1 && idx < list.length - 1) ? list[idx + 1] : null;
+});
+
+const prevLecture = computed(() => {
+    const list = allLectures.value;
+    const idx = list.findIndex(l => l.id === currentLectureId.value);
+    return (idx !== -1 && idx > 0) ? list[idx - 1] : null;
+});
+
+const isCompleted = (lectureId) => learningStore.currentProgress.includes(lectureId);
+
+const goToLecture = (lectureId) => {
+    router.push(`/learn/course/${props.courseSlug}/lecture/${lectureId}`);
+};
+
+const onVideoEnded = async () => {
+    await markComplete();
+    if (nextLecture.value) {
+        // Optional: Add a small delay or user preference check
+        goToLecture(nextLecture.value.id);
+    }
+};
 
 onMounted(async () => {
     try {

@@ -15,10 +15,13 @@ class Order extends Model
         'total',
         'status',
         'payment_method',
+        'payment_intent_id',
+        'paid_at',
     ];
 
     protected $casts = [
         'total' => 'decimal:2',
+        'paid_at' => 'datetime',
     ];
 
     public function user()

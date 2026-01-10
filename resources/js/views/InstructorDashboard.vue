@@ -316,12 +316,14 @@
 
 <script setup>
 import { ref, computed, onMounted, h } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Navbar from '../components/Navbar.vue';
 import { useI18n } from 'vue-i18n';
 
 // State
 const { t } = useI18n();
+const router = useRouter();
 const loading = ref(true);
 const stats = ref(null);
 const courses = ref([]);
@@ -429,7 +431,7 @@ const formatDate = (date) => {
 };
 
 const editCourse = (course) => {
-  console.log('Edit course:', course.id);
+  router.push(`/instructor/course/${course.id}/manage`);
 };
 
 const viewAnalytics = (course) => {

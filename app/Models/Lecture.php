@@ -15,6 +15,7 @@ class Lecture extends Model
         'type',
         'content',
         'video_url',
+        'video_path',
         'duration_minutes',
         'order',
         'preview',

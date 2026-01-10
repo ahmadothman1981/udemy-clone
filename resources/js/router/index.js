@@ -29,6 +29,11 @@ const routes = [
     { path: '/instructor', component: InstructorDashboard, meta: { requiresAuth: true, requiresInstructor: true } },
     { path: '/course/:slug', component: CourseDetail, props: true },
     {
+        path: '/instructor/course/:id/manage',
+        component: () => import('../views/CourseEditor.vue'),
+        meta: { requiresAuth: true, requiresInstructor: true }
+    },
+    {
         path: '/learn/course/:courseSlug',
         component: LearningPlayer,
         props: true,

@@ -5,6 +5,7 @@ export const useCourseStore = defineStore('course', {
     state: () => ({
         courses: [],
         categories: [],
+        levels: [],
         currentCourse: null,
         loading: false,
     }),
@@ -13,6 +14,14 @@ export const useCourseStore = defineStore('course', {
             try {
                 const response = await axios.get('/api/categories');
                 this.categories = response.data.data;
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        async fetchLevels() {
+            try {
+                const response = await axios.get('/api/levels');
+                this.levels = response.data.data || response.data;
             } catch (e) {
                 console.error(e);
             }

@@ -157,6 +157,7 @@ import { useAuthStore } from '../stores/auth';
 
 const email = ref('');
 const password = ref('');
+const loading = ref(false);
 const auth = useAuthStore();
 const router = useRouter();
 
@@ -170,12 +171,15 @@ const getRedirectPath = (user) => {
 };
 
 const handleLogin = async () => {
+    loading.value = true;
     try {
         await auth.login(email.value, password.value);
         const redirectPath = getRedirectPath(auth.user);
         router.push(redirectPath);
     } catch (e) {
         alert('Login failed');
+    } finally {
+        loading.value = false;
     }
 };
 
