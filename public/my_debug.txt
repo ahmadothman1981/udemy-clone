@@ -1,0 +1,2 @@
+User lookup result: Found (ID: 4503)
+Passed validation. User object type: object

@@ -18,6 +18,61 @@ export default {
         settings: "Settings",
     },
 
+    // Home/Catalog
+    home: {
+        all_courses: "All Courses",
+        explore_library: "Explore our library of courses",
+        no_courses: "No courses found",
+        adjust_filters: "Try adjusting your filters",
+        clear_filters: "Clear Filters",
+        search_placeholder: "What do you want to learn?",
+
+        filters: {
+            all_categories: "All Categories",
+            all_levels: "All Levels",
+            price_range: "Price Range",
+            sort_by: "Sort by",
+            most_popular: "Most Popular",
+            newest: "Newest",
+            highest_rated: "Highest Rated",
+            price_low: "Price: Low to High",
+            price_high: "Price: High to Low",
+        },
+
+        hero: {
+            learn_without: "Learn without",
+            limits: "limits",
+            subtitle: "Start, switch, or advance your career with more than 5,000 courses from expert instructors.",
+            courses_count_suffix: "courses",
+        },
+
+        stats: {
+            students: "Students",
+            courses: "Courses",
+            avg_rating: "Average Rating",
+        },
+
+        trending: {
+            title: "Trending Courses",
+            subtitle: "Courses that represent what people are learning right now",
+            badge: "Bestseller",
+        },
+
+        featured: {
+            title: "Featured Categories",
+            subtitle: "Find the best courses in the most popular categories",
+        },
+
+        categories: {
+            development: "Development",
+            data_science: "Data Science",
+            design: "Design",
+            business: "Business",
+            photography: "Photography",
+            music: "Music",
+        },
+    },
+
     // Catalog/Search
     catalog: {
         search_placeholder: "Search for anything",
@@ -39,6 +94,33 @@ export default {
         submit: "Submit",
         view_all: "View All",
         learn_more: "Learn More",
+
+        footer: {
+            company: "Company",
+            about: "About Us",
+            careers: "Careers",
+            blog: "Blog",
+            community: "Community",
+            become_instructor: "Become an Instructor",
+            affiliate: "Affiliate",
+            partners: "Partners",
+            support: "Support",
+            help: "Help and Support",
+            contact: "Contact Us",
+            faq: "FAQ",
+            legal: "Legal",
+            terms: "Terms",
+            privacy: "Privacy Policy",
+            cookie: "Cookie Settings",
+            rights: "© 2026 Udemy Clone. All rights reserved.",
+        },
+
+        newsletter: {
+            title: "Subscribe to our newsletter",
+            subtitle: "Get the latest updates and offers",
+            placeholder: "Enter your email",
+            subscribe: "Subscribe",
+        },
     },
 
     // Student Dashboard
@@ -87,3 +169,4 @@ export default {
         forgot_password: "Forgot Password?",
     },
 };
+
