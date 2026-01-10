@@ -39,7 +39,7 @@ class InstructorController extends Controller implements HasMiddleware
         }
 
         $avgRating = $courseCount > 0 ? $globalRatingSum / $courseCount : 0;
-        
+
         // Recent Reviews (limit 5)
         $courseIds = $courses->pluck('id');
         $recentReviews = \App\Models\Review::whereIn('course_id', $courseIds)
@@ -57,7 +57,7 @@ class InstructorController extends Controller implements HasMiddleware
                     'created_at' => $review->created_at,
                 ];
             });
-            
+
         // Recent Questions (limit 5)
         $recentQuestions = \App\Models\CourseQuestion::whereIn('course_id', $courseIds)
             ->with(['user:id,name', 'course:id,title'])
@@ -76,7 +76,7 @@ class InstructorController extends Controller implements HasMiddleware
                     'created_at' => $q->created_at, // Use created_at or asked_at if exists
                 ];
             });
-            
+
         $unansweredCount = \App\Models\CourseQuestion::whereIn('course_id', $courseIds)
             ->whereDoesntHave('answers') // Assuming 'answers' relation exists
             ->count();
@@ -99,7 +99,7 @@ class InstructorController extends Controller implements HasMiddleware
     public function courses(Request $request)
     {
         $user = $request->user();
-        
+
         // Using correct relationship 'courses' instead of 'courses_taught'
         $courses = $user->courses()
             ->withCount(['enrollments', 'reviews'])
@@ -109,7 +109,97 @@ class InstructorController extends Controller implements HasMiddleware
                 $course->rating_avg = $course->rating_avg ?? 0;
                 return $course;
             });
-            
+
         return response()->json($courses);
+    }
+
+    /**
+     * Enhanced analytics for instructor dashboard
+     */
+    public function analytics(Request $request)
+    {
+        $user = $request->user();
+        $courseIds = $user->courses->pluck('id');
+
+        // Enrollment trends (last 30 days)
+        $enrollmentTrends = \App\Models\Enrollment::whereIn('course_id', $courseIds)
+            ->where('created_at', '>=', now()->subDays(30))
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn($e) => ['date' => $e->date, 'enrollments' => $e->count]);
+
+        // Revenue by course (from actual orders)
+        $revenueByCourse = $user->courses()
+            ->withCount('enrollments')
+            ->get()
+            ->map(function ($course) {
+                return [
+                    'id' => $course->id,
+                    'title' => $course->title,
+                    'enrollments' => $course->enrollments_count,
+                    'revenue' => $course->price * $course->enrollments_count,
+                ];
+            })
+            ->sortByDesc('revenue')
+            ->values();
+
+        // Student engagement (completion rates)
+        $engagement = $user->courses()
+            ->with(['sections.lectures', 'enrollments.progress'])
+            ->get()
+            ->map(function ($course) {
+                $totalLectures = $course->sections->sum(fn($s) => $s->lectures->count());
+                $enrolledCount = $course->enrollments->count();
+
+                if ($totalLectures === 0 || $enrolledCount === 0) {
+                    return [
+                        'course_id' => $course->id,
+                        'title' => $course->title,
+                        'avg_completion' => 0,
+                        'completed_students' => 0,
+                    ];
+                }
+
+                $totalCompleted = 0;
+                $fullyCompleted = 0;
+
+                foreach ($course->enrollments as $enrollment) {
+                    $completedLectures = $enrollment->progress->where('completed', true)->count();
+                    $percentage = ($completedLectures / $totalLectures) * 100;
+                    $totalCompleted += $percentage;
+                    if ($percentage >= 100)
+                        $fullyCompleted++;
+                }
+
+                return [
+                    'course_id' => $course->id,
+                    'title' => $course->title,
+                    'avg_completion' => round($totalCompleted / $enrolledCount, 1),
+                    'completed_students' => $fullyCompleted,
+                ];
+            });
+
+        // Monthly summary
+        $thisMonth = now()->startOfMonth();
+        $monthlyEnrollments = \App\Models\Enrollment::whereIn('course_id', $courseIds)
+            ->where('created_at', '>=', $thisMonth)
+            ->count();
+
+        $monthlyRevenue = \App\Models\Enrollment::whereIn('course_id', $courseIds)
+            ->where('created_at', '>=', $thisMonth)
+            ->join('courses', 'enrollments.course_id', '=', 'courses.id')
+            ->sum('courses.price');
+
+        return response()->json([
+            'enrollment_trends' => $enrollmentTrends,
+            'revenue_by_course' => $revenueByCourse,
+            'engagement' => $engagement,
+            'monthly_summary' => [
+                'enrollments' => $monthlyEnrollments,
+                'revenue' => number_format($monthlyRevenue, 2),
+            ],
+        ]);
     }
 }

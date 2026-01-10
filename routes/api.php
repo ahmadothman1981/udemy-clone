@@ -112,6 +112,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Instructor Dashboard
     Route::get('/instructor/dashboard', [\App\Http\Controllers\InstructorController::class, 'dashboard']);
     Route::get('/instructor/courses', [\App\Http\Controllers\InstructorController::class, 'courses']);
+    Route::get('/instructor/analytics', [\App\Http\Controllers\InstructorController::class, 'analytics']);
 });
 
 // Public Social
@@ -124,7 +125,16 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/users', [\App\Http\Controllers\AdminController::class, 'users']);
     Route::get('/courses/pending', [\App\Http\Controllers\AdminController::class, 'pendingCourses']);
     Route::post('/courses/{course}/approve', [\App\Http\Controllers\AdminController::class, 'approveCourse']);
+
+    // Promo Codes (Admin)
+    Route::get('/promo-codes', [\App\Http\Controllers\PromoCodeController::class, 'index']);
+    Route::post('/promo-codes', [\App\Http\Controllers\PromoCodeController::class, 'store']);
+    Route::put('/promo-codes/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'update']);
+    Route::delete('/promo-codes/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'destroy']);
 });
+
+// Promo Code Validation (for checkout)
+Route::middleware(['auth:sanctum'])->post('/promo-codes/validate', [\App\Http\Controllers\PromoCodeController::class, 'validate']);
 
 // Payment
 Route::post('/courses/{course}/payment-intent', [\App\Http\Controllers\PaymentController::class, 'createIntent']);

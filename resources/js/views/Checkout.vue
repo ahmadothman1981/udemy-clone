@@ -107,15 +107,48 @@
                                     <span class="line-through">${{ (checkoutStore.subtotal * 1.5).toFixed(2) }}</span>
                                 </div>
 
+                                <!-- Promo Code Input -->
+                                <div class="border-t border-gray-200 pt-4">
+                                    <label class="text-sm font-medium text-gray-700 mb-2 block">Promo Code</label>
+                                    <div class="flex gap-2">
+                                        <input 
+                                            v-model="promoCode"
+                                            type="text" 
+                                            placeholder="Enter code"
+                                            :disabled="promoApplied"
+                                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100"
+                                        >
+                                        <button 
+                                            v-if="!promoApplied"
+                                            @click="applyPromoCode"
+                                            :disabled="!promoCode || applyingPromo"
+                                            class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {{ applyingPromo ? '...' : 'Apply' }}
+                                        </button>
+                                        <button 
+                                            v-else
+                                            @click="removePromoCode"
+                                            class="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                    <p v-if="promoError" class="text-red-500 text-xs mt-1">{{ promoError }}</p>
+                                    <p v-if="promoApplied" class="text-green-600 text-xs mt-1 flex items-center gap-1">
+                                        ✓ Code "{{ appliedPromoCode }}" applied
+                                    </p>
+                                </div>
+
                                 <div class="flex justify-between text-green-600 text-sm">
                                     <span>Discount</span>
-                                    <span>-${{ (checkoutStore.subtotal * 0.5).toFixed(2) }}</span>
+                                    <span>-${{ promoDiscount.toFixed(2) }}</span>
                                 </div>
                                 
                                 <div class="border-t border-gray-200 pt-4">
                                     <div class="flex justify-between items-center">
                                         <span class="text-xl font-bold text-gray-900">Total</span>
-                                        <span class="text-3xl font-bold text-purple-600">${{ checkoutStore.total.toFixed(2) }}</span>
+                                        <span class="text-3xl font-bold text-purple-600">${{ finalTotal.toFixed(2) }}</span>
                                     </div>
                                 </div>
 
@@ -186,8 +219,21 @@ const stripeReady = ref(false);
 const processing = ref(false);
 const paymentError = ref(null);
 
+// Promo code state
+const promoCode = ref('');
+const promoApplied = ref(false);
+const appliedPromoCode = ref('');
+const promoDiscount = ref(0);
+const promoError = ref('');
+const applyingPromo = ref(false);
+
 // Get Stripe publishable key from env
 const stripeKey = import.meta.env.VITE_STRIPE_KEY || 'pk_test_placeholder';
+
+// Computed final total with promo discount
+const finalTotal = computed(() => {
+    return Math.max(0, checkoutStore.total - promoDiscount.value);
+});
 
 // Check if checkout can proceed
 const canCheckout = computed(() => {
@@ -195,6 +241,52 @@ const canCheckout = computed(() => {
            !processing.value && 
            checkoutStore.items.length > 0;
 });
+
+// Apply promo code
+const applyPromoCode = async () => {
+    if (!promoCode.value) return;
+    
+    applyingPromo.value = true;
+    promoError.value = '';
+    
+    try {
+        const response = await fetch('/api/promo-codes/validate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                code: promoCode.value,
+                order_total: checkoutStore.subtotal,
+            }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.valid) {
+            promoApplied.value = true;
+            appliedPromoCode.value = data.code;
+            promoDiscount.value = data.discount_amount;
+        } else {
+            promoError.value = data.message || 'Invalid promo code';
+        }
+    } catch (error) {
+        promoError.value = 'Failed to validate promo code';
+    } finally {
+        applyingPromo.value = false;
+    }
+};
+
+// Remove promo code
+const removePromoCode = () => {
+    promoCode.value = '';
+    promoApplied.value = false;
+    appliedPromoCode.value = '';
+    promoDiscount.value = 0;
+    promoError.value = '';
+};
 
 // Load Stripe.js dynamically
 const loadStripe = async () => {
