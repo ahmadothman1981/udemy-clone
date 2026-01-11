@@ -21,9 +21,9 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="flex gap-8">
+      <div class="flex flex-col md:flex-row gap-8">
         <!-- Sidebar -->
-        <aside class="w-64 flex-shrink-0 hidden lg:block">
+        <aside class="w-full md:w-64 flex-shrink-0">
           <nav class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-4 border-b border-gray-100">
               <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">{{ $t('common.actions') }}</h3>
@@ -523,6 +523,7 @@ onMounted(async () => {
 
 .sidebar-item {
   display: flex;
+  width: 100%; /* Ensure full width */
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
@@ -538,7 +539,7 @@ onMounted(async () => {
 .sidebar-item.active {
   color: #7c3aed;
   background: #f5f3ff;
-  border-right: 3px solid #7c3aed;
+  border-inline-start: 3px solid #7c3aed; /* RTL friendly */
   font-weight: 600;
 }
 

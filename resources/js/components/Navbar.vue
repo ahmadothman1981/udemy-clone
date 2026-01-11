@@ -142,6 +142,9 @@
                    <router-link to="/dashboard" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
                        {{ $t('nav.dashboard') }}
                    </router-link>
+                   <router-link v-if="auth.isInstructor" to="/instructor" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50 bg-purple-50" @click="isUserMenuOpen = false">
+                       {{ $t('nav.instructor') }}
+                   </router-link>
                    <router-link to="/my-courses" class="block px-4 py-3 text-sm text-gray-700 hover:text-purple-600 hover:bg-gray-50" @click="isUserMenuOpen = false">
                        {{ $t('nav.my_learning') }}
                    </router-link>

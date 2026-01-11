@@ -138,7 +138,7 @@ class CourseController extends Controller implements HasMiddleware
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
             'price' => 'sometimes|numeric',
-            'discount_price' => 'nullable|numeric|lt:price',
+            'discount_price' => 'nullable|numeric',
             'published' => 'sometimes|boolean',
             'language' => 'sometimes|string',
             'category_id' => 'sometimes|exists:categories,id',
@@ -152,6 +152,18 @@ class CourseController extends Controller implements HasMiddleware
         if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')->store('thumbnails', 'public');
             $validated['thumbnail'] = '/storage/' . $path;
+        }
+
+        // Logic check: Ensure discount is valid (less than price)
+        if (isset($validated['discount_price']) && isset($validated['price'])) {
+            if ($validated['discount_price'] >= $validated['price']) {
+                $validated['discount_price'] = null;
+            }
+        } elseif (isset($validated['discount_price']) && !isset($validated['price'])) {
+            // If price not updated, check against DB
+            if ($validated['discount_price'] >= $course->price) {
+                $validated['discount_price'] = null;
+            }
         }
 
         $course->update($validated);

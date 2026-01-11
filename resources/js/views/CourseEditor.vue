@@ -219,8 +219,16 @@
                   <input v-model="courseForm.price" type="number" step="0.01" min="0" class="input-field" required>
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Discount ($)</label>
-                  <input v-model="courseForm.discount_price" type="number" step="0.01" min="0" class="input-field" placeholder="Optional">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Discount Amount ($)</label>
+                  <input v-model="discountAmount" type="number" step="0.01" min="0" class="input-field" placeholder="Amount to deduct">
+                  <div class="flex justify-between items-center mt-1">
+                    <p class="text-xs text-gray-500">
+                      Final Price: <span class="font-bold">${{ courseForm.discount_price ?? courseForm.price ?? 0 }}</span>
+                    </p>
+                    <span v-if="discountPercentage > 0" class="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                      {{ discountPercentage }}% OFF {{ courseForm.discount_price == 0 ? '(FREE)' : '' }}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -382,10 +390,61 @@ const uploadProgress = ref(0);
 const uploading = ref(false);
 const videoInput = ref(null);
 
-// Settings Form
 const courseForm = ref({});
 const categories = computed(() => courseStore.categories);
 const levels = computed(() => courseStore.levels);
+
+const discountAmount = computed({
+  get: () => {
+    const price = parseFloat(courseForm.value.price) || 0;
+    // If discount_price is null/undefined, there is no discount amount (0 or null)
+    if (courseForm.value.discount_price === null || courseForm.value.discount_price === undefined) return null;
+    
+    const discountPrice = parseFloat(courseForm.value.discount_price);
+    // Deduced Amount = Price - Final Price
+    return Math.max(0, parseFloat((price - discountPrice).toFixed(2)));
+  },
+  set: (val) => {
+    // If user clears input, remove discount
+    if (val === '' || val === null) {
+        courseForm.value.discount_price = null;
+        return;
+    }
+    
+    const amount = parseFloat(val);
+    const price = parseFloat(courseForm.value.price) || 0;
+    
+    if (isNaN(amount)) {
+         return; // Don't update if invalid
+    }
+    
+    // Final Price = Price - Amount
+    // Ensure it doesn't go below 0
+    let finalPrice = Math.max(0, price - amount);
+    
+    // If finalPrice equals original price (amount is 0), then NO discount.
+    if (finalPrice >= price) {
+        courseForm.value.discount_price = null;
+    } else {
+        courseForm.value.discount_price = parseFloat(finalPrice.toFixed(2));
+    }
+  }
+});
+
+const discountPercentage = computed(() => {
+  const price = parseFloat(courseForm.value.price) || 0;
+  const discountPrice = parseFloat(courseForm.value.discount_price);
+  
+  if (!price) return 0;
+  if (courseForm.value.discount_price === null || isNaN(discountPrice)) return 0;
+  
+  if (discountPrice >= price) return 0; // Negative discount?
+  // If Free
+  if (discountPrice === 0) return 100;
+
+  return Math.round(((price - discountPrice) / price) * 100);
+});
+
 const saving = ref(false);
 
 const fetchCourseData = async () => {
@@ -446,11 +505,19 @@ const updateCourse = async () => {
     formData.append('_method', 'PUT'); // For Laravel multipart PUT
     
     // Append standard fields
-    ['title', 'subtitle', 'description', 'price', 'discount_price', 'language', 'category_id', 'level_id'].forEach(key => {
+    ['title', 'subtitle', 'description', 'price', 'language', 'category_id', 'level_id'].forEach(key => {
       if (courseForm.value[key] !== null && courseForm.value[key] !== undefined) {
           formData.append(key, courseForm.value[key]);
       }
     });
+    
+    // Explicitly handle discount_price to allow clearing it (sending null)
+    if (courseForm.value.discount_price !== null && courseForm.value.discount_price !== undefined) {
+        formData.append('discount_price', courseForm.value.discount_price);
+    } else {
+        // Send empty string to indicate null/removal
+        formData.append('discount_price', ''); 
+    }
 
     if (courseForm.value.thumbnail) {
       formData.append('thumbnail', courseForm.value.thumbnail);
@@ -464,7 +531,15 @@ const updateCourse = async () => {
     alert("Course settings saved successfully!");
   } catch (e) {
     console.error("Failed to update course", e);
-    alert("Failed to update course settings: " + (e.response?.data?.message || e.message));
+    let errorMsg = e.response?.data?.message || e.message;
+    
+    // Append validation errors if available
+    if (e.response?.status === 422 && e.response?.data?.errors) {
+        const validationErrors = Object.values(e.response.data.errors).flat().join('\n');
+        errorMsg += '\n\n' + validationErrors;
+    }
+    
+    alert("Failed to update course settings:\n" + errorMsg);
   } finally {
     saving.value = false;
   }

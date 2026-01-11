@@ -76,8 +76,17 @@
       <!-- Price -->
       <div class="mt-auto">
         <div class="flex items-center gap-2">
-          <span class="text-lg font-bold text-gray-900">${{ course.price }}</span>
-          <span v-if="course.discount_price" class="text-sm text-gray-400 line-through">${{ course.discount_price }}</span>
+          <!-- Discounted Price (Active) -->
+          <span v-if="course.discount_price && course.discount_price < course.price" class="text-lg font-bold text-gray-900">${{ course.discount_price }}</span>
+          
+          <!-- Original Price (Strikethrough if discounted, otherwise Active) -->
+          <span 
+            :class="course.discount_price && course.discount_price < course.price ? 'text-sm text-gray-400 line-through' : 'text-lg font-bold text-gray-900'"
+          >
+            ${{ course.price }}
+          </span>
+
+          <!-- Badge -->
           <span v-if="discountPercent" class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
             {{ discountPercent }}% off
           </span>
@@ -122,7 +131,8 @@ const isWishlisted = computed(() => {
 
 const discountPercent = computed(() => {
   if (!props.course.discount_price || !props.course.price) return null;
-  const discount = ((props.course.discount_price - props.course.price) / props.course.discount_price) * 100;
+  if (props.course.discount_price >= props.course.price) return null;
+  const discount = ((props.course.price - props.course.discount_price) / props.course.price) * 100;
   return Math.round(discount);
 });
 

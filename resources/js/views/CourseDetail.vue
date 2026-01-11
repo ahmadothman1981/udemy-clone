@@ -50,9 +50,46 @@
                 </div>
             </div>
 
-            <!-- Absolute Sidebar Container (Desktop) -->
-            <!-- We use a wrapper to center it relative to the page, but position absolute to overlay -->
-            <div class="hidden lg:block absolute top-8 right-0 left-0 pointer-events-none">
+            <!-- Mobile/Tablet Purchase Section (Visible < lg) -->
+            <div class="md:hidden bg-white p-6 border-b border-gray-200">
+                 <div class="max-w-4xl mx-auto">
+                    <!-- Video Preview -->
+                    <div class="relative w-full h-48 bg-gray-900 rounded-lg overflow-hidden mb-6">
+                        <img :src="course.thumbnail" class="w-full h-full object-cover opacity-90" alt="preview">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="bg-white rounded-full p-4 shadow-lg">
+                                <div class="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-black border-b-[10px] border-b-transparent ml-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-4">
+                         <div class="flex items-baseline gap-2">
+                             <span class="text-3xl font-bold text-gray-900">£{{ finalPrice }}</span>
+                             <span v-if="hasDiscount" class="text-gray-500 line-through text-sm">£{{ originalPrice }}</span>
+                         </div>
+                         <span v-if="hasDiscount" class="text-green-700 bg-green-100 px-2 py-1 rounded font-bold text-sm whitespace-nowrap">
+                            {{ discountPercentage }}% off
+                         </span>
+                    </div>
+
+                    <div class="flex flex-row gap-3 w-full">
+                        <button @click="addToCart" class="flex-1 bg-[#a435f0] text-white font-bold py-3 text-sm sm:text-base rounded-md hover:bg-[#8710d8] transition text-center whitespace-nowrap flex items-center justify-center">
+                            Add to cart
+                        </button>
+                        <button @click="buyNow" class="flex-1 bg-white border border-black text-black font-bold py-3 text-sm sm:text-base rounded-md hover:bg-gray-50 transition text-center whitespace-nowrap flex items-center justify-center">
+                            Buy now
+                        </button>
+                    </div>
+
+                    <div class="text-center text-xs text-gray-500 mt-4">
+                        30-Day Money-Back Guarantee • Full Lifetime Access
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Absolute Sidebar Container (Desktop >= lg) -->
+            <div class="hidden md:block absolute top-8 right-0 left-0 pointer-events-none">
                  <div class="max-w-7xl mx-auto px-4 flex justify-end">
                      <!-- The Sidebar Card Itself -->
                      <div class="w-[340px] bg-white shadow-xl pointer-events-auto border border-gray-200 z-10">
@@ -70,24 +107,29 @@
                         </div>
 
                         <div class="p-6">
-                            <!-- Tabs (Visual Only for now) -->
+                            <!-- Tabs (Visual Only) -->
                             <div class="flex border-b border-gray-200 mb-4 text-center">
                                 <div class="flex-1 py-2 border-b-2 border-black font-bold cursor-pointer">Personal</div>
                                 <div class="flex-1 py-2 text-gray-600 hover:text-gray-900 cursor-pointer">Teams</div>
                             </div>
 
                             <div class="flex items-baseline space-x-2 mb-4">
-                                <span class="text-3xl font-bold text-gray-900">£{{ course.price }}</span>
-                                <span class="text-gray-500 line-through text-sm">£{{ (course.price * 1.25).toFixed(2) }}</span>
-                                <span class="text-gray-500 text-sm">29% off</span>
+                                <!-- Price Logic (Desktop) -->
+                                <span class="text-3xl font-bold text-gray-900">£{{ finalPrice }}</span>
+                                <span v-if="hasDiscount" class="text-gray-500 line-through text-sm">£{{ originalPrice }}</span>
+                                <span v-if="hasDiscount" class="text-gray-500 text-sm">
+                                    {{ discountPercentage }}% off
+                                </span>
                             </div>
 
-                            <button @click="addToCart" class="w-full bg-[#a435f0] text-white font-bold py-3 text-base mb-2 hover:bg-[#8710d8] transition">
-                                Add to cart
-                            </button>
-                            <button @click="buyNow" class="w-full bg-white border border-black text-black font-bold py-3 text-base mb-4 hover:bg-gray-50 transition">
-                                Buy now
-                            </button>
+                            <div class="flex flex-row gap-2 w-full mb-4">
+                                <button @click="addToCart" class="flex-1 bg-[#a435f0] text-white font-bold py-3 text-sm rounded-md hover:bg-[#8710d8] transition text-center whitespace-nowrap flex items-center justify-center">
+                                    Add to cart
+                                </button>
+                                <button @click="buyNow" class="flex-1 bg-white border border-black text-black font-bold py-3 text-sm rounded-md hover:bg-gray-50 transition text-center whitespace-nowrap flex items-center justify-center">
+                                    Buy now
+                                </button>
+                            </div>
                             
                              <div class="flex justify-center items-center mt-2">
                                 <button @click="toggleWishlist" class="text-sm font-bold flex items-center hover:text-red-600" :class="wishlistStore.hasItem(course.id) ? 'text-red-500' : 'text-gray-800'">
@@ -188,6 +230,29 @@ const cartStore = useCartStore();
 const wishlistStore = useWishlistStore();
 
 const course = computed(() => courseStore.currentCourse);
+
+const originalPrice = computed(() => {
+    return parseFloat(course.value?.price || 0);
+});
+
+const discountPriceVal = computed(() => {
+    return parseFloat(course.value?.discount_price || 0);
+});
+
+const hasDiscount = computed(() => {
+    const p = originalPrice.value;
+    const d = discountPriceVal.value;
+    return d > 0 && d < p;
+});
+
+const finalPrice = computed(() => {
+    return hasDiscount.value ? discountPriceVal.value : originalPrice.value;
+});
+
+const discountPercentage = computed(() => {
+    if (!hasDiscount.value) return 0;
+    return Math.round(((originalPrice.value - finalPrice.value) / originalPrice.value) * 100);
+});
 
 onMounted(() => {
     courseStore.fetchCourseDetail(route.params.slug);
