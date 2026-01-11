@@ -112,6 +112,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Instructor Dashboard
     Route::get('/instructor/dashboard', [\App\Http\Controllers\InstructorController::class, 'dashboard']);
     Route::get('/instructor/courses', [\App\Http\Controllers\InstructorController::class, 'courses']);
+    Route::post('/instructor/courses', [\App\Http\Controllers\InstructorController::class, 'store']);
+    Route::patch('/instructor/courses/{course}/publish', [\App\Http\Controllers\InstructorController::class, 'publish']);
     Route::get('/instructor/analytics', [\App\Http\Controllers\InstructorController::class, 'analytics']);
 });
 

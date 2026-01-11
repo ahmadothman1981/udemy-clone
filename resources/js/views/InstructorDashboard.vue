@@ -196,6 +196,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                         </button>
+                        <button @click="deleteCourse(course)" class="action-btn text-red-500 hover:bg-red-50" :title="$t('common.delete') || 'Delete'">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -444,6 +449,18 @@ const togglePublish = async (course) => {
     course.published = !course.published;
   } catch (e) {
     console.error('Failed to toggle publish', e);
+  }
+};
+
+const deleteCourse = async (course) => {
+  if (!confirm(t('common.confirm_delete') || "Are you sure you want to delete this course?")) return;
+  
+  try {
+    await axios.delete(`/api/courses/${course.id}`);
+    courses.value = courses.value.filter(c => c.id !== course.id);
+  } catch (e) {
+    console.error("Failed to delete course", e);
+    alert(t('common.error_occurred') || "Failed to delete course");
   }
 };
 

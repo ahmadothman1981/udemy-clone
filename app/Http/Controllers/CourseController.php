@@ -138,9 +138,21 @@ class CourseController extends Controller implements HasMiddleware
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
             'price' => 'sometimes|numeric',
+            'discount_price' => 'nullable|numeric|lt:price',
             'published' => 'sometimes|boolean',
-            // ... other fields
+            'language' => 'sometimes|string',
+            'category_id' => 'sometimes|exists:categories,id',
+            'level_id' => 'sometimes|exists:course_levels,id',
+            'subtitle' => 'nullable|string|max:255',
+            'thumbnail' => 'nullable|image|max:2048', // For file upload handling via proper means or if handling here
+            // Note: Update usually handles multipart differently or uses separate endpoint for files if not using _method=PUT
+            // The frontend sends _method=PUT so Request captures it.
         ]);
+
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('thumbnails', 'public');
+            $validated['thumbnail'] = '/storage/' . $path;
+        }
 
         $course->update($validated);
 

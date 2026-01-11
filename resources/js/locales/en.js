@@ -102,6 +102,33 @@ export default {
         browse_all: "Browse All Courses",
     },
 
+    // Instructor Dashboard
+    instructor_dashboard: {
+        title: "Instructor Dashboard",
+        your_courses: "Your Courses",
+        recent_reviews: "Recent Reviews",
+        student_questions: "Student Questions",
+        sidebar: {
+            dashboard: "Dashboard",
+            courses: "Courses",
+            communication: "Communication",
+            performance: "Performance",
+            create_course: "Create New Course",
+        },
+        stats: {
+            total_revenue: "Total Revenue",
+            total_students: "Total Students",
+            average_rating: "Average Rating",
+        },
+        course_table: {
+            course: "Course",
+            students: "Students",
+            rating: "Rating",
+            revenue: "Revenue",
+            status: "Status",
+        },
+    },
+
     // Common
     common: {
         welcome: "Welcome",
@@ -113,6 +140,11 @@ export default {
         submit: "Submit",
         view_all: "View All",
         learn_more: "Learn More",
+        actions: "Actions",
+        edit: "Edit",
+        delete: "Delete",
+        confirm_delete: "Are you sure you want to delete this course?",
+        error_occurred: "An error occurred. Please try again.",
 
         footer: {
             company: "Company",

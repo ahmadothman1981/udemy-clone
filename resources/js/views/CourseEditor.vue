@@ -30,7 +30,27 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="mb-6 border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8">
+          <button 
+            @click="activeTab = 'curriculum'"
+            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors"
+            :class="activeTab === 'curriculum' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          >
+            Curriculum
+          </button>
+          <button 
+            @click="activeTab = 'settings'"
+            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors"
+            :class="activeTab === 'settings' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          >
+            Course Settings
+          </button>
+        </nav>
+      </div>
+
+      <!-- Curriculum Tab -->
+      <div v-show="activeTab === 'curriculum'" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Sidebar: Sections List -->
         <div class="lg:col-span-1 space-y-6">
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
@@ -174,7 +194,94 @@
           </div>
         </div>
       </div>
-    </div>
+
+      <!-- Settings Tab -->
+      <div v-show="activeTab === 'settings'" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-4xl mx-auto">
+        <h2 class="text-xl font-bold text-gray-900 mb-6">Course Settings</h2>
+        
+        <form @submit.prevent="updateCourse" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Basic Info -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Course Title</label>
+                <input v-model="courseForm.title" type="text" class="input-field" required>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Subtitle</label>
+                <input v-model="courseForm.subtitle" type="text" class="input-field">
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Price ($)</label>
+                  <input v-model="courseForm.price" type="number" step="0.01" min="0" class="input-field" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Discount ($)</label>
+                  <input v-model="courseForm.discount_price" type="number" step="0.01" min="0" class="input-field" placeholder="Optional">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Language</label>
+                <input v-model="courseForm.language" type="text" class="input-field" required>
+              </div>
+            </div>
+
+            <!-- Taxonomy -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                <select v-model="courseForm.category_id" class="input-field" required>
+                  <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Level</label>
+                <select v-model="courseForm.level_id" class="input-field" required>
+                  <option v-for="level in levels" :key="level.id" :value="level.id">{{ level.name }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+             <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+             <textarea v-model="courseForm.description" rows="6" class="input-field" required></textarea>
+          </div>
+
+          <!-- Thumbnail -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Course Thumbnail</label>
+            <div class="flex items-start gap-6">
+              <div v-if="course.thumbnail_url || courseForm.thumbnail_preview || course.thumbnail" class="w-48 h-32 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border">
+                <img :src="courseForm.thumbnail_preview || course.thumbnail_url || course.thumbnail" class="w-full h-full object-cover">
+              </div>
+              <div class="flex-1">
+                 <input type="file" ref="thumbnailInput" accept="image/*" @change="handleThumbnailSelect" class="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-purple-50 file:text-purple-700
+                    hover:file:bg-purple-100
+                  "/>
+                 <p class="mt-1 text-xs text-gray-500">Recommended size: 750x422 pixels.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-4 border-t">
+            <button type="submit" class="px-6 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors" :disabled="saving">
+              {{ saving ? 'Saving Changes...' : 'Save Course Settings' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    
+  </div>
 
     <!-- Modals -->
     <!-- Add/Edit Lecture Modal -->
@@ -244,20 +351,22 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
+import { useCourseStore } from '../stores/course'; // Import store
+
 import axios from 'axios';
 import draggable from 'vuedraggable';
 import Navbar from '../components/Navbar.vue';
 
 const route = useRoute();
-const courseId = route.params.id; // Actually slug or ID depending on router, prefer ID for manage
-// Wait, router usually passes ID for edit, let's assume router config will pass ID
-// If backend uses course model binding, we might need ID.
-// Let's use `course` prop if available, or fetch by ID.
+
+const courseStore = useCourseStore(); // Initialize store
+const courseId = route.params.id;
 
 const loading = ref(true);
+const activeTab = ref('curriculum'); 
 const course = ref({});
 const sections = ref([]);
-const lectures = ref([]); // Lectures for selected section
+const lectures = ref([]); 
 const selectedSection = ref(null);
 
 // Section Editing
@@ -271,34 +380,39 @@ const lectureForm = ref({ title: '', type: 'video', content: '', currentVideoUrl
 const uploadFile = ref(null);
 const uploadProgress = ref(0);
 const uploading = ref(false);
-
 const videoInput = ref(null);
 
-// Initialize
-onMounted(async () => {
-  await fetchCourseData();
-});
+// Settings Form
+const courseForm = ref({});
+const categories = computed(() => courseStore.categories);
+const levels = computed(() => courseStore.levels);
+const saving = ref(false);
 
 const fetchCourseData = async () => {
     try {
-        // Assuming we have an endpoint like /api/instructor/courses/{id}/curriculum
-        // Or we use existing endpoints.
-        // Let's assume we use standard REST:
-        // GET /api/courses/{id} -> get course details
-        // GET /api/courses/{id}/sections -> get sections
-        
-        // Wait, Route param might be ID. 
-        // Let's fetch course first
-        const courseRes = await axios.get(`/api/courses/${courseId}`); 
-        // Note: public endpoint usually, but we need instructor specific check?
-        // Actually /api/instructor/courses returns list, maybe /api/instructor/courses/{id} exists?
-        // Let's try /api/courses/{id} for now, it should work if we own it.
-        
-        course.value = courseRes.data;
+        await Promise.all([
+          courseStore.fetchCategories(),
+          courseStore.fetchLevels()
+        ]);
 
-        // Fetch sections
+        const courseRes = await axios.get(`/api/courses/${courseId}`); 
+        course.value = courseRes.data.data || courseRes.data; 
+        
+        // Initialize form
+        courseForm.value = {
+          title: course.value.title,
+          subtitle: course.value.subtitle,
+          description: course.value.description,
+          price: course.value.price,
+          discount_price: course.value.discount_price,
+          language: course.value.language,
+          category_id: course.value.category?.id || course.value.category_id,
+          level_id: course.value.level?.id || course.value.level_id,
+          thumbnail_preview: null
+        };
+
         const sectionsRes = await axios.get(`/api/courses/${courseId}/sections`);
-        sections.value = sectionsRes.data;
+        sections.value = sectionsRes.data.data || sectionsRes.data;
 
         loading.value = false;
         
@@ -309,6 +423,51 @@ const fetchCourseData = async () => {
         console.error("Failed to load course data", e);
         loading.value = false;
     }
+};
+
+// Initialize
+onMounted(async () => {
+  await fetchCourseData();
+});
+
+
+const handleThumbnailSelect = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    courseForm.value.thumbnail = file;
+    courseForm.value.thumbnail_preview = URL.createObjectURL(file);
+  }
+};
+
+const updateCourse = async () => {
+  saving.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('_method', 'PUT'); // For Laravel multipart PUT
+    
+    // Append standard fields
+    ['title', 'subtitle', 'description', 'price', 'discount_price', 'language', 'category_id', 'level_id'].forEach(key => {
+      if (courseForm.value[key] !== null && courseForm.value[key] !== undefined) {
+          formData.append(key, courseForm.value[key]);
+      }
+    });
+
+    if (courseForm.value.thumbnail) {
+      formData.append('thumbnail', courseForm.value.thumbnail);
+    }
+
+    const res = await axios.post(`/api/courses/${courseId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    course.value = res.data.data;
+    alert("Course settings saved successfully!");
+  } catch (e) {
+    console.error("Failed to update course", e);
+    alert("Failed to update course settings: " + (e.response?.data?.message || e.message));
+  } finally {
+    saving.value = false;
+  }
 };
 
 // Section Methods

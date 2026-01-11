@@ -18,6 +18,18 @@ class CoursePolicy
     }
 
     /**
+     * Determine whether the user can view the model (e.g. for editing context).
+     */
+    public function view(User $user, Course $course): bool
+    {
+        // Admin or owner
+        if ($user->roles()->where('name', 'admin')->exists()) {
+            return true;
+        }
+        return $user->id === $course->instructor_id;
+    }
+
+    /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Course $course): bool

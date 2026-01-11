@@ -101,6 +101,33 @@ export default {
         browse_all: "تصفح جميع الدورات",
     },
 
+    // Instructor Dashboard
+    instructor_dashboard: {
+        title: "لوحة تحكم المدرب",
+        your_courses: "دوراتك",
+        recent_reviews: "أحدث المراجعات",
+        student_questions: "أسئلة الطلاب",
+        sidebar: {
+            dashboard: "لوحة التحكم",
+            courses: "الدورات",
+            communication: "التواصل",
+            performance: "الأداء",
+            create_course: "إنشاء دورة جديدة",
+        },
+        stats: {
+            total_revenue: "إجمالي الإيرادات",
+            total_students: "إجمالي الطلاب",
+            average_rating: "متوسط التقييم",
+        },
+        course_table: {
+            course: "الدورة",
+            students: "الطلاب",
+            rating: "التقييم",
+            revenue: "الإيرادات",
+            status: "الحالة",
+        },
+    },
+
     // Common
     common: {
         welcome: "مرحباً",
@@ -112,6 +139,11 @@ export default {
         submit: "إرسال",
         view_all: "عرض الكل",
         learn_more: "اقرأ المزيد",
+        actions: "إجراءات",
+        edit: "تعديل",
+        delete: "حذف",
+        confirm_delete: "هل أنت متأكد أنك تريد حذف هذه الدورة؟",
+        error_occurred: "حدث خطأ. يرجى المحاولة مرة أخرى.",
 
         footer: {
             company: "الشركة",

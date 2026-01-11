@@ -24,6 +24,7 @@ class InstructorController extends Controller implements HasMiddleware
 
         // Get courses where user is instructor
         $courses = $user->courses;
+        $courseIds = $courses->pluck('id');
 
         $totalStudents = 0;
         $totalRevenue = 0;
@@ -33,6 +34,8 @@ class InstructorController extends Controller implements HasMiddleware
 
         foreach ($courses as $course) {
             $totalStudents += $course->enrollment_count ?? 0;
+            // Calculate revenue based on enrollments and price (simplified)
+            // Ideally, this should come from a transaction/order table
             $totalRevenue += (($course->price ?? 0) * ($course->enrollment_count ?? 0));
             $totalReviews += $course->reviews()->count();
             $globalRatingSum += $course->rating_avg ?? 0;
@@ -41,7 +44,6 @@ class InstructorController extends Controller implements HasMiddleware
         $avgRating = $courseCount > 0 ? $globalRatingSum / $courseCount : 0;
 
         // Recent Reviews (limit 5)
-        $courseIds = $courses->pluck('id');
         $recentReviews = \App\Models\Review::whereIn('course_id', $courseIds)
             ->with(['user:id,name', 'course:id,title'])
             ->latest()
@@ -81,15 +83,31 @@ class InstructorController extends Controller implements HasMiddleware
             ->whereDoesntHave('answers') // Assuming 'answers' relation exists
             ->count();
 
+        // Monthly Stats (Real calculation)
+        $startOfMonth = now()->startOfMonth();
+
+        $monthlyStudents = \App\Models\Enrollment::whereIn('course_id', $courseIds)
+            ->where('created_at', '>=', $startOfMonth)
+            ->count();
+
+        $monthlyRevenue = \App\Models\Enrollment::whereIn('enrollments.course_id', $courseIds)
+            ->where('enrollments.created_at', '>=', $startOfMonth)
+            ->join('courses', 'enrollments.course_id', '=', 'courses.id')
+            ->sum('courses.price');
+
+        $monthlyReviews = \App\Models\Review::whereIn('course_id', $courseIds)
+            ->where('created_at', '>=', $startOfMonth)
+            ->count();
+
         return response()->json([
             'total_students' => $totalStudents,
             'total_revenue' => number_format($totalRevenue, 2),
             'average_rating' => round($avgRating, 2),
             'total_reviews' => $totalReviews,
             'course_count' => $courseCount,
-            'monthly_students' => rand(5, 30), // Mock for now
-            'monthly_revenue' => number_format(rand(100, 2000), 2),
-            'monthly_reviews' => rand(1, 15),
+            'monthly_students' => $monthlyStudents,
+            'monthly_revenue' => number_format($monthlyRevenue, 2),
+            'monthly_reviews' => $monthlyReviews,
             'recent_reviews' => $recentReviews,
             'recent_questions' => $recentQuestions,
             'unanswered_questions_count' => $unansweredCount
@@ -103,6 +121,7 @@ class InstructorController extends Controller implements HasMiddleware
         // Using correct relationship 'courses' instead of 'courses_taught'
         $courses = $user->courses()
             ->withCount(['enrollments', 'reviews'])
+            ->latest()
             ->get()
             ->map(function ($course) {
                 $course->revenue = number_format(($course->price ?? 0) * ($course->enrollments_count ?? 0), 2);
@@ -111,6 +130,57 @@ class InstructorController extends Controller implements HasMiddleware
             });
 
         return response()->json($courses);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string', // Frontend sends slug or name, need to resolve ID
+        ]);
+
+        // Resolve category ID
+        $category = \App\Models\Category::where('slug', $validated['category'])
+            ->orWhere('id', $validated['category'])
+            ->first();
+
+        // Fallback if category not found (shouldn't happen with proper frontend)
+        $categoryId = $category ? $category->id : 1;
+
+        // Get generic level
+        $levelId = \App\Models\CourseLevel::first()->id ?? 1;
+
+        $course = new \App\Models\Course();
+        $course->instructor_id = $request->user()->id;
+        $course->title = $validated['title'];
+        $course->category_id = $categoryId;
+
+        // Defaults for Draft
+        $course->description = "Draft Course Description";
+        $course->price = 0.00;
+        $course->language = "English";
+        $course->level_id = $levelId;
+        $course->published = false;
+
+        $course->save();
+
+        return response()->json($course->loadCount(['enrollments', 'reviews']));
+    }
+
+    public function publish(Request $request, \App\Models\Course $course)
+    {
+        $this->authorize('update', $course);
+
+        $course->published = !$course->published;
+        if ($course->published) {
+            $course->published_at = now();
+        }
+        $course->save();
+
+        return response()->json([
+            'message' => $course->published ? 'Course published' : 'Course unpublished',
+            'published' => $course->published
+        ]);
     }
 
     /**
