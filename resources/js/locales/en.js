@@ -15,7 +15,10 @@ export default {
         notifications: "Notifications",
         messages: "Messages",
         profile: "Profile",
+        profile: "Profile",
         settings: "Settings",
+        account_settings: "Account Settings",
+        payment_methods: "Payment Methods",
     },
 
     // Home/Catalog
@@ -82,6 +85,21 @@ export default {
         price: "Price",
         level: "Level",
         rating: "Rating",
+    },
+
+    // Search Results Page
+    search: {
+        results_for: "Results for",
+        courses_found: "courses found",
+        filters: "Filters",
+        clear_all: "Clear All",
+        category: "Category",
+        level: "Level",
+        price_range: "Price Range",
+        sort_by: "Sort By",
+        no_results: "No results found",
+        try_different: "Try different keywords or adjust your filters",
+        browse_all: "Browse All Courses",
     },
 
     // Common

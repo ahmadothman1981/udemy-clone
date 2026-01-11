@@ -7,21 +7,36 @@
           <router-link to="/" class="text-2xl font-bold text-gray-800 flex-shrink-0">UdemyClone</router-link>
 
           <!-- Categories -->
-          <div class="relative group hidden md:block">
-              <button class="text-sm font-medium text-gray-700 hover:text-purple-600 px-2 py-4">{{ $t('nav.categories') }}</button>
-              <!-- Dropdown code unchanged, just ensuring parent visibility -->
-              <div class="absolute top-14 left-0 w-64 bg-white border border-gray-200 shadow-xl hidden group-hover:block z-50 rounded-sm">
+          <div class="relative hidden md:block" ref="categoriesRef">
+              <button 
+                @click.stop="toggleCategories"
+                class="text-sm font-medium text-gray-700 hover:text-purple-600 px-2 py-4 focus:outline-none"
+              >
+                {{ $t('nav.categories') }}
+              </button>
+              
+              <div v-if="isCategoriesOpen" class="absolute top-14 left-0 rtl:right-0 rtl:left-auto w-64 bg-white border border-gray-200 shadow-xl z-50 rounded-sm">
                    <div v-if="courseStore.categories.length === 0" class="p-4 text-gray-500 text-sm">{{ $t('common.loading') }}</div>
                    <ul v-else class="py-2">
                        <li v-for="cat in courseStore.categories" :key="cat.id" class="px-4 py-2 hover:bg-gray-100 relative group/sub">
-                           <router-link :to="`/?category=${cat.slug}`" class="block text-sm text-gray-700 flex justify-between items-center">
+                           <router-link 
+                                :to="`/?category=${cat.slug}`" 
+                                class="block text-sm text-gray-700 flex justify-between items-center"
+                                @click="isCategoriesOpen = false"
+                           >
                                {{ cat.name }}
                                <span v-if="cat.children && cat.children.length" class="text-xs">›</span>
                            </router-link>
-                           <div v-if="cat.children && cat.children.length" class="absolute left-full top-0 w-64 bg-white border border-gray-200 shadow-xl hidden group-hover/sub:block">
+                           <div v-if="cat.children && cat.children.length" class="absolute left-full rtl:right-full rtl:left-auto top-0 w-64 bg-white border border-gray-200 shadow-xl hidden group-hover/sub:block">
                                <ul class="py-2">
                                    <li v-for="sub in cat.children" :key="sub.id" class="px-4 py-2 hover:bg-gray-100">
-                                       <router-link :to="`/?category=${sub.slug}`" class="block text-sm text-gray-700">{{ sub.name }}</router-link>
+                                       <router-link 
+                                            :to="`/?category=${sub.slug}`" 
+                                            class="block text-sm text-gray-700"
+                                            @click="isCategoriesOpen = false"
+                                       >
+                                            {{ sub.name }}
+                                       </router-link>
                                    </li>
                                </ul>
                            </div>
@@ -33,20 +48,22 @@
 
       <!-- Center Search -->
       <div class="hidden md:flex flex-1 mx-4 max-w-2xl relative">
-        <div class="relative w-full">
-            <button class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+        <form @submit.prevent="handleSearch" class="relative w-full">
+            <input 
+              type="text" 
+              v-model="searchQuery"
+              :placeholder="$t('catalog.search_placeholder')"
+              class="w-full bg-gray-50 border border-gray-300 rounded-full py-2 pl-10 pr-4 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+            >
+            <button 
+                type="submit"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10 hover:text-purple-600 transition-colors cursor-pointer"
+            >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </button>
-            <input 
-              type="text" 
-              v-model="searchQuery"
-              @keyup.enter="handleSearch"
-              :placeholder="$t('catalog.search_placeholder')"
-              class="w-full bg-gray-50 border border-gray-300 rounded-full py-2 pl-10 pr-4 focus:ring-2 focus:ring-purple-500 focus:outline-none"
-            >
-        </div>
+        </form>
       </div>
 
       <!-- Right Side Links -->
@@ -108,7 +125,7 @@
            </button>
 
            <!-- Dropdown Menu -->
-           <div v-if="isUserMenuOpen" class="absolute top-12 right-0 w-72 bg-white border border-gray-200 shadow-xl rounded-sm z-50 overflow-hidden group">
+               <div v-if="isUserMenuOpen" class="absolute top-12 right-0 rtl:left-0 rtl:right-auto w-72 bg-white border border-gray-200 shadow-xl rounded-sm z-50 overflow-hidden group">
                <!-- User Info Header -->
                <div class="p-4 border-b border-gray-100 flex items-center gap-3 hover:bg-gray-50 transition-colors">
                     <div class="w-16 h-16 rounded-full bg-purple-600 text-white flex items-center justify-center text-xl font-bold">
@@ -171,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useCourseStore } from '../stores/course';
 import { useCartStore } from '../stores/cart';
@@ -195,35 +212,56 @@ const userMenuRef = ref(null);
 
 const toggleUserMenu = () => {
     isUserMenuOpen.value = !isUserMenuOpen.value;
+    if (isUserMenuOpen.value) isCategoriesOpen.value = false;
 };
 
-const closeUserMenu = (e) => {
+const isCategoriesOpen = ref(false);
+const categoriesRef = ref(null);
+
+const toggleCategories = () => {
+    isCategoriesOpen.value = !isCategoriesOpen.value;
+    if (isCategoriesOpen.value) isUserMenuOpen.value = false;
+};
+
+// Close all menus on route change
+watch(() => route.fullPath, () => {
+    isUserMenuOpen.value = false;
+    isCategoriesOpen.value = false;
+});
+
+const closeMenus = (e) => {
+    // Close User Menu
     if (userMenuRef.value && !userMenuRef.value.contains(e.target)) {
         isUserMenuOpen.value = false;
+    }
+    // Close Categories Menu
+    if (categoriesRef.value && !categoriesRef.value.contains(e.target)) {
+        isCategoriesOpen.value = false;
     }
 };
 
 onMounted(() => {
-    if (route.query.search) {
-        searchQuery.value = route.query.search;
-    }
+    // Reset states on mount to ensure clean slate
+    isUserMenuOpen.value = false;
+    isCategoriesOpen.value = false;
+
+    // REMOVED: Pre-fill searchQuery from route to satisfy user request "refresh should clear search bar"
+    // if (route.query.search) {
+    //     searchQuery.value = route.query.search;
+    // }
     courseStore.fetchCategories();
-    document.addEventListener('click', closeUserMenu);
+    document.addEventListener('click', closeMenus);
 });
 
 
 onUnmounted(() => {
-    document.removeEventListener('click', closeUserMenu);
+    document.removeEventListener('click', closeMenus);
 });
 
 const handleSearch = () => {
-    router.push({ 
-        path: '/', 
-        query: { 
-            ...route.query, 
-            search: searchQuery.value 
-        } 
-    });
+    if (!searchQuery.value.trim()) return;
+    router.push({ path: '/search', query: { q: searchQuery.value.trim() } });
+    searchQuery.value = ''; // Clear after search
 };
 
 const toggleLang = () => {

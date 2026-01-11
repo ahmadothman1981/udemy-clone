@@ -10,9 +10,11 @@ const LearningPlayer = () => import('../views/LearningPlayer.vue');
 const MyCourses = () => import('../views/MyCourses.vue');
 const InstructorDashboard = () => import('../views/InstructorDashboard.vue');
 const AdminDashboard = () => import('../views/AdminDashboard.vue');
+const SearchResults = () => import('../views/SearchResults.vue');
 
 const routes = [
     { path: '/', component: Home },
+    { path: '/search', component: SearchResults },
     { path: '/login', component: Login },
     { path: '/signup', component: Signup },
     { path: '/forgot-password', component: () => import('../views/ForgotPassword.vue') },

@@ -274,8 +274,15 @@ onMounted(() => {
   }
 });
 
-watch(() => route.query, () => {
+watch(() => route.query, (newQuery) => {
   loadCourses();
+  
+  // Sync local state with URL query to ensure UI consistency
+  selectedCategory.value = newQuery.category || '';
+  selectedLevel.value = newQuery.level || '';
+  priceMin.value = newQuery.price_min || '';
+  priceMax.value = newQuery.price_max || '';
+  sortBy.value = newQuery.sort || '';
 }, { deep: true });
 </script>
 

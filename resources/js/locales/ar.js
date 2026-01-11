@@ -16,6 +16,8 @@ export default {
         messages: "الرسائل",
         profile: "الملف الشخصي",
         settings: "الإعدادات",
+        account_settings: "إعدادات الحساب",
+        payment_methods: "طرق الدفع",
     },
 
     // Home/Catalog
@@ -82,6 +84,21 @@ export default {
         price: "السعر",
         level: "المستوى",
         rating: "التقييم",
+    },
+
+    // Search Results Page
+    search: {
+        results_for: "نتائج البحث عن",
+        courses_found: "دورة موجودة",
+        filters: "التصفية",
+        clear_all: "مسح الكل",
+        category: "التصنيف",
+        level: "المستوى",
+        price_range: "نطاق السعر",
+        sort_by: "ترتيب حسب",
+        no_results: "لا توجد نتائج",
+        try_different: "جرب كلمات مختلفة أو عدل خيارات التصفية",
+        browse_all: "تصفح جميع الدورات",
     },
 
     // Common
