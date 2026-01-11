@@ -86,6 +86,7 @@ export default {
 
     // Common
     common: {
+        welcome: "Welcome",
         loading: "Loading...",
         error: "Error",
         success: "Success",
@@ -129,6 +130,19 @@ export default {
         my_courses: "My Courses",
         continue_learning: "Continue Learning",
         completed: "Completed",
+        browse_courses: "Browse Courses",
+        learning_streak: "Learning Streak",
+        no_courses: "You haven't enrolled in any courses yet.",
+        stats: {
+            enrolled_courses: "Enrolled Courses",
+            hours_learned: "Hours Learned",
+            certificates: "Certificates",
+            completed: "Completed Courses",
+        },
+        tabs: {
+            achievements: "Achievements",
+        },
+        quick_actions: "Quick Actions",
     },
 
     // Course
@@ -145,6 +159,21 @@ export default {
         reviews: "Reviews",
         instructor: "Instructor",
         free: "Free",
+        back_to_dashboard: "Back to Dashboard",
+        mark_complete: "Mark Complete",
+        mark_incomplete: "Mark Incomplete",
+        next_lecture: "Next Lecture",
+        previous: "Previous",
+        video_not_available: "Video not available",
+        progress: "Progress",
+        certificate: {
+            completed_title: "Course Completed!",
+            congratulations: "Congratulations! You have successfully completed the course.",
+            get_certificate: "Get Certificate",
+            download: "Download Certificate",
+            generating: "Generating Certificate...",
+            view: "View Certificate",
+        },
     },
 
     // Checkout

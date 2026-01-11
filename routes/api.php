@@ -152,11 +152,15 @@ Route::post('/webhooks/stripe', [\App\Http\Controllers\StripeWebhookController::
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/certificates', [\App\Http\Controllers\CertificateController::class, 'index']);
     Route::post('/courses/{course}/certificate', [\App\Http\Controllers\CertificateController::class, 'generate']);
-    Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\CertificateController::class, 'download']);
+    // Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\CertificateController::class, 'download']);
+    Route::get('/certificates/{certificate}/download-url', [\App\Http\Controllers\CertificateController::class, 'getDownloadUrl']);
 });
 
 // Public certificate verification
 Route::get('/verify/{certificateNumber}', [\App\Http\Controllers\CertificateController::class, 'verify']);
+Route::get('/certificates/signed-download/{certificate}/{user}', [\App\Http\Controllers\CertificateController::class, 'downloadSigned'])
+    ->name('certificates.download.signed')
+    ->middleware('signed');
 
 // Public Profiles
 Route::get('/profile/{identifier}', [\App\Http\Controllers\ProfileController::class, 'show']);

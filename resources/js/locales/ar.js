@@ -86,6 +86,7 @@ export default {
 
     // Common
     common: {
+        welcome: "مرحباً",
         loading: "جاري التحميل...",
         error: "خطأ",
         success: "نجاح",
@@ -129,6 +130,19 @@ export default {
         my_courses: "دوراتي",
         continue_learning: "تابع التعلم",
         completed: "مكتمل",
+        browse_courses: "تصفح الدورات",
+        learning_streak: "تتابع التعلم",
+        no_courses: "لم تقم بالتسجيل في أي دورة بعد.",
+        stats: {
+            enrolled_courses: "الدورات المسجلة",
+            hours_learned: "ساعات التعلم",
+            certificates: "الشهادات",
+            completed: "الدورات المكتملة",
+        },
+        tabs: {
+            achievements: "الإنجازات",
+        },
+        quick_actions: "إجراءات سريعة",
     },
 
     // Course
@@ -145,6 +159,21 @@ export default {
         reviews: "المراجعات",
         instructor: "المدرب",
         free: "مجاني",
+        back_to_dashboard: "العودة للوحة التحكم",
+        mark_complete: "وضع علامة مكتمل",
+        mark_incomplete: "وضع علامة غير مكتمل",
+        next_lecture: "المحاضرة التالية",
+        previous: "السابق",
+        video_not_available: "الفيديو غير متاح",
+        progress: "التقدم",
+        certificate: {
+            completed_title: "تم إكمال الدورة!",
+            congratulations: "تهانينا! لقد أتممت الدورة بنجاح.",
+            get_certificate: "الحصول على الشهادة",
+            download: "تحميل الشهادة",
+            generating: "جاري إصدار الشهادة...",
+            view: "عرض الشهادة",
+        },
     },
 
     // Checkout

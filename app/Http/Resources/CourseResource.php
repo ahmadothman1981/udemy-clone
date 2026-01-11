@@ -26,6 +26,7 @@ class CourseResource extends JsonResource
             'category' => new CategoryResource($this->whenLoaded('category')),
             'sections' => SectionResource::collection($this->whenLoaded('sections')), // Need SectionResource
             'is_enrolled' => $this->isEnrolledBy($request->user()),
+            'progress' => $this->when(isset($this->progress), $this->progress),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

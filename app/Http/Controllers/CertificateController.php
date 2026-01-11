@@ -16,7 +16,7 @@ class CertificateController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('auth:sanctum', except: ['verify']),
+            new Middleware('auth:sanctum', except: ['verify', 'downloadSigned']),
         ];
     }
 
@@ -70,7 +70,7 @@ class CertificateController extends Controller implements HasMiddleware
         }
 
         $lectureIds = $course->sections->flatMap(fn($s) => $s->lectures->pluck('id'));
-        $completedCount = UserProgress::where('user_id', $user->id)
+        $completedCount = UserProgress::where('enrollment_id', $enrollment->id)
             ->whereIn('lecture_id', $lectureIds)
             ->where('completed', true)
             ->count();
@@ -111,6 +111,55 @@ class CertificateController extends Controller implements HasMiddleware
         // Check ownership
         if ($certificate->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $certificate->load(['user', 'course']);
+
+        $pdf = Pdf::loadView('certificates.template', [
+            'certificate' => $certificate,
+            'user' => $certificate->user,
+            'course' => $certificate->course,
+        ]);
+
+        $filename = 'certificate-' . $certificate->certificate_number . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Get signed download URL
+     */
+    public function getDownloadUrl(Request $request, Certificate $certificate)
+    {
+        $user = $request->user();
+
+        // Check ownership
+        if ($certificate->user_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Generate temporary signed URL (valid for 5 minutes)
+        $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'certificates.download.signed',
+            now()->addMinutes(5),
+            ['certificate' => $certificate->id, 'user' => $user->id]
+        );
+
+        return response()->json(['url' => $url]);
+    }
+
+    /**
+     * Download via signed URL (public route but validated)
+     */
+    public function downloadSigned(Request $request, Certificate $certificate, $user)
+    {
+        if (!$request->hasValidSignature()) {
+            abort(403);
+        }
+
+        // Extra check: ensure the certificate belongs to the user in the URL
+        if ($certificate->user_id != $user) {
+            abort(403);
         }
 
         $certificate->load(['user', 'course']);

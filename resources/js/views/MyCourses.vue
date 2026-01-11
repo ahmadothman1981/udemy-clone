@@ -23,8 +23,9 @@
                      
                      <div class="mt-auto">
                          <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                             <div class="bg-purple-600 h-2 rounded-full" style="width: 25%"></div>
+                             <div class="bg-purple-600 h-2 rounded-full" :style="{ width: `${course.progress || 0}%` }"></div>
                          </div>
+                         <div class="text-xs text-gray-500 mb-2 font-semibold text-right">{{ course.progress || 0 }}% Complete</div>
                          <router-link :to="`/learn/course/${course.slug || course.id}`" class="text-purple-600 font-bold hover:underline">
                              Continue Learning
                          </router-link>
