@@ -28,7 +28,7 @@ class SectionController extends Controller implements HasMiddleware
         $this->authorize('view', $course); // Ensure user can view (e.g. is instructor or admin or enrolled student?)
         // Actually, for editing curriculum, strict policy.
 
-        $sections = $course->sections()->with('lectures')->orderBy('order')->get();
+        $sections = $course->sections()->with(['lectures.quiz'])->orderBy('order')->get();
         return SectionResource::collection($sections);
     }
 

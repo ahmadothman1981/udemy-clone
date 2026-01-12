@@ -45,6 +45,24 @@ class QuizController extends Controller implements HasMiddleware
     }
 
     /**
+     * Update an existing quiz
+     */
+    public function update(Request $request, Course $course, Quiz $quiz)
+    {
+        $this->authorize('update', $course);
+
+        $validated = $request->validate([
+            'title' => 'sometimes|string',
+            'pass_percentage' => 'sometimes|integer|min:0|max:100',
+            'time_limit' => 'nullable|integer',
+        ]);
+
+        $quiz->update($validated);
+
+        return response()->json($quiz);
+    }
+
+    /**
      * Get quiz with questions for taking
      */
     public function show(Course $course, Quiz $quiz)
@@ -56,14 +74,21 @@ class QuizController extends Controller implements HasMiddleware
             ->where('course_id', $course->id)
             ->exists();
 
-        if (!$isEnrolled && $course->instructor_id !== $user->id) {
+        $isInstructor = $course->instructor_id === $user->id;
+
+        if (!$isEnrolled && !$isInstructor) {
             return response()->json(['message' => 'Not enrolled in this course'], 403);
         }
 
         $quiz->load([
-            'questions' => function ($query) {
-                // Don't send correct answers to frontend
-                $query->select('id', 'quiz_id', 'question_text', 'options', 'points');
+            'questions' => function ($query) use ($isInstructor) {
+                if ($isInstructor) {
+                    // Instructor sees everything
+                    $query->select('*');
+                } else {
+                    // Don't send correct answers to frontend for students
+                    $query->select('id', 'quiz_id', 'question_text', 'options', 'points');
+                }
             }
         ]);
 
@@ -78,6 +103,7 @@ class QuizController extends Controller implements HasMiddleware
             'attempts' => $attempts,
             'best_score' => $attempts->max('score'),
             'passed' => $attempts->where('passed', true)->count() > 0,
+            'is_instructor' => $isInstructor
         ]);
     }
 
@@ -98,6 +124,46 @@ class QuizController extends Controller implements HasMiddleware
         $question = $quiz->questions()->create($validated);
 
         return response()->json($question, 201);
+    }
+
+    /**
+     * Update an existing question
+     */
+    public function updateQuestion(Request $request, Course $course, Quiz $quiz, Question $question)
+    {
+        $this->authorize('update', $course);
+
+        // Ensure question belongs to quiz
+        if ($question->quiz_id !== $quiz->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'question_text' => 'sometimes|string',
+            'options' => 'sometimes|array|min:2',
+            'correct_answer' => 'sometimes|string',
+            'points' => 'integer|min:1',
+        ]);
+
+        $question->update($validated);
+
+        return response()->json($question);
+    }
+
+    /**
+     * Delete a question
+     */
+    public function destroyQuestion(Request $request, Course $course, Quiz $quiz, Question $question)
+    {
+        $this->authorize('update', $course);
+
+        if ($question->quiz_id !== $quiz->id) {
+            abort(404);
+        }
+
+        $question->delete();
+
+        return response()->noContent();
     }
 
     /**

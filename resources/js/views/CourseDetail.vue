@@ -180,14 +180,44 @@
                              <span class="text-[#a435f0] font-bold cursor-pointer">Expand all sections</span>
                          </div>
                          <!-- Sections -->
+                         <!-- Sections -->
                         <div v-for="section in course.sections" :key="section.id" class="border-b border-gray-200 last:border-0">
-                            <div class="bg-gray-50 p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100">
-                                <span class="font-bold flex items-center">
-                                    <span class="mr-2 text-xs">▼</span> {{ section.title }}
+                            <div @click="toggleSection(section.id)" class="bg-gray-50 p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100 transition-colors">
+                                <span class="font-bold flex items-center text-gray-800">
+                                    <span class="mr-3 text-xs w-4 transition-transform duration-200" :class="{'rotate-180': isExpanded(section.id)}">▼</span>
+                                    {{ section.title }}
                                 </span>
-                                <span class="text-xs text-gray-600">{{ section.lectures?.length || 0 }} lectures • 45m</span>
+                                <span class="text-xs text-gray-600">{{ section.lectures?.length || 0 }} lectures</span>
                             </div>
-                            <!-- Lectures would go here if expanded -->
+                            
+                            <!-- Lectures List -->
+                            <div v-show="isExpanded(section.id)" class="bg-white">
+                                <div v-for="lecture in section.lectures" :key="lecture.id" class="flex items-start p-3 pl-10 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                    <div class="mr-3 mt-1 text-gray-400">
+                                        <!-- Icons based on type -->
+                                        <svg v-if="lecture.type === 'video'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <svg v-else-if="lecture.type === 'quiz'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                        </svg>
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="text-sm text-gray-700">{{ lecture.title }}</div>
+                                        <div class="flex items-center gap-2 mt-0.5">
+                                            <span v-if="lecture.duration_minutes" class="text-xs text-gray-500">{{ lecture.duration_minutes }} min</span>
+                                            <span v-if="lecture.preview" class="text-xs font-bold text-purple-600 cursor-pointer hover:underline">Preview</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="(!section.lectures || section.lectures.length === 0)" class="p-4 pl-10 text-xs text-gray-400 italic">
+                                    No lectures available.
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -208,7 +238,8 @@
 </template>
 
 <script setup>
-import { onMounted, computed, defineAsyncComponent } from 'vue';
+import { onMounted, computed, defineAsyncComponent, ref } from 'vue';
+
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '../stores/course';
 import { useLearningStore } from '../stores/learning';
@@ -277,4 +308,17 @@ const buyNow = () => {
 const toggleWishlist = () => {
     wishlistStore.toggleItem(course.value);
 };
+
+// Curriculum Expansion Logic
+const expandedSections = ref(new Set());
+
+const toggleSection = (sectionId) => {
+    if (expandedSections.value.has(sectionId)) {
+        expandedSections.value.delete(sectionId);
+    } else {
+        expandedSections.value.add(sectionId);
+    }
+};
+
+const isExpanded = (sectionId) => expandedSections.value.has(sectionId);
 </script>

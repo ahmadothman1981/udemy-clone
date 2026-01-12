@@ -57,7 +57,7 @@ class LectureController extends Controller implements HasMiddleware
             'title' => 'required|string|max:255',
             'type' => 'required|in:video,article,quiz,resource',
             'content' => 'nullable|string', // Text content for articles
-            'video' => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:512000', // 500MB limit
+            'video' => 'nullable|file|mimes:mp4,mov,avi,mkv,webm,mpeg,mpg,m4v|max:512000', // 500MB limit - more flexible format support
             'duration_minutes' => 'nullable|integer',
             'preview' => 'boolean',
         ]);
@@ -88,7 +88,7 @@ class LectureController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'content' => 'nullable|string',
-            'video' => 'nullable|file|mimetypes:video/mp4,video/quicktime|max:512000',
+            'video' => 'nullable|file|mimes:mp4,mov,avi,mkv,webm,mpeg,mpg,m4v|max:512000', // More flexible format support
             'duration_minutes' => 'nullable|integer',
             'preview' => 'boolean',
             'order' => 'integer',

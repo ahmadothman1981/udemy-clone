@@ -171,6 +171,14 @@
                         <div v-else-if="lecture.type === 'article'">
                            <p class="line-clamp-2">{{ lecture.content || 'No content added' }}</p>
                         </div>
+                        <div v-else-if="lecture.type === 'quiz'">
+                           <button @click="openQuizEditor(lecture)" class="text-purple-600 font-semibold hover:underline flex items-center gap-1">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                             </svg>
+                             Manage Questions & Settings
+                           </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -353,6 +361,13 @@
       </div>
     </div>
 
+    <!-- Quiz Editor Modal -->
+    <quiz-editor
+      v-if="showQuizEditor && currentQuizLecture"
+      :lecture="currentQuizLecture"
+      :course-id="courseId"
+      @close="showQuizEditor = false"
+    />
   </div>
 </template>
 
@@ -364,6 +379,7 @@ import { useCourseStore } from '../stores/course'; // Import store
 import axios from 'axios';
 import draggable from 'vuedraggable';
 import Navbar from '../components/Navbar.vue';
+import QuizEditor from '../components/QuizEditor.vue';
 
 const route = useRoute();
 
@@ -376,6 +392,10 @@ const course = ref({});
 const sections = ref([]);
 const lectures = ref([]); 
 const selectedSection = ref(null);
+
+// Quiz Editor
+const showQuizEditor = ref(false);
+const currentQuizLecture = ref(null);
 
 // Section Editing
 const editingSectionId = ref(null);
@@ -393,6 +413,14 @@ const videoInput = ref(null);
 const courseForm = ref({});
 const categories = computed(() => courseStore.categories);
 const levels = computed(() => courseStore.levels);
+
+// ... existing code ...
+
+const openQuizEditor = (lecture) => {
+    currentQuizLecture.value = lecture;
+    showQuizEditor.value = true;
+};
+
 
 const discountAmount = computed({
   get: () => {
@@ -555,16 +583,9 @@ const selectSection = async (section) => {
     if (section.lectures) {
         lectures.value = section.lectures;
     } else {
-        // Fetch specific lectures if not included?
-        // Assuming included for now based on standard Larave Resources
-        // But if not, we might need `with=lectures`
+        // New section or section without loaded lectures - initialize empty
+        lectures.value = [];
     }
-    
-    // Refresh lectures just in case
-    // const res = await axios.get(`/api/sections/${section.id}/lectures`); // Hypothetical
-    // lectures.value = res.data;
-    
-    // For now assuming `sections` includes `lectures`.
 };
 
 const addSection = async () => {
@@ -577,8 +598,10 @@ const addSection = async () => {
             course_id: course.value.id,
             order: sections.value.length + 1
         });
-        sections.value.push(res.data);
-        if (!selectedSection.value) selectSection(res.data);
+        // API returns SectionResource which wraps data - extract correctly
+        const newSection = res.data.data || res.data;
+        sections.value.push(newSection);
+        if (!selectedSection.value) selectSection(newSection);
     } catch (e) {
         alert("Failed to create section");
     }
@@ -708,7 +731,17 @@ const saveLecture = async () => {
         closeLectureModal();
     } catch (e) {
         console.error("Failed to save lecture", e);
-        alert("Failed to save lecture: " + (e.response?.data?.message || e.message));
+        let errorMsg = e.response?.data?.message || e.message;
+        
+        // Show validation errors if available
+        if (e.response?.status === 422 && e.response?.data?.errors) {
+            const validationErrors = Object.entries(e.response.data.errors)
+                .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+                .join('\n');
+            errorMsg += '\n\nValidation errors:\n' + validationErrors;
+        }
+        
+        alert("Failed to save lecture: " + errorMsg);
     } finally {
         uploading.value = false;
     }

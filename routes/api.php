@@ -90,7 +90,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Quizzes (Instructor)
     Route::post('/courses/{course}/lectures/{lecture}/quiz', [\App\Http\Controllers\QuizController::class, 'store']);
+    Route::put('/courses/{course}/quizzes/{quiz}', [\App\Http\Controllers\QuizController::class, 'update']); // Update quiz settings
     Route::post('/courses/{course}/quizzes/{quiz}/questions', [\App\Http\Controllers\QuizController::class, 'storeQuestion']);
+    Route::put('/courses/{course}/quizzes/{quiz}/questions/{question}', [\App\Http\Controllers\QuizController::class, 'updateQuestion']);
+    Route::delete('/courses/{course}/quizzes/{quiz}/questions/{question}', [\App\Http\Controllers\QuizController::class, 'destroyQuestion']);
 
     // Quizzes (Student)
     Route::get('/courses/{course}/quizzes/{quiz}', [\App\Http\Controllers\QuizController::class, 'show']);
