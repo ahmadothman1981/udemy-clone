@@ -16,6 +16,7 @@ class CourseResource extends JsonResource
             'subtitle' => $this->subtitle,
             'description' => $this->when($request->routeIs('courses.show'), $this->description), // Full description only on details
             'thumbnail' => $this->thumbnail,
+            'preview_video_url' => $this->preview_video_url,
             'price' => $this->price,
             'discount_price' => $this->discount_price,
             'level' => $this->level?->name,

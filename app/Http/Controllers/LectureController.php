@@ -6,6 +6,7 @@ use App\Http\Resources\LectureResource;
 use App\Models\Course;
 use App\Models\Section;
 use App\Models\Lecture;
+use App\Models\LectureResource as LectureResourceModel;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -129,4 +130,91 @@ class LectureController extends Controller implements HasMiddleware
         $lecture->delete();
         return response()->noContent();
     }
+
+    // ==================== RESOURCE MANAGEMENT ====================
+
+    /**
+     * Get resources for a lecture
+     */
+    public function getResources(Course $course, Section $section, Lecture $lecture)
+    {
+        if ($section->course_id !== $course->id || $lecture->section_id !== $section->id)
+            abort(404);
+
+        $resources = $lecture->resources()->get();
+
+        return response()->json($resources);
+    }
+
+    /**
+     * Upload a resource to a lecture
+     */
+    public function storeResource(Request $request, Course $course, Section $section, Lecture $lecture)
+    {
+        if ($section->course_id !== $course->id || $lecture->section_id !== $section->id)
+            abort(404);
+        $this->authorize('update', $course);
+
+        $request->validate([
+            'file' => 'required|file|max:102400', // 100MB limit
+            'title' => 'nullable|string|max:255',
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->store('resources/' . $lecture->id, 'public');
+
+        $resource = LectureResourceModel::create([
+            'lecture_id' => $lecture->id,
+            'title' => $request->input('title', $file->getClientOriginalName()),
+            'file_path' => $path,
+            'file_name' => $file->getClientOriginalName(),
+            'file_type' => $file->getClientOriginalExtension(),
+            'file_size' => $file->getSize(),
+        ]);
+
+        return response()->json($resource, 201);
+    }
+
+    /**
+     * Delete a resource
+     */
+    public function destroyResource(Request $request, Course $course, Section $section, Lecture $lecture, LectureResourceModel $resource)
+    {
+        if ($resource->lecture_id !== $lecture->id)
+            abort(404);
+        $this->authorize('update', $course);
+
+        Storage::disk('public')->delete($resource->file_path);
+        $resource->delete();
+
+        return response()->noContent();
+    }
+
+    /**
+     * Download a resource (for enrolled students)
+     */
+    public function downloadResource(Request $request, Lecture $lecture, LectureResourceModel $resource)
+    {
+        if ($resource->lecture_id !== $lecture->id)
+            abort(404);
+
+        // Check enrollment (lecture -> section -> course)
+        $course = $lecture->section->course;
+        $user = $request->user();
+
+        $isEnrolled = $course->isEnrolledBy($user);
+        $isInstructor = $course->instructor_id === $user->id;
+
+        if (!$isEnrolled && !$isInstructor) {
+            return response()->json(['message' => 'Not enrolled in this course'], 403);
+        }
+
+        // Increment download count
+        $resource->increment('downloads');
+
+        $path = Storage::disk('public')->path($resource->file_path);
+
+        return response()->download($path, $resource->file_name);
+    }
 }
+

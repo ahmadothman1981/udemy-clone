@@ -40,12 +40,28 @@ class EnrollmentController extends Controller implements HasMiddleware
         // Bump enrollment count
         $course->increment('enrollment_count');
 
+        // Create instructor earning (70% to instructor, 30% platform fee)
+        $grossAmount = $course->price;
+        $platformFee = $grossAmount * 0.30;
+        $netAmount = $grossAmount - $platformFee;
+
+        \App\Models\InstructorEarning::create([
+            'instructor_id' => $course->instructor_id,
+            'enrollment_id' => $enrollment->id,
+            'course_id' => $course->id,
+            'gross_amount' => $grossAmount,
+            'platform_fee' => $platformFee,
+            'net_amount' => $netAmount,
+            'status' => 'available', // Immediately available for simplicity
+        ]);
+
         return response()->json(['message' => 'Enrolled successfully', 'enrollment_id' => $enrollment->id], 201);
     }
 
-    public function dashboardStats(Request $request) {
+    public function dashboardStats(Request $request)
+    {
         $user = $request->user();
-        
+
         // 1. Enrolled Courses Count
         $enrolledCount = Enrollment::where('user_id', $user->id)->count();
 
@@ -55,29 +71,29 @@ class EnrollmentController extends Controller implements HasMiddleware
         // Let's check enrollment for 'completed_at' (it doesn't exist yet in the migration we saw but assuming we might use it or infer)
         // Re-checking migration: we don't have 'completed_at' in enrollment table definition in memory.
         // Let's infer completion from UserProgress vs Total Lectures.
-        
+
         $enrollments = Enrollment::where('user_id', $user->id)->with(['course.sections.lectures', 'progress'])->get();
-        
+
         $completedCoursesCount = 0;
         $totalMinutesLearned = 0;
-        
+
         foreach ($enrollments as $enrollment) {
             $course = $enrollment->course;
             $allLectures = $course->lectures; // via hasManyThrough
             $completedLectureIds = $enrollment->progress->where('completed', true)->pluck('lecture_id')->toArray();
-            
+
             // Calc hours
             $completedLectures = $allLectures->whereIn('id', $completedLectureIds);
             $totalMinutesLearned += $completedLectures->sum('duration_minutes');
-            
+
             // Calc completion
             if ($allLectures->count() > 0 && count($completedLectureIds) >= $allLectures->count()) {
                 $completedCoursesCount++;
             }
         }
-        
+
         $hoursLearned = round($totalMinutesLearned / 60, 1);
-        
+
         // Mock Achievements for now (can be dynamic later)
         $achievements = [
             ['id' => 1, 'name' => 'First Course', 'icon' => '🎓', 'unlocked' => $enrolledCount > 0],
@@ -103,29 +119,29 @@ class EnrollmentController extends Controller implements HasMiddleware
         $courses = Course::whereHas('enrollments', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         })->with([
-            'instructor',
-            'sections.lectures' // Need this to count total lectures
-        ])->paginate(10);
+                    'instructor',
+                    'sections.lectures' // Need this to count total lectures
+                ])->paginate(10);
 
         // Attach progress to each course
         // We can't easily modify the paginator's collection directly and return it as clean paginator without transforming.
         // So we will use map on the collection.
-        
+
         $courses->getCollection()->transform(function ($course) use ($user) {
             $enrollment = $course->enrollments()->where('user_id', $user->id)->first();
             $totalLectures = $course->lectures->count();
-            
+
             // Get user progress count
             if ($enrollment) {
-                 $completedCount = \App\Models\UserProgress::where('enrollment_id', $enrollment->id)
+                $completedCount = \App\Models\UserProgress::where('enrollment_id', $enrollment->id)
                     ->where('completed', true)
                     ->count();
             } else {
                 $completedCount = 0;
             }
-            
+
             $percent = $totalLectures > 0 ? round(($completedCount / $totalLectures) * 100) : 0;
-            
+
             $course->progress = $percent;
             return $course;
         });

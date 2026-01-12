@@ -52,33 +52,99 @@
             </main>
 
             <!-- Sidebar -->
-            <aside class="w-80 bg-gray-800 border-l border-gray-700 overflow-y-auto flex-shrink-0">
-                 <div class="p-4 border-b border-gray-700 font-bold">{{ $t('course.course_content') }}</div>
-                 <div v-for="section in course?.sections" :key="section.id">
-                     <div class="bg-gray-700 px-4 py-2 text-sm font-bold border-b border-gray-600">
-                         {{ section.title }}
-                     </div>
-                     <ul>
-                         <li v-for="lecture in section.lectures" :key="lecture.id">
-                             <router-link 
-                                :to="`/learn/course/${course?.slug || courseSlug}/lecture/${lecture.id}`"
-                                class="block px-4 py-3 text-sm hover:bg-gray-700 border-b border-gray-700 flex items-start"
-                                :class="{ 'bg-gray-900 border-l-4 border-l-purple-500': lecture.id == currentLectureId }"
-                             >
-                                 <input 
-                                    type="checkbox" 
-                                    :checked="isCompleted(lecture.id)" 
-                                    class="mr-3 mt-1 cursor-pointer" 
-                                    @click.stop="toggleLectureComplete(lecture.id)"
+            <aside class="w-80 bg-gray-800 border-l border-gray-700 overflow-y-auto flex-shrink-0 flex flex-col">
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-700">
+                    <button @click="sidebarTab = 'content'" :class="sidebarTab === 'content' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-white'" class="flex-1 py-3 text-sm font-bold">Content</button>
+                    <button @click="sidebarTab = 'notes'" :class="sidebarTab === 'notes' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-white'" class="flex-1 py-3 text-sm font-bold">Notes</button>
+                    <button @click="sidebarTab = 'resources'" :class="sidebarTab === 'resources' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-white'" class="flex-1 py-3 text-sm font-bold">Resources</button>
+                </div>
+
+                <!-- Content Tab -->
+                <div v-if="sidebarTab === 'content'" class="flex-1 overflow-y-auto">
+                    <div v-for="section in course?.sections" :key="section.id">
+                        <div class="bg-gray-700 px-4 py-2 text-sm font-bold border-b border-gray-600">
+                            {{ section.title }}
+                        </div>
+                        <ul>
+                            <li v-for="lecture in section.lectures" :key="lecture.id">
+                                <router-link 
+                                    :to="`/learn/course/${course?.slug || courseSlug}/lecture/${lecture.id}`"
+                                    class="block px-4 py-3 text-sm hover:bg-gray-700 border-b border-gray-700 flex items-start"
+                                    :class="{ 'bg-gray-900 border-l-4 border-l-purple-500': lecture.id == currentLectureId }"
                                 >
-                                 <div>
-                                     <div>{{ lecture.title }}</div>
-                                     <div class="text-xs text-gray-500 mt-1">{{ lecture.duration_minutes }} min</div>
-                                 </div>
-                             </router-link>
-                         </li>
-                     </ul>
-                 </div>
+                                    <input 
+                                        type="checkbox" 
+                                        :checked="isCompleted(lecture.id)" 
+                                        class="mr-3 mt-1 cursor-pointer" 
+                                        @click.stop="toggleLectureComplete(lecture.id)"
+                                    >
+                                    <div>
+                                        <div>{{ lecture.title }}</div>
+                                        <div class="text-xs text-gray-500 mt-1">{{ lecture.duration_minutes }} min</div>
+                                    </div>
+                                </router-link>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Notes Tab -->
+                <div v-if="sidebarTab === 'notes'" class="flex-1 flex flex-col">
+                    <div class="p-4 border-b border-gray-700">
+                        <textarea 
+                            v-model="newNoteContent" 
+                            placeholder="Add a note..." 
+                            class="w-full bg-gray-700 text-white rounded p-3 text-sm resize-none h-20 focus:ring-2 focus:ring-purple-500"
+                        ></textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <button @click="addNoteAtCurrentTime" class="text-xs text-purple-400 hover:text-purple-300">
+                                📍 Add at {{ getCurrentTimestamp() }}
+                            </button>
+                            <button @click="saveNote" :disabled="!newNoteContent.trim()" class="bg-purple-600 text-white px-4 py-1 rounded text-sm font-bold hover:bg-purple-700 disabled:opacity-50">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                        <div v-for="note in notes" :key="note.id" class="bg-gray-700 rounded-lg p-3">
+                            <div class="flex justify-between items-start mb-2">
+                                <button v-if="note.video_timestamp" @click="seekToTimestamp(note.video_timestamp)" class="text-purple-400 text-xs hover:underline">
+                                    ⏱️ {{ formatTimestamp(note.video_timestamp) }}
+                                </button>
+                                <span v-else class="text-gray-500 text-xs">{{ note.lecture?.title || 'General' }}</span>
+                                <button @click="deleteNote(note.id)" class="text-red-400 hover:text-red-300 text-xs">Delete</button>
+                            </div>
+                            <p class="text-sm text-gray-200">{{ note.content }}</p>
+                        </div>
+                        <div v-if="notes.length === 0" class="text-center text-gray-500 py-8">
+                            No notes yet. Start taking notes!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resources Tab -->
+                <div v-if="sidebarTab === 'resources'" class="flex-1 overflow-y-auto">
+                    <div v-if="currentLectureResources.length > 0" class="p-4 space-y-2">
+                        <a 
+                            v-for="resource in currentLectureResources" 
+                            :key="resource.id"
+                            :href="`/api/lectures/${currentLectureId}/resources/${resource.id}/download`"
+                            target="_blank"
+                            class="flex items-center gap-3 bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition"
+                        >
+                            <span class="text-2xl">📄</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-medium truncate">{{ resource.title }}</div>
+                                <div class="text-xs text-gray-400">{{ resource.file_type?.toUpperCase() }} • {{ formatFileSize(resource.file_size) }}</div>
+                            </div>
+                            <span class="text-purple-400">⬇️</span>
+                        </a>
+                    </div>
+                    <div v-else class="text-center text-gray-500 py-8 px-4">
+                        No downloadable resources for this lecture.
+                    </div>
+                </div>
             </aside>
         </div>
         </div>
@@ -286,6 +352,117 @@ const downloadCertificate = async () => {
     } finally {
         downloadingCertificate.value = false;
     }
+};
+
+// ==================== NOTES & RESOURCES ====================
+const sidebarTab = ref('content');
+const notes = ref([]);
+const newNoteContent = ref('');
+const noteTimestamp = ref(null);
+const currentLectureResources = ref([]);
+
+// Load notes when course loads
+watch(course, async (newCourse) => {
+    if (newCourse?.id) {
+        await loadNotes();
+    }
+}, { immediate: true });
+
+// Load resources when lecture changes
+watch(currentLectureId, async (newId) => {
+    if (newId && course.value) {
+        await loadResources();
+    }
+}, { immediate: true });
+
+const loadNotes = async () => {
+    if (!course.value) return;
+    try {
+        const res = await axios.get(`/api/courses/${course.value.id}/notes`);
+        notes.value = res.data;
+    } catch (e) {
+        console.error('Failed to load notes', e);
+    }
+};
+
+const loadResources = async () => {
+    if (!currentLecture.value) {
+        currentLectureResources.value = [];
+        return;
+    }
+    try {
+        // Find the section for this lecture
+        const section = course.value.sections.find(s => s.lectures.some(l => l.id === currentLectureId.value));
+        if (section) {
+            const res = await axios.get(`/api/courses/${course.value.id}/sections/${section.id}/lectures/${currentLectureId.value}/resources`);
+            currentLectureResources.value = res.data;
+        }
+    } catch (e) {
+        console.error('Failed to load resources', e);
+        currentLectureResources.value = [];
+    }
+};
+
+const saveNote = async () => {
+    if (!newNoteContent.value.trim()) return;
+    try {
+        const res = await axios.post(`/api/courses/${course.value.id}/notes`, {
+            content: newNoteContent.value,
+            lecture_id: currentLectureId.value,
+            video_timestamp: noteTimestamp.value,
+        });
+        notes.value.unshift(res.data);
+        newNoteContent.value = '';
+        noteTimestamp.value = null;
+    } catch (e) {
+        console.error('Failed to save note', e);
+    }
+};
+
+const deleteNote = async (noteId) => {
+    try {
+        await axios.delete(`/api/courses/${course.value.id}/notes/${noteId}`);
+        notes.value = notes.value.filter(n => n.id !== noteId);
+    } catch (e) {
+        console.error('Failed to delete note', e);
+    }
+};
+
+const addNoteAtCurrentTime = () => {
+    const video = document.querySelector('video');
+    if (video) {
+        noteTimestamp.value = Math.floor(video.currentTime);
+    }
+};
+
+const getCurrentTimestamp = () => {
+    const video = document.querySelector('video');
+    if (video) {
+        return formatTimestamp(Math.floor(video.currentTime));
+    }
+    return '0:00';
+};
+
+const seekToTimestamp = (seconds) => {
+    const video = document.querySelector('video');
+    if (video) {
+        video.currentTime = seconds;
+        video.play();
+    }
+};
+
+const formatTimestamp = (seconds) => {
+    if (!seconds) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+const formatFileSize = (bytes) => {
+    if (!bytes) return '0 B';
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+    if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return bytes + ' B';
 };
 </script>
 

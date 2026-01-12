@@ -112,12 +112,17 @@ export default {
             courses: "الدورات",
             communication: "التواصل",
             performance: "الأداء",
+            earnings: "الأرباح",
             create_course: "إنشاء دورة جديدة",
         },
         stats: {
             total_revenue: "إجمالي الإيرادات",
             total_students: "إجمالي الطلاب",
             average_rating: "متوسط التقييم",
+            this_month: "هذا الشهر",
+            new_students: "طلاب جدد",
+            revenue: "الإيرادات",
+            reviews: "المراجعات",
         },
         course_table: {
             course: "الدورة",

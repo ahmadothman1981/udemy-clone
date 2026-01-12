@@ -144,15 +144,23 @@ class CourseController extends Controller implements HasMiddleware
             'category_id' => 'sometimes|exists:categories,id',
             'level_id' => 'sometimes|exists:course_levels,id',
             'subtitle' => 'nullable|string|max:255',
-            'thumbnail' => 'nullable|image|max:2048', // For file upload handling via proper means or if handling here
-            // Note: Update usually handles multipart differently or uses separate endpoint for files if not using _method=PUT
-            // The frontend sends _method=PUT so Request captures it.
+            'thumbnail' => 'nullable|image|max:2048',
+            'preview_video' => 'nullable|file|mimes:mp4,mov,avi,mkv,webm|max:512000', // 500MB preview video
         ]);
 
         if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')->store('thumbnails', 'public');
             $validated['thumbnail'] = '/storage/' . $path;
         }
+
+        // Handle preview video upload
+        if ($request->hasFile('preview_video')) {
+            $path = $request->file('preview_video')->store('preview_videos', 'public');
+            $validated['preview_video_url'] = '/storage/' . $path;
+        }
+
+        // Remove the file fields from validated data
+        unset($validated['preview_video']);
 
         // Logic check: Ensure discount is valid (less than price)
         if (isset($validated['discount_price']) && isset($validated['price'])) {

@@ -16,6 +16,7 @@ class Course extends Model
         'subtitle',
         'description',
         'thumbnail',
+        'preview_video_url',
         'price',
         'discount_price',
         'level_id',

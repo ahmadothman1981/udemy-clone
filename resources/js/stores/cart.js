@@ -6,16 +6,23 @@ export const useCartStore = defineStore('cart', {
     }),
     getters: {
         count: (state) => state.items.length,
-        total: (state) => state.items.reduce((acc, item) => acc + parseFloat(item.price), 0),
+        total: (state) => state.items.reduce((acc, item) => acc + parseFloat(item.effectivePrice || item.price), 0),
         hasItem: (state) => (courseId) => state.items.some(item => item.id === courseId),
     },
     actions: {
         addItem(course) {
             if (!this.hasItem(course.id)) {
+                // Use discount_price if available, otherwise use regular price
+                const effectivePrice = (course.discount_price !== null && course.discount_price !== undefined && course.discount_price < course.price)
+                    ? course.discount_price
+                    : course.price;
+
                 this.items.push({
                     id: course.id,
                     title: course.title,
                     price: course.price,
+                    discount_price: course.discount_price,
+                    effectivePrice: effectivePrice,
                     thumbnail: course.thumbnail,
                     slug: course.slug
                 });

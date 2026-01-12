@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EnrollmentConfirmation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Enrollment;
 use App\Models\Course;
+use App\Models\InstructorEarning;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
@@ -76,6 +80,8 @@ class StripeWebhookController extends Controller
             'paid_at' => now(),
         ]);
 
+        $user = User::find($order->user_id);
+
         // Get order items and create enrollments
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
@@ -86,7 +92,7 @@ class StripeWebhookController extends Controller
                 ->first();
 
             if (!$existingEnrollment) {
-                Enrollment::create([
+                $enrollment = Enrollment::create([
                     'user_id' => $order->user_id,
                     'course_id' => $item->course_id,
                     'amount_paid' => $item->price,
@@ -94,7 +100,28 @@ class StripeWebhookController extends Controller
                 ]);
 
                 // Increment enrollment count
-                Course::where('id', $item->course_id)->increment('enrollment_count');
+                $course = Course::find($item->course_id);
+                $course->increment('enrollment_count');
+
+                // Create instructor earning (70% to instructor, 30% platform fee)
+                $grossAmount = $item->price;
+                $platformFee = $grossAmount * 0.30;
+                $netAmount = $grossAmount - $platformFee;
+
+                InstructorEarning::create([
+                    'instructor_id' => $course->instructor_id,
+                    'enrollment_id' => $enrollment->id,
+                    'course_id' => $course->id,
+                    'gross_amount' => $grossAmount,
+                    'platform_fee' => $platformFee,
+                    'net_amount' => $netAmount,
+                    'status' => 'available', // Immediately available for simplicity
+                ]);
+
+                // Send enrollment confirmation email
+                if ($user) {
+                    Mail::to($user->email)->queue(new EnrollmentConfirmation($user, $course));
+                }
             }
         }
     }

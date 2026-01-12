@@ -113,12 +113,17 @@ export default {
             courses: "Courses",
             communication: "Communication",
             performance: "Performance",
+            earnings: "Earnings",
             create_course: "Create New Course",
         },
         stats: {
             total_revenue: "Total Revenue",
             total_students: "Total Students",
             average_rating: "Average Rating",
+            this_month: "This Month",
+            new_students: "New Students",
+            revenue: "Revenue",
+            reviews: "Reviews",
         },
         course_table: {
             course: "Course",

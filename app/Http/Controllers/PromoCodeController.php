@@ -21,7 +21,7 @@ class PromoCodeController extends Controller implements HasMiddleware
      */
     public function index(Request $request)
     {
-        // TODO: Add admin check
+        // Admin check handled by EnsureUserIsAdmin middleware in routes
         $promoCodes = PromoCode::orderBy('created_at', 'desc')->get();
 
         return response()->json($promoCodes);
@@ -32,7 +32,7 @@ class PromoCodeController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
-        // TODO: Add admin check
+        // Admin check handled by EnsureUserIsAdmin middleware in routes
         $validated = $request->validate([
             'code' => 'required|string|max:50|unique:promo_codes,code',
             'description' => 'nullable|string|max:255',
@@ -57,7 +57,7 @@ class PromoCodeController extends Controller implements HasMiddleware
      */
     public function update(Request $request, PromoCode $promoCode)
     {
-        // TODO: Add admin check
+        // Admin check handled by EnsureUserIsAdmin middleware in routes
         $validated = $request->validate([
             'description' => 'nullable|string|max:255',
             'discount_type' => 'in:percentage,fixed',
@@ -78,7 +78,7 @@ class PromoCodeController extends Controller implements HasMiddleware
      */
     public function destroy(PromoCode $promoCode)
     {
-        // TODO: Add admin check
+        // Admin check handled by EnsureUserIsAdmin middleware in routes
         $promoCode->delete();
 
         return response()->json(['message' => 'Promo code deleted']);

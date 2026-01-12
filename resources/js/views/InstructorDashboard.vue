@@ -45,18 +45,18 @@
           
           <!-- Quick Stats Widget -->
           <div class="mt-6 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl p-5 text-white">
-            <h4 class="font-semibold mb-3">This Month</h4>
+            <h4 class="font-semibold mb-3">{{ $t('instructor_dashboard.stats.this_month') }}</h4>
             <div class="space-y-3">
               <div class="flex justify-between items-center">
-                <span class="text-purple-200 text-sm">New Students</span>
+                <span class="text-purple-200 text-sm">{{ $t('instructor_dashboard.stats.new_students') }}</span>
                 <span class="font-bold">+{{ monthlyStats.newStudents }}</span>
               </div>
               <div class="flex justify-between items-center">
-                <span class="text-purple-200 text-sm">Revenue</span>
+                <span class="text-purple-200 text-sm">{{ $t('instructor_dashboard.stats.revenue') }}</span>
                 <span class="font-bold">${{ monthlyStats.revenue }}</span>
               </div>
               <div class="flex justify-between items-center">
-                <span class="text-purple-200 text-sm">Reviews</span>
+                <span class="text-purple-200 text-sm">{{ $t('instructor_dashboard.stats.reviews') }}</span>
                 <span class="font-bold">+{{ monthlyStats.reviews }}</span>
               </div>
             </div>
@@ -268,6 +268,96 @@
               </div>
             </div>
           </div>
+
+          <!-- Earnings Section -->
+          <div v-if="activeTab === 'earnings'" class="space-y-6">
+            <!-- Earnings Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <p class="text-sm text-gray-500 mb-1">Total Earnings</p>
+                <p class="text-2xl font-bold text-gray-900">${{ earningsData.total_earnings || 0 }}</p>
+              </div>
+              <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <p class="text-sm text-gray-500 mb-1">Available Balance</p>
+                <p class="text-2xl font-bold text-green-600">${{ earningsData.available_balance || 0 }}</p>
+              </div>
+              <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <p class="text-sm text-gray-500 mb-1">Pending</p>
+                <p class="text-2xl font-bold text-amber-500">${{ earningsData.pending_earnings || 0 }}</p>
+              </div>
+              <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <p class="text-sm text-gray-500 mb-1">Paid Out</p>
+                <p class="text-2xl font-bold text-gray-400">${{ earningsData.paid_out || 0 }}</p>
+              </div>
+            </div>
+
+            <!-- Payout Request -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h3 class="text-lg font-bold">Request a Payout</h3>
+                  <p class="text-purple-200 text-sm">Minimum payout: $50. Available balance: ${{ earningsData.available_balance || 0 }}</p>
+                </div>
+                <button 
+                  @click="showPayoutModal = true" 
+                  :disabled="(earningsData.available_balance || 0) < 50"
+                  class="px-6 py-3 bg-white text-purple-600 font-bold rounded-lg hover:bg-purple-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Request Payout
+                </button>
+              </div>
+            </div>
+
+            <!-- Recent Earnings -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div class="p-6 border-b border-gray-100">
+                <h3 class="font-bold text-gray-900">Recent Earnings</h3>
+              </div>
+              <div class="divide-y divide-gray-100">
+                <div v-for="earning in earningsData.recent_earnings" :key="earning.id" class="p-4 flex justify-between items-center hover:bg-gray-50">
+                  <div>
+                    <p class="font-medium text-gray-900">{{ earning.course?.title || 'Course' }}</p>
+                    <p class="text-sm text-gray-500">{{ formatDate(earning.created_at) }}</p>
+                  </div>
+                  <div class="text-end">
+                    <p class="font-bold text-green-600">+${{ earning.net_amount }}</p>
+                    <p class="text-xs text-gray-400">Fee: ${{ earning.platform_fee }}</p>
+                  </div>
+                </div>
+                <div v-if="!earningsData.recent_earnings?.length" class="p-8 text-center text-gray-500">
+                  No earnings yet. Start selling courses to earn!
+                </div>
+              </div>
+            </div>
+
+            <!-- Payout History -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div class="p-6 border-b border-gray-100">
+                <h3 class="font-bold text-gray-900">Payout History</h3>
+              </div>
+              <div class="divide-y divide-gray-100">
+                <div v-for="payout in payoutHistory" :key="payout.id" class="p-4 flex justify-between items-center">
+                  <div>
+                    <p class="font-medium text-gray-900">${{ payout.amount }} via {{ payout.method }}</p>
+                    <p class="text-sm text-gray-500">{{ formatDate(payout.created_at) }}</p>
+                  </div>
+                  <span 
+                    class="px-3 py-1 text-xs font-semibold rounded-full"
+                    :class="{
+                      'bg-yellow-100 text-yellow-700': payout.status === 'requested' || payout.status === 'processing',
+                      'bg-green-100 text-green-700': payout.status === 'completed',
+                      'bg-red-100 text-red-700': payout.status === 'failed'
+                    }"
+                  >
+                    {{ payout.status }}
+                  </span>
+                </div>
+                <div v-if="!payoutHistory.length" class="p-8 text-center text-gray-500">
+                  No payout history yet.
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -316,6 +406,52 @@
         </form>
       </div>
     </div>
+
+    <!-- Payout Request Modal -->
+    <div v-if="showPayoutModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showPayoutModal = false"></div>
+      <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-modalIn">
+        <button @click="showPayoutModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Request Payout</h2>
+        <p class="text-gray-500 mb-6">Available balance: ${{ earningsData.available_balance || 0 }}</p>
+        
+        <form @submit.prevent="requestPayout">
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Amount ($)</label>
+            <input 
+              v-model.number="payoutAmount" 
+              type="number" 
+              min="50"
+              :max="earningsData.available_balance || 0"
+              placeholder="50"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              required
+            >
+            <p class="text-xs text-gray-500 mt-1">Minimum: $50</p>
+          </div>
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Payout Method</label>
+            <select v-model="payoutMethod" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+              <option value="paypal">PayPal</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="stripe">Stripe</option>
+            </select>
+          </div>
+          <div class="flex gap-3">
+            <button type="button" @click="showPayoutModal = false" class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" :disabled="requestingPayout" class="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50">
+              {{ requestingPayout ? 'Processing...' : 'Request Payout' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -339,6 +475,14 @@ const courseFilter = ref('all');
 const showCreateCourse = ref(false);
 const newCourseTitle = ref('');
 const newCourseCategory = ref('');
+
+// Earnings State
+const earningsData = ref({});
+const payoutHistory = ref([]);
+const showPayoutModal = ref(false);
+const payoutAmount = ref(50);
+const payoutMethod = ref('paypal');
+const requestingPayout = ref(false);
 
 // Icon Components
 const DashboardIcon = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'w-5 h-5', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
@@ -377,15 +521,16 @@ const CoursesCountIcon = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', c
 const menuItems = computed(() => [
   { id: 'dashboard', label: t('instructor_dashboard.sidebar.dashboard'), icon: DashboardIcon },
   { id: 'courses', label: t('instructor_dashboard.sidebar.courses'), icon: CoursesIcon },
+  { id: 'earnings', label: t('instructor_dashboard.sidebar.earnings'), icon: RevenueIcon },
   { id: 'communication', label: t('instructor_dashboard.sidebar.communication'), icon: CommunicationIcon },
   { id: 'performance', label: t('instructor_dashboard.sidebar.performance'), icon: PerformanceIcon },
 ]);
 
 // Computed
 const monthlyStats = computed(() => ({
-  newStudents: stats.value?.monthly_students || 23,
-  revenue: stats.value?.monthly_revenue || '1,245',
-  reviews: stats.value?.monthly_reviews || 12,
+  newStudents: stats.value?.monthly_students || 0,
+  revenue: stats.value?.monthly_revenue || 0,
+  reviews: stats.value?.monthly_reviews || 0,
 }));
 
 const statsCards = computed(() => [
@@ -394,7 +539,7 @@ const statsCards = computed(() => [
     value: `$${stats.value?.total_revenue || '0'}`,
     icon: RevenueIcon,
     bgClass: 'bg-gradient-to-br from-green-500 to-emerald-600',
-    change: '12%',
+    change: null,
     changePositive: true,
   },
   {
@@ -402,7 +547,7 @@ const statsCards = computed(() => [
     value: stats.value?.total_students || 0,
     icon: StudentsIcon,
     bgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600',
-    change: '8%',
+    change: null,
     changePositive: true,
   },
   {
@@ -410,7 +555,7 @@ const statsCards = computed(() => [
     value: `${stats.value?.average_rating || '0'} / 5.0`,
     icon: RatingIcon,
     bgClass: 'bg-gradient-to-br from-amber-500 to-orange-600',
-    change: '0.2',
+    change: null,
     changePositive: true,
   },
   {
@@ -493,14 +638,49 @@ onMounted(async () => {
     recentReviews.value = statsRes.data.recent_reviews || [];
     recentQuestions.value = statsRes.data.recent_questions || [];
     
-    // Fallback if empty for demo feeling (optional, maybe remove for production)
-    // If we want real empty state, just leave as is.
+    // Load earnings data
+    loadEarningsData();
   } catch (e) {
     console.error("Error loading instructor data", e);
   } finally {
     loading.value = false;
   }
 });
+
+// Earnings Methods
+const loadEarningsData = async () => {
+  try {
+    const [earningsRes, payoutsRes] = await Promise.all([
+      axios.get('/api/instructor/earnings'),
+      axios.get('/api/instructor/payouts'),
+    ]);
+    earningsData.value = earningsRes.data;
+    payoutHistory.value = payoutsRes.data.data || payoutsRes.data || [];
+  } catch (e) {
+    console.error('Error loading earnings', e);
+  }
+};
+
+const requestPayout = async () => {
+  if (payoutAmount.value < 50) {
+    alert('Minimum payout is $50');
+    return;
+  }
+  requestingPayout.value = true;
+  try {
+    await axios.post('/api/instructor/payouts', {
+      amount: payoutAmount.value,
+      method: payoutMethod.value,
+    });
+    showPayoutModal.value = false;
+    loadEarningsData();
+    alert('Payout requested successfully!');
+  } catch (e) {
+    alert(e.response?.data?.message || 'Failed to request payout');
+  } finally {
+    requestingPayout.value = false;
+  }
+};
 </script>
 
 <style scoped>

@@ -36,4 +36,9 @@ class Lecture extends Model
     {
         return $this->hasOne(Quiz::class);
     }
+
+    public function resources()
+    {
+        return $this->hasMany(LectureResource::class);
+    }
 }

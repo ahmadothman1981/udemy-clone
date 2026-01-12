@@ -56,16 +56,22 @@ export const useAuthStore = defineStore('auth', {
                 throw e;
             }
         },
-        logout() {
+        async logout() {
+            // Call server to revoke token
+            try {
+                await axios.post('/api/logout');
+            } catch (e) {
+                // Ignore errors - clear local state anyway
+            }
+
             this.token = null;
             this.user = null;
             localStorage.removeItem('token');
+            delete axios.defaults.headers.common['Authorization'];
 
             // Clear cart
             const cartStore = useCartStore();
             cartStore.clear();
-
-            // call api logout if needed (optional)
         }
     }
 });

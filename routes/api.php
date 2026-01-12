@@ -24,14 +24,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/auth/{provider}/callback', [App\Http\Controllers\SocialAuthController::class, 'callback']);
 });
 
-Route::get('/debug-social-config', function () {
-    return response()->json([
-        'google_id_set' => !empty(config('services.google.client_id')),
-        'google_secret_set' => !empty(config('services.google.client_secret')),
-        'google_redirect_set' => !empty(config('services.google.redirect')),
-        'google_redirect_value' => config('services.google.redirect'), // Safe to show redirect URL
-    ]);
-});
+// Debug route removed for security - do not expose config in production
 
 // Public Content
 Route::get('/courses', [CourseController::class, 'index']); // Search, Filter, Sort
@@ -107,6 +100,18 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/lectures/{lecture}/progress', [\App\Http\Controllers\ProgressController::class, 'update']); // Toggle complete
     Route::get('/courses/{course}/progress', [\App\Http\Controllers\ProgressController::class, 'show']); // Get completed IDs
 
+    // Lecture Resources
+    Route::get('/courses/{course}/sections/{section}/lectures/{lecture}/resources', [\App\Http\Controllers\LectureController::class, 'getResources']);
+    Route::post('/courses/{course}/sections/{section}/lectures/{lecture}/resources', [\App\Http\Controllers\LectureController::class, 'storeResource']);
+    Route::delete('/courses/{course}/sections/{section}/lectures/{lecture}/resources/{resource}', [\App\Http\Controllers\LectureController::class, 'destroyResource']);
+    Route::get('/lectures/{lecture}/resources/{resource}/download', [\App\Http\Controllers\LectureController::class, 'downloadResource']);
+
+    // Student Notes
+    Route::get('/courses/{course}/notes', [\App\Http\Controllers\NoteController::class, 'index']);
+    Route::post('/courses/{course}/notes', [\App\Http\Controllers\NoteController::class, 'store']);
+    Route::put('/courses/{course}/notes/{note}', [\App\Http\Controllers\NoteController::class, 'update']);
+    Route::delete('/courses/{course}/notes/{note}', [\App\Http\Controllers\NoteController::class, 'destroy']);
+
     // Social (Reviews & QnA)
     Route::post('/courses/{course}/reviews', [\App\Http\Controllers\ReviewController::class, 'store']);
     Route::post('/courses/{course}/questions', [\App\Http\Controllers\CourseQuestionController::class, 'store']);
@@ -118,34 +123,44 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/instructor/courses', [\App\Http\Controllers\InstructorController::class, 'store']);
     Route::patch('/instructor/courses/{course}/publish', [\App\Http\Controllers\InstructorController::class, 'publish']);
     Route::get('/instructor/analytics', [\App\Http\Controllers\InstructorController::class, 'analytics']);
+    Route::get('/instructor/earnings', [\App\Http\Controllers\PayoutController::class, 'earningsStats']);
+    Route::get('/instructor/payouts', [\App\Http\Controllers\PayoutController::class, 'index']);
+    Route::post('/instructor/payouts', [\App\Http\Controllers\PayoutController::class, 'store']);
+
+    // Wishlist (backend persistence)
+    Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index']);
+    Route::post('/wishlist', [\App\Http\Controllers\WishlistController::class, 'store']);
+    Route::delete('/wishlist/{courseId}', [\App\Http\Controllers\WishlistController::class, 'destroy']);
+    Route::get('/wishlist/check/{courseId}', [\App\Http\Controllers\WishlistController::class, 'check']);
 });
 
 // Public Social
 Route::get('/courses/{course}/reviews', [\App\Http\Controllers\ReviewController::class, 'index']);
 Route::get('/courses/{course}/questions', [\App\Http\Controllers\CourseQuestionController::class, 'index']);
 
-// Admin
+// Admin (requires admin role)
 Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
-    Route::get('/stats', [\App\Http\Controllers\AdminController::class, 'stats']);
-    Route::get('/users', [\App\Http\Controllers\AdminController::class, 'users']);
-    Route::get('/courses/pending', [\App\Http\Controllers\AdminController::class, 'pendingCourses']);
-    Route::post('/courses/{course}/approve', [\App\Http\Controllers\AdminController::class, 'approveCourse']);
+    // Admin role check applied to all admin routes
+    Route::middleware([\App\Http\Middleware\EnsureUserIsAdmin::class])->group(function () {
+        Route::get('/stats', [\App\Http\Controllers\AdminController::class, 'stats']);
+        Route::get('/users', [\App\Http\Controllers\AdminController::class, 'users']);
+        Route::get('/courses/pending', [\App\Http\Controllers\AdminController::class, 'pendingCourses']);
+        Route::post('/courses/{course}/approve', [\App\Http\Controllers\AdminController::class, 'approveCourse']);
 
-    // Promo Codes (Admin)
-    Route::get('/promo-codes', [\App\Http\Controllers\PromoCodeController::class, 'index']);
-    Route::post('/promo-codes', [\App\Http\Controllers\PromoCodeController::class, 'store']);
-    Route::put('/promo-codes/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'update']);
-    Route::delete('/promo-codes/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'destroy']);
+        // Promo Codes (Admin)
+        Route::get('/promo-codes', [\App\Http\Controllers\PromoCodeController::class, 'index']);
+        Route::post('/promo-codes', [\App\Http\Controllers\PromoCodeController::class, 'store']);
+        Route::put('/promo-codes/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'update']);
+        Route::delete('/promo-codes/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'destroy']);
+    });
 });
 
 // Promo Code Validation (for checkout)
 Route::middleware(['auth:sanctum'])->post('/promo-codes/validate', [\App\Http\Controllers\PromoCodeController::class, 'validate']);
 
-// Payment
-Route::post('/courses/{course}/payment-intent', [\App\Http\Controllers\PaymentController::class, 'createIntent']);
-
-// Checkout
+// Payment & Checkout (requires auth)
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/courses/{course}/payment-intent', [\App\Http\Controllers\PaymentController::class, 'createIntent']);
     Route::post('/checkout/preview', [\App\Http\Controllers\CheckoutController::class, 'preview']);
     Route::post('/checkout', [\App\Http\Controllers\CheckoutController::class, 'processOrder']);
 });

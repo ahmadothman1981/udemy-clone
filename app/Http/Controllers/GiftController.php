@@ -42,7 +42,10 @@ class GiftController extends Controller implements HasMiddleware
             'message' => $validated['message'] ?? null,
         ]);
 
-        // TODO: Send email with redemption code
+        // Send gift notification email to recipient
+        Mail::to($gift->recipient_email)->queue(
+            new \App\Mail\GiftNotification($gift, $request->user()->name)
+        );
 
         return response()->json([
             'message' => 'Gift created successfully',

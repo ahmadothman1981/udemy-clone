@@ -103,6 +103,7 @@
                                      <div class="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-black border-b-[10px] border-b-transparent ml-1"></div>
                                  </div>
                              </div>
+                             <div @click="playPreview" class="absolute inset-0 cursor-pointer"></div>
                              <div class="absolute bottom-4 left-0 right-0 text-center text-white font-bold mb-2">Preview this course</div>
                         </div>
 
@@ -234,6 +235,25 @@
         <div v-else class="text-center py-20 text-red-500">
             Course not found.
         </div>
+
+        <!-- Preview Video Modal -->
+        <div v-if="showPreviewModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90" @click.self="showPreviewModal = false">
+            <div class="relative w-full max-w-4xl">
+                <button @click="showPreviewModal = false" class="absolute -top-10 right-0 text-white hover:text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <video 
+                    :src="course.preview_video_url" 
+                    controls 
+                    autoplay 
+                    class="w-full rounded-lg shadow-2xl"
+                >
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -321,4 +341,15 @@ const toggleSection = (sectionId) => {
 };
 
 const isExpanded = (sectionId) => expandedSections.value.has(sectionId);
+
+// Preview Video Modal
+const showPreviewModal = ref(false);
+
+const playPreview = () => {
+    if (course.value?.preview_video_url) {
+        showPreviewModal.value = true;
+    } else {
+        alert('No preview video available for this course');
+    }
+};
 </script>

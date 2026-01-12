@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EnrollmentConfirmation;
 use App\Models\Course;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -9,6 +10,7 @@ use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
@@ -105,7 +107,7 @@ class CheckoutController extends Controller implements HasMiddleware
         // Create pending order
         $order = Order::create([
             'user_id' => $user->id,
-            'order_number' => 'ORD-' . strtoupper(Str::random(10)),
+            'order_number' => 'ORD-' . (string) Str::uuid(),
             'total' => $total,
             'status' => 'pending',
             'payment_method' => 'stripe',
@@ -163,7 +165,7 @@ class CheckoutController extends Controller implements HasMiddleware
     {
         $order = Order::create([
             'user_id' => $user->id,
-            'order_number' => 'ORD-' . strtoupper(Str::random(10)),
+            'order_number' => 'ORD-' . (string) Str::uuid(),
             'total' => 0,
             'status' => 'paid',
             'payment_method' => 'free',
@@ -185,6 +187,22 @@ class CheckoutController extends Controller implements HasMiddleware
             ]);
 
             $course->increment('enrollment_count');
+
+            // Create instructor earning record (even for free courses)
+            \App\Models\InstructorEarning::create([
+                'instructor_id' => $course->instructor_id,
+                'enrollment_id' => Enrollment::where('user_id', $user->id)
+                    ->where('course_id', $course->id)
+                    ->first()->id,
+                'course_id' => $course->id,
+                'gross_amount' => 0,
+                'platform_fee' => 0,
+                'net_amount' => 0,
+                'status' => 'available',
+            ]);
+
+            // Send enrollment confirmation email
+            Mail::to($user->email)->queue(new EnrollmentConfirmation($user, $course));
         }
 
         return response()->json([
