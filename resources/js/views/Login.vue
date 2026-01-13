@@ -23,6 +23,14 @@
           </p>
         </div>
 
+        <!-- Error Alert -->
+        <div v-if="errorMessage" class="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-200 text-sm flex items-start">
+            <svg class="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ errorMessage }}</span>
+        </div>
+
         <!-- Form -->
         <form class="space-y-6" @submit.prevent="handleLogin">
           <div class="space-y-4">
@@ -170,14 +178,29 @@ const getRedirectPath = (user) => {
     return '/dashboard'; // Default for students and other users
 };
 
+const errorMessage = ref('');
+
 const handleLogin = async () => {
     loading.value = true;
+    errorMessage.value = '';
     try {
         await auth.login(email.value, password.value);
         const redirectPath = getRedirectPath(auth.user);
         router.push(redirectPath);
     } catch (e) {
-        alert('Login failed');
+        if (e.response && e.response.status === 422) {
+            // Check for specific field errors or general message
+            if (e.response.data.errors) {
+                // Combine all errors into a single string or specifically show the email error which is common for auth
+                 errorMessage.value = Object.values(e.response.data.errors).flat().join(' ');
+            } else {
+                 errorMessage.value = e.response.data.message || 'Invalid credentials.';
+            }
+        } else if (e.response && e.response.status === 401) {
+            errorMessage.value = 'Invalid credentials.';
+        } else {
+            errorMessage.value = 'An error occurred. Please try again.';
+        }
     } finally {
         loading.value = false;
     }

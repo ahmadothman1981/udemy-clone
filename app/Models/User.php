@@ -33,6 +33,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'email_verified' => 'boolean',
+        'is_banned' => 'boolean',
         'preferences' => 'array',
         'password' => 'hashed',
     ];

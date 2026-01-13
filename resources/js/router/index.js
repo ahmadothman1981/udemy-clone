@@ -27,6 +27,8 @@ const routes = [
     { path: '/payment-methods', component: () => import('../views/PaymentMethods.vue'), meta: { requiresAuth: true } },
     { path: '/messages', component: () => import('../views/Messages.vue'), meta: { requiresAuth: true } },
     { path: '/admin', component: AdminDashboard, meta: { requiresAuth: true, requiresAdmin: true } },
+    { path: '/admin/users', component: () => import('../views/UserManagement.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+    { path: '/admin/promo-codes', component: () => import('../views/PromoCodes.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
     { path: '/dashboard', component: () => import('../views/StudentDashboard.vue'), meta: { requiresAuth: true } },
     { path: '/instructor', component: InstructorDashboard, meta: { requiresAuth: true, requiresInstructor: true } },
     { path: '/course/:slug', component: CourseDetail, props: true },

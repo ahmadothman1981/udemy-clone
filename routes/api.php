@@ -150,6 +150,7 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     Route::middleware([\App\Http\Middleware\EnsureUserIsAdmin::class])->group(function () {
         Route::get('/stats', [\App\Http\Controllers\AdminController::class, 'stats']);
         Route::get('/users', [\App\Http\Controllers\AdminController::class, 'users']);
+        Route::post('/users/{user}/ban', [\App\Http\Controllers\AdminController::class, 'toggleBan']);
         Route::get('/courses/pending', [\App\Http\Controllers\AdminController::class, 'pendingCourses']);
         Route::post('/courses/{course}/approve', [\App\Http\Controllers\AdminController::class, 'approveCourse']);
 

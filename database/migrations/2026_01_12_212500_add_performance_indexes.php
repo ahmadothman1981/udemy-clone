@@ -57,9 +57,9 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('enrollments', function (Blueprint $table) {
-            $table->dropIndex(['user_id']);
-            $table->dropIndex(['course_id']);
-            $table->dropIndex(['user_id', 'course_id']);
+            // $table->dropIndex(['user_id']);
+            // $table->dropIndex(['course_id']);
+            // $table->dropIndex(['user_id', 'course_id']);
         });
 
         Schema::table('orders', function (Blueprint $table) {
