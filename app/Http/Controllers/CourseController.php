@@ -10,6 +10,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Cache;
 
 class CourseController extends Controller implements HasMiddleware
 {
@@ -24,77 +25,82 @@ class CourseController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        $query = Course::query()->where('published', true);
+        // Generate a unique cache key based on query parameters
+        $cacheKey = 'courses_idx_' . md5(json_encode($request->all()));
 
-        // Search
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
+        $courses = Cache::tags(['courses'])->remember($cacheKey, 60 * 15, function () use ($request) { // 15 minutes
+            $query = Course::query()->where('published', true);
 
-        // Filters
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
+            // Search
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
 
-        if ($request->has('category')) {
-            $slug = $request->category;
-            $query->whereHas('category', function ($q) use ($slug) {
-                $q->where('slug', $slug);
-            });
-        }
+            // Filters
+            if ($request->has('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
 
-        if ($request->has('level_id')) {
-            $query->where('level_id', $request->level_id);
-        }
+            if ($request->has('category')) {
+                $slug = $request->category;
+                $query->whereHas('category', function ($q) use ($slug) {
+                    $q->where('slug', $slug);
+                });
+            }
 
-        // Level filter by slug
-        if ($request->has('level')) {
-            $levelSlug = $request->level;
-            $query->whereHas('level', function ($q) use ($levelSlug) {
-                $q->where('slug', $levelSlug);
-            });
-        }
+            if ($request->has('level_id')) {
+                $query->where('level_id', $request->level_id);
+            }
 
-        // Price range filters
-        if ($request->has('price_min')) {
-            $query->where('price', '>=', (float) $request->price_min);
-        }
+            // Level filter by slug
+            if ($request->has('level')) {
+                $levelSlug = $request->level;
+                $query->whereHas('level', function ($q) use ($levelSlug) {
+                    $q->where('slug', $levelSlug);
+                });
+            }
 
-        if ($request->has('price_max')) {
-            $query->where('price', '<=', (float) $request->price_max);
-        }
+            // Price range filters
+            if ($request->has('price_min')) {
+                $query->where('price', '>=', (float) $request->price_min);
+            }
 
-        if ($request->has('min_rating')) {
-            $query->where('rating_avg', '>=', $request->min_rating);
-        }
+            if ($request->has('price_max')) {
+                $query->where('price', '<=', (float) $request->price_max);
+            }
 
-        // Sorting - map frontend values to database columns
-        $sortParam = $request->input('sort', 'newest');
+            if ($request->has('min_rating')) {
+                $query->where('rating_avg', '>=', $request->min_rating);
+            }
 
-        $sortMapping = [
-            'popular' => ['column' => 'enrollment_count', 'direction' => 'desc'],
-            'newest' => ['column' => 'created_at', 'direction' => 'desc'],
-            'rating' => ['column' => 'rating_avg', 'direction' => 'desc'],
-            'price_low' => ['column' => 'price', 'direction' => 'asc'],
-            'price_high' => ['column' => 'price', 'direction' => 'desc'],
-            // Legacy support for direct column names
-            'price' => ['column' => 'price', 'direction' => $request->input('direction', 'asc')],
-            'rating_avg' => ['column' => 'rating_avg', 'direction' => 'desc'],
-            'created_at' => ['column' => 'created_at', 'direction' => 'desc'],
-            'enrollment_count' => ['column' => 'enrollment_count', 'direction' => 'desc'],
-        ];
+            // Sorting - map frontend values to database columns
+            $sortParam = $request->input('sort', 'newest');
 
-        if (isset($sortMapping[$sortParam])) {
-            $query->orderBy($sortMapping[$sortParam]['column'], $sortMapping[$sortParam]['direction']);
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
+            $sortMapping = [
+                'popular' => ['column' => 'enrollment_count', 'direction' => 'desc'],
+                'newest' => ['column' => 'created_at', 'direction' => 'desc'],
+                'rating' => ['column' => 'rating_avg', 'direction' => 'desc'],
+                'price_low' => ['column' => 'price', 'direction' => 'asc'],
+                'price_high' => ['column' => 'price', 'direction' => 'desc'],
+                // Legacy support for direct column names
+                'price' => ['column' => 'price', 'direction' => $request->input('direction', 'asc')],
+                'rating_avg' => ['column' => 'rating_avg', 'direction' => 'desc'],
+                'created_at' => ['column' => 'created_at', 'direction' => 'desc'],
+                'enrollment_count' => ['column' => 'enrollment_count', 'direction' => 'desc'],
+            ];
 
-        $courses = $query->with(['instructor', 'category', 'level'])->paginate(15);
+            if (isset($sortMapping[$sortParam])) {
+                $query->orderBy($sortMapping[$sortParam]['column'], $sortMapping[$sortParam]['direction']);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+            return $query->with(['instructor', 'category', 'level'])->paginate(15);
+        });
 
         return CourseResource::collection($courses);
     }
@@ -126,6 +132,8 @@ class CourseController extends Controller implements HasMiddleware
         $course = new Course($validated);
         $course->instructor_id = $request->user()->id;
         $course->save();
+
+        Cache::tags(['courses'])->flush();
 
         return new CourseResource($course);
     }
@@ -176,6 +184,8 @@ class CourseController extends Controller implements HasMiddleware
 
         $course->update($validated);
 
+        Cache::tags(['courses'])->flush();
+
         return new CourseResource($course);
     }
 
@@ -183,6 +193,7 @@ class CourseController extends Controller implements HasMiddleware
     {
         $this->authorize('delete', $course);
         $course->delete();
+        Cache::tags(['courses'])->flush();
         return response()->noContent();
     }
 }

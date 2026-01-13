@@ -13,9 +13,9 @@ return new class extends Migration {
     {
         // Enrollments - frequently queried by user_id and course_id
         Schema::table('enrollments', function (Blueprint $table) {
-            $table->index('user_id');
-            $table->index('course_id');
-            $table->index(['user_id', 'course_id']);
+            // $table->index('user_id');
+            // $table->index('course_id');
+            // $table->index(['user_id', 'course_id']);
         });
 
         // Orders - frequently queried by user_id and status

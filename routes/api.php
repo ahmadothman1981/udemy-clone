@@ -59,6 +59,12 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/messages/{id}', [\App\Http\Controllers\MessageController::class, 'show']);
     Route::post('/messages', [\App\Http\Controllers\MessageController::class, 'store']);
 
+    // Video Upload (Chunked)
+    Route::post('/upload/video', [\App\Http\Controllers\UploadController::class, 'upload']);
+
+    // Video Streaming (Secure)
+    Route::get('/stream/{lecture}/{filename}', [\App\Http\Controllers\VideoController::class, 'stream']);
+
     // Instructor / Admin (Policies handle which roles allowed)
     Route::post('/courses', [CourseController::class, 'store']);
     Route::put('/courses/{course}', [CourseController::class, 'update']);

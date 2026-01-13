@@ -15,14 +15,36 @@
              <!-- Main Content Area -->
             <main class="flex-1 overflow-y-auto bg-black flex items-center justify-center relative">
                  <div v-if="currentLecture?.type === 'video'" class="w-full h-full max-w-5xl aspect-video mx-auto">
-                     <video 
-                        v-if="currentLecture.video_url"
-                        controls 
-                        autoplay
-                        class="w-full h-full"
-                        @ended="onVideoEnded"
-                        :src="currentLecture.video_url"
-                    ></video>
+                     <div v-if="currentLecture.hls_path || currentLecture.video_url" class="unique-video-container w-full h-full relative">
+                        <video 
+                            ref="videoPlayer" 
+                            class="video-js vjs-default-skin vjs-big-play-centered w-full h-full"
+                            controls 
+                            preload="auto"
+                            data-setup='{}'
+                        >
+                            <source 
+                                v-if="currentLecture.hls_path" 
+                                :src="`/api/stream/${currentLecture.id}/playlist.m3u8`" 
+                                type="application/x-mpegURL"
+                            >
+                            <source 
+                                v-else 
+                                :src="`/api/stream/${currentLecture.id}/${currentLecture.video_path.split('/').pop()}`" 
+                                :type="getVideoType(currentLecture.video_path)"
+                            >
+                            <p class="vjs-no-js">
+                                To view this video please enable JavaScript, and consider upgrading to a web browser that
+                                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                            </p>
+                        </video>
+                        <div v-if="currentLecture.processing_state === 'processing'" class="absolute inset-0 flex items-center justify-center bg-black/50 z-30">
+                            <div class="text-center">
+                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                                <p>Video is processing... (You can watch the original meanwhile)</p>
+                            </div>
+                        </div>
+                    </div>
                     <div v-else class="flex flex-col items-center justify-center h-full text-gray-500">
                         <p>{{ $t('course.video_not_available') }}</p>
                     </div>
@@ -186,12 +208,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch, ref } from 'vue';
+import { computed, onMounted, onUnmounted, watch, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '../stores/course';
 import { useLearningStore } from '../stores/learning';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
 
 const { t } = useI18n();
 
@@ -286,6 +310,52 @@ const checkCompletion = () => {
         }
     }, 500);
 };
+
+// Video Player State
+const videoPlayer = ref(null);
+const player = ref(null);
+
+const initPlayer = () => {
+    if (player.value) {
+        player.value.dispose();
+        player.value = null;
+    }
+
+    if (videoPlayer.value && (currentLecture.value.hls_path || currentLecture.value.video_url)) {
+        player.value = videojs(videoPlayer.value, {
+            controls: true,
+            autoplay: true,
+            preload: 'auto',
+            fluid: true,
+            sources: currentLecture.value.hls_path 
+                ? [{
+                    src: `/api/stream/${currentLecture.value.id}/playlist.m3u8`,
+                    type: 'application/x-mpegURL',
+                    withCredentials: true 
+                }]
+                : [{
+                    src: `/api/stream/${currentLecture.value.id}/${currentLecture.value.video_path.split('/').pop()}`,
+                    type: getVideoType(currentLecture.value.video_path),
+                    withCredentials: true
+                }]
+        });
+
+        player.value.on('ended', onVideoEnded);
+    }
+};
+
+onUnmounted(() => {
+    if (player.value) {
+        player.value.dispose();
+    }
+});
+
+watch(currentLecture, () => {
+    // Wait for DOM
+    setTimeout(() => {
+        initPlayer();
+    }, 100);
+}, { deep: true });
 
 // Return immediately if already completed on mount
 onMounted(async () => {
@@ -429,26 +499,45 @@ const deleteNote = async (noteId) => {
 };
 
 const addNoteAtCurrentTime = () => {
-    const video = document.querySelector('video');
-    if (video) {
-        noteTimestamp.value = Math.floor(video.currentTime);
+    let currentTime = 0;
+    if (player.value) {
+        currentTime = player.value.currentTime();
+    } else {
+        const video = document.querySelector('video');
+        if (video) currentTime = video.currentTime;
     }
+    noteTimestamp.value = Math.floor(currentTime);
 };
 
 const getCurrentTimestamp = () => {
-    const video = document.querySelector('video');
-    if (video) {
-        return formatTimestamp(Math.floor(video.currentTime));
+    let currentTime = 0;
+    if (player.value) {
+        currentTime = player.value.currentTime();
+    } else {
+        const video = document.querySelector('video');
+        if (video) currentTime = video.currentTime;
     }
-    return '0:00';
+    return formatTimestamp(Math.floor(currentTime));
 };
 
 const seekToTimestamp = (seconds) => {
-    const video = document.querySelector('video');
-    if (video) {
-        video.currentTime = seconds;
-        video.play();
+    if (player.value) {
+        player.value.currentTime(seconds);
+        player.value.play();
+    } else {
+        const video = document.querySelector('video');
+        if (video) {
+            video.currentTime = seconds;
+            video.play();
+        }
     }
+};
+
+const getVideoType = (url) => {
+    if (!url) return '';
+    const ext = url.split('.').pop().toLowerCase();
+    if (ext === 'm3u8') return 'application/x-mpegURL';
+    return `video/${ext}`;
 };
 
 const formatTimestamp = (seconds) => {

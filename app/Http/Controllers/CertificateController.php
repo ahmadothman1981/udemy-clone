@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateCertificatePdf;
 use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\Enrollment;
@@ -95,6 +96,9 @@ class CertificateController extends Controller implements HasMiddleware
 
         $certificate->load('course:id,title,slug');
 
+        // Async generation
+        GenerateCertificatePdf::dispatch($certificate);
+
         return response()->json([
             'message' => 'Certificate generated successfully!',
             'certificate' => $certificate,
@@ -113,6 +117,11 @@ class CertificateController extends Controller implements HasMiddleware
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        if ($certificate->pdf_path && \Illuminate\Support\Facades\Storage::exists($certificate->pdf_path)) {
+            return \Illuminate\Support\Facades\Storage::download($certificate->pdf_path);
+        }
+
+        // Fallback: Generate inline if job failed or hasn't run (prevents user 404)
         $certificate->load(['user', 'course']);
 
         $pdf = Pdf::loadView('certificates.template', [
@@ -121,9 +130,7 @@ class CertificateController extends Controller implements HasMiddleware
             'course' => $certificate->course,
         ]);
 
-        $filename = 'certificate-' . $certificate->certificate_number . '.pdf';
-
-        return $pdf->download($filename);
+        return $pdf->download('certificate-' . $certificate->certificate_number . '.pdf');
     }
 
     /**
@@ -162,6 +169,11 @@ class CertificateController extends Controller implements HasMiddleware
             abort(403);
         }
 
+        if ($certificate->pdf_path && \Illuminate\Support\Facades\Storage::exists($certificate->pdf_path)) {
+            return \Illuminate\Support\Facades\Storage::download($certificate->pdf_path);
+        }
+
+        // Fallback
         $certificate->load(['user', 'course']);
 
         $pdf = Pdf::loadView('certificates.template', [
@@ -170,9 +182,7 @@ class CertificateController extends Controller implements HasMiddleware
             'course' => $certificate->course,
         ]);
 
-        $filename = 'certificate-' . $certificate->certificate_number . '.pdf';
-
-        return $pdf->download($filename);
+        return $pdf->download('certificate-' . $certificate->certificate_number . '.pdf');
     }
 
     /**

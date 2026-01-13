@@ -12,6 +12,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
+use App\Jobs\ProcessLectureVideo;
 
 class LectureController extends Controller implements HasMiddleware
 {
@@ -65,7 +66,7 @@ class LectureController extends Controller implements HasMiddleware
 
         $lectureData = $request->only(['title', 'type', 'content', 'duration_minutes', 'preview']);
 
-        // Handle Video Upload
+        // Handle Video Upload (File or Path)
         if ($request->hasFile('video') && $request->file('video')->isValid()) {
             $disk = $this->getVideoDisk();
             $path = $request->file('video')->store('lectures/' . $course->id, $disk);
@@ -73,9 +74,23 @@ class LectureController extends Controller implements HasMiddleware
             // Store the path (not URL) so we can generate signed URLs later
             $lectureData['video_path'] = $path;
             $lectureData['video_url'] = $this->getVideoUrl($path);
+        } elseif ($request->filled('video_path')) {
+            // Already uploaded via chunked uploader
+            $tempPath = $request->input('video_path');
+            // Move from tmp to lectures
+            if (Storage::disk('public')->exists($tempPath)) {
+                $newPath = 'lectures/' . $course->id . '/' . basename($tempPath);
+                Storage::disk('public')->move($tempPath, $newPath);
+                $lectureData['video_path'] = $newPath;
+                $lectureData['video_url'] = $this->getVideoUrl($newPath);
+            }
         }
 
         $lecture = $section->lectures()->create($lectureData);
+
+        if (($request->hasFile('video') && $request->file('video')->isValid()) || $request->filled('video_path')) {
+            ProcessLectureVideo::dispatch($lecture);
+        }
 
         return new LectureResource($lecture);
     }
@@ -108,9 +123,35 @@ class LectureController extends Controller implements HasMiddleware
             $path = $request->file('video')->store('lectures/' . $course->id, $disk);
             $lectureData['video_path'] = $path;
             $lectureData['video_url'] = $this->getVideoUrl($path);
+        } elseif ($request->filled('video_path')) {
+            // Chunked upload
+            $tempPath = $request->input('video_path');
+            
+            // Check 'local' disk (private) instead of public
+            if (Storage::disk('local')->exists($tempPath)) {
+                $disk = $this->getVideoDisk(); 
+
+                $newPath = 'lectures/' . $course->id . '/' . basename($tempPath);
+
+                // Source is 'local', Dest is $disk ('lectures' or 's3')
+                // Always use stream copy since roots likely differ
+                Storage::disk($disk)->put($newPath, Storage::disk('local')->get($tempPath));
+                Storage::disk('local')->delete($tempPath);
+                }
+
+                $lectureData['video_path'] = $newPath;
+                $lectureData['video_url'] = $this->getVideoUrl($newPath);
+
+                // Trigger processing
+                $shouldDispatch = true; // Flag to dispatch job outside
+            }
         }
 
         $lecture->update($lectureData);
+
+        if (($request->hasFile('video') && $request->file('video')->isValid()) || (isset($shouldDispatch) && $shouldDispatch)) {
+            ProcessLectureVideo::dispatch($lecture);
+        }
 
         return new LectureResource($lecture);
     }

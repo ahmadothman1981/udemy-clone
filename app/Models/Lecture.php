@@ -14,11 +14,13 @@ class Lecture extends Model
         'title',
         'type',
         'content',
-        'video_url',
         'video_path',
+        'video_url',
+        'hls_path',
+        'processing_state',
         'duration_minutes',
-        'order',
         'preview',
+        'order',
         'free_preview',
     ];
 

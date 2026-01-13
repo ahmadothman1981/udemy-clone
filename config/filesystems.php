@@ -39,8 +39,16 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        // Private videos disk
+        'lectures' => [
+            'driver' => 'local',
+            'root' => storage_path('app/lectures'),
+            'visibility' => 'private',
             'throw' => false,
         ],
 

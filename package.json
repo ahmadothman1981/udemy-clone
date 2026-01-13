@@ -30,6 +30,8 @@
         "laravel-echo": "^2.2.7",
         "lodash": "^4.17.21",
         "pusher-js": "^8.4.0",
+        "resumablejs": "^1.1.0",
+        "video.js": "^8.23.4",
         "vuedraggable": "^4.1.0"
     }
 }

@@ -371,10 +371,13 @@
   </div>
 </template>
 
+
+
 <script setup>
-import { ref, onMounted, computed, nextTick } from 'vue';
+import { ref, onMounted, computed, nextTick, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCourseStore } from '../stores/course'; // Import store
+import Resumable from 'resumablejs';
 
 import axios from 'axios';
 import draggable from 'vuedraggable';
@@ -409,17 +412,64 @@ const uploadFile = ref(null);
 const uploadProgress = ref(0);
 const uploading = ref(false);
 const videoInput = ref(null);
+const uploadedVideoPath = ref(null); // Store path after chunked upload
 
 const courseForm = ref({});
 const categories = computed(() => courseStore.categories);
 const levels = computed(() => courseStore.levels);
 
-// ... existing code ...
-
 const openQuizEditor = (lecture) => {
     currentQuizLecture.value = lecture;
     showQuizEditor.value = true;
 };
+
+let r = null; // Resumable instance
+
+const initResumable = () => {
+    r = new Resumable({
+        target: '/api/upload/video',
+        chunkSize: 2 * 1024 * 1024, // 2MB
+        simultaneousUploads: 3,
+        testChunks: false,
+        throttleProgressCallbacks: 1,
+        headers: {
+             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+        }
+    });
+
+    r.on('fileAdded', (file) => {
+        uploadFile.value = file.file;
+        uploadProgress.value = 0;
+        // Automatically start upload or wait for user?
+        // Let's wait for user to click save, but we need to trigger it manually.
+        // Actually, better UX: start upload immediately or on save?
+        // To simplify integration with existing flow: 
+        // We will trigger r.upload() inside saveLecture.
+    });
+
+    r.on('fileProgress', (file) => {
+        uploadProgress.value = Math.floor(file.progress() * 100);
+    });
+
+    r.on('fileSuccess', (file, message) => {
+        const response = JSON.parse(message);
+        uploadedVideoPath.value = response.path;
+        finalizeLectureSave();
+    });
+
+    r.on('fileError', (file, message) => {
+        console.error('Upload error', message);
+        alert('Upload failed: ' + message);
+        uploading.value = false;
+        uploadProgress.value = 0;
+    });
+};
+
+onMounted(async () => {
+    await fetchCourseData();
+    initResumable();
+});
+
 
 
 const discountAmount = computed({
@@ -654,7 +704,13 @@ const reorderSections = async () => {
 
 // Lecture Methods
 const handleFileSelect = (event) => {
-    uploadFile.value = event.target.files[0];
+    const file = event.target.files[0];
+    if (file && r) {
+        r.addFile(file);
+        // uploadFile updated via fileAdded event
+    } else {
+        uploadFile.value = file;
+    }
 };
 
 const clearFile = () => {
@@ -668,6 +724,8 @@ const closeLectureModal = () => {
     lectureForm.value = { title: '', type: 'video', content: '', currentVideoUrl: null };
     clearFile();
     uploadProgress.value = 0;
+    uploadedVideoPath.value = null;
+    if (r) r.cancel();
 };
 
 const editLecture = (lecture) => {
@@ -685,45 +743,55 @@ const saveLecture = async () => {
     if (!selectedSection.value) return;
     
     uploading.value = true;
+
+    // If file to upload, start resumable upload first
+    if (uploadFile.value && !uploadedVideoPath.value) {
+        if (!r.files.length) {
+            // Should not happen if handleFileSelect used correct flow
+             r.addFile(uploadFile.value);
+        }
+        r.upload();
+        // Execution will continue in 'fileSuccess' event (finalizeLectureSave)
+        return;
+    }
+
+    // If no file or already uploaded
+    finalizeLectureSave();
+};
+
+const finalizeLectureSave = async () => {
     const formData = new FormData();
     formData.append('title', lectureForm.value.title);
     formData.append('type', lectureForm.value.type);
     if (lectureForm.value.content) formData.append('content', lectureForm.value.content);
     
-    // Add file if exists
-    if (uploadFile.value) {
-        formData.append('video', uploadFile.value);
-    }
+    // Add file path if uploaded
+    if (uploadedVideoPath.value) {
+        formData.append('video_path', uploadedVideoPath.value);
+    } 
+    // Legacy support or direct small file upload? Not needed with Chunked.
+    // However, if we didn't use chunked flow (e.g. error), we could fallback, but let's stick to path.
 
     try {
         let res;
-        const config = {
-            headers: { 'Content-Type': 'multipart/form-data' },
-            onUploadProgress: (progressEvent) => {
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                uploadProgress.value = percentCompleted;
-            }
-        };
-
+        // No custom config needed for formData without files (video_path is string)
+        
         if (editingLecture.value) {
              // Update
-             // Note: PHP needs _method=PUT for multipart/form-data
              formData.append('_method', 'PUT');
              res = await axios.post(
                  `/api/courses/${course.value.id}/sections/${selectedSection.value.id}/lectures/${editingLecture.value.id}`,
-                 formData,
-                 config
+                 formData
              );
              
              // Update local list
              const idx = lectures.value.findIndex(l => l.id === editingLecture.value.id);
-             if (idx !== -1) lectures.value[idx] = res.data.data || res.data; // Resource vs plain json
+             if (idx !== -1) lectures.value[idx] = res.data.data || res.data;
         } else {
              // Create
              res = await axios.post(
                  `/api/courses/${course.value.id}/sections/${selectedSection.value.id}/lectures`,
-                 formData,
-                 config
+                 formData
              );
              lectures.value.push(res.data.data || res.data);
         }
@@ -733,7 +801,6 @@ const saveLecture = async () => {
         console.error("Failed to save lecture", e);
         let errorMsg = e.response?.data?.message || e.message;
         
-        // Show validation errors if available
         if (e.response?.status === 422 && e.response?.data?.errors) {
             const validationErrors = Object.entries(e.response.data.errors)
                 .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
