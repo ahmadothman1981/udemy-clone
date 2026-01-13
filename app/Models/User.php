@@ -19,7 +19,6 @@ class User extends Authenticatable
         'avatar',
         'bio',
         'headline',
-        'email_verified',
         'preferences',
         'google_id',
         'facebook_id',

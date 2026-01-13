@@ -58,7 +58,11 @@ class StoreCourseRequest extends FormRequest
         // Allow only safe HTML tags
         $allowedTags = '<p><br><strong><b><em><i><u><ul><ol><li><h1><h2><h3><h4><h5><h6><a><blockquote><pre><code>';
 
-        return strip_tags($html, $allowedTags);
+        $html = strip_tags($html, $allowedTags);
+
+        // Strip all attributes from tags to prevent XSS (e.g. onclick, javascript: href)
+        // This is a strict approach. For handling links safely, a library like HTMLPurifier is recommended.
+        return preg_replace('/<([a-z][a-z0-9]*)[^>]*?(\/?)>/i', '<$1$2>', $html);
     }
 
     public function messages(): array
