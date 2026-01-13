@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCourseRequest;
 use App\Http\Resources\CourseResource;
 use App\Models\Course;
 use Illuminate\Http\Request;
@@ -116,18 +117,11 @@ class CourseController extends Controller implements HasMiddleware
         return new CourseResource($course);
     }
 
-    public function store(Request $request)
+    public function store(StoreCourseRequest $request)
     {
         $this->authorize('create', Course::class);
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric',
-            'category_id' => 'required|exists:categories,id',
-            'language' => 'required|string',
-            'level_id' => 'required|exists:course_levels,id', // using level_id FK
-        ]);
+        $validated = $request->validated();
 
         $course = new Course($validated);
         $course->instructor_id = $request->user()->id;

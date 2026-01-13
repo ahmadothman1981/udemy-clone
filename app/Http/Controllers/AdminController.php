@@ -28,9 +28,9 @@ class AdminController extends Controller implements HasMiddleware
         // Simple aggregation
         return response()->json([
             'total_users' => User::count(),
-            'total_instructors' => User::has('courses_taught')->count(),
+            'total_instructors' => User::has('courses')->count(),
             'total_courses' => Course::count(),
-            'total_revenue' => Order::sum('total_amount'), // Assuming Order model has total_amount
+            'total_revenue' => Order::sum('total'), // Uses 'total' column from orders table
             'pending_courses' => Course::where('status', 'pending')->count(),
         ]);
     }

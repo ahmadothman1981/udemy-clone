@@ -15,9 +15,10 @@ class MessageController extends Controller
         $userId = $request->user()->id;
 
         // Fetch user IDs who have sent messages to or received messages from the current user
+        // Fixed: Use proper query binding instead of string concatenation
         $userIds = Message::where('sender_id', $userId)
             ->orWhere('receiver_id', $userId)
-            ->select(DB::raw('CASE WHEN sender_id = '.$userId.' THEN receiver_id ELSE sender_id END as other_user_id'))
+            ->selectRaw('CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as other_user_id', [$userId])
             ->distinct()
             ->pluck('other_user_id');
 

@@ -23,13 +23,19 @@ class EnrollmentController extends Controller implements HasMiddleware
 
     public function store(Request $request, Course $course)
     {
-        // Check if already enrolled
+        // 1. Check if already enrolled
         if ($course->enrollments()->where('user_id', $request->user()->id)->exists()) {
             return response()->json(['message' => 'Already enrolled'], 409);
         }
 
-        // Logic for paid vs free. For now, assuming free mock or direct access.
-        // In real app, create Order, PaymentIntent, etc.
+        // 2. BLOCK FREE ENROLLMENT ON PAID COURSES
+        // This endpoint should only be used for free courses or internal logic.
+        // Paid courses must go through CheckoutController.
+        if ($course->price > 0) {
+            return response()->json(['message' => 'This course requires payment. Please use checkout.', 'redirect' => '/checkout'], 402);
+        }
+
+        // 3. Enroll (Free)
 
         $enrollment = $course->enrollments()->create([
             'user_id' => $request->user()->id,
@@ -79,7 +85,11 @@ class EnrollmentController extends Controller implements HasMiddleware
 
         foreach ($enrollments as $enrollment) {
             $course = $enrollment->course;
-            $allLectures = $course->lectures; // via hasManyThrough
+
+            // Avoid N+1: Use the eager loaded sections->lectures
+            // Convert sections collection to flat map of lectures
+            $allLectures = $course->sections->flatMap(fn($s) => $s->lectures);
+
             $completedLectureIds = $enrollment->progress->where('completed', true)->pluck('lecture_id')->toArray();
 
             // Calc hours

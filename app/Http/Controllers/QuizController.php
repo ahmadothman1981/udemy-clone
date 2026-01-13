@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreQuestionRequest;
+use App\Http\Requests\SubmitQuizRequest;
 use App\Models\Course;
 use App\Models\Lecture;
 use App\Models\Quiz;
@@ -110,18 +112,11 @@ class QuizController extends Controller implements HasMiddleware
     /**
      * Add a question to a quiz
      */
-    public function storeQuestion(Request $request, Course $course, Quiz $quiz)
+    public function storeQuestion(StoreQuestionRequest $request, Course $course, Quiz $quiz)
     {
         $this->authorize('update', $course);
 
-        $validated = $request->validate([
-            'question_text' => 'required|string',
-            'options' => 'required|array|min:2',
-            'correct_answer' => 'required|string',
-            'points' => 'integer|min:1',
-        ]);
-
-        $question = $quiz->questions()->create($validated);
+        $question = $quiz->questions()->create($request->validated());
 
         return response()->json($question, 201);
     }
@@ -169,7 +164,7 @@ class QuizController extends Controller implements HasMiddleware
     /**
      * Submit quiz answers and get results
      */
-    public function submit(Request $request, Course $course, Quiz $quiz)
+    public function submit(SubmitQuizRequest $request, Course $course, Quiz $quiz)
     {
         $user = $request->user();
 
@@ -182,12 +177,7 @@ class QuizController extends Controller implements HasMiddleware
             return response()->json(['message' => 'Not enrolled in this course'], 403);
         }
 
-        $validated = $request->validate([
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|integer|exists:questions,id',
-            'answers.*.answer' => 'required|string',
-            'started_at' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
         // Load quiz with questions
         $quiz->load('questions');

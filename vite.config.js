@@ -15,4 +15,16 @@ export default defineConfig({
             '@': '/resources/js',
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Split large dependencies into separate chunks
+                    'video-player': ['video.js'],
+                    'vue-vendor': ['vue', 'vue-router', 'pinia'],
+                },
+            },
+        },
+        chunkSizeWarningLimit: 600, // Slightly increase limit since splits are in place
+    },
 });

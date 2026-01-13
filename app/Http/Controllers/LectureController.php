@@ -75,12 +75,17 @@ class LectureController extends Controller implements HasMiddleware
             $lectureData['video_path'] = $path;
             $lectureData['video_url'] = $this->getVideoUrl($path);
         } elseif ($request->filled('video_path')) {
-            // Already uploaded via chunked uploader
+            // Chunked upload
             $tempPath = $request->input('video_path');
-            // Move from tmp to lectures
-            if (Storage::disk('public')->exists($tempPath)) {
+            // Move from tmp (local private) to lectures (private)
+            if (Storage::disk('local')->exists($tempPath)) {
+                $disk = $this->getVideoDisk();
                 $newPath = 'lectures/' . $course->id . '/' . basename($tempPath);
-                Storage::disk('public')->move($tempPath, $newPath);
+
+                // Explicit stream copy
+                Storage::disk($disk)->put($newPath, Storage::disk('local')->get($tempPath));
+                Storage::disk('local')->delete($tempPath);
+
                 $lectureData['video_path'] = $newPath;
                 $lectureData['video_url'] = $this->getVideoUrl($newPath);
             }
@@ -126,10 +131,10 @@ class LectureController extends Controller implements HasMiddleware
         } elseif ($request->filled('video_path')) {
             // Chunked upload
             $tempPath = $request->input('video_path');
-            
+
             // Check 'local' disk (private) instead of public
             if (Storage::disk('local')->exists($tempPath)) {
-                $disk = $this->getVideoDisk(); 
+                $disk = $this->getVideoDisk();
 
                 $newPath = 'lectures/' . $course->id . '/' . basename($tempPath);
 
@@ -137,7 +142,6 @@ class LectureController extends Controller implements HasMiddleware
                 // Always use stream copy since roots likely differ
                 Storage::disk($disk)->put($newPath, Storage::disk('local')->get($tempPath));
                 Storage::disk('local')->delete($tempPath);
-                }
 
                 $lectureData['video_path'] = $newPath;
                 $lectureData['video_url'] = $this->getVideoUrl($newPath);

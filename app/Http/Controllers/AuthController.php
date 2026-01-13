@@ -80,9 +80,15 @@ class AuthController extends Controller
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Login failed',
+            // Log the actual error for debugging
+            \Illuminate\Support\Facades\Log::error('Login failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Return generic error to client (don't expose internals)
+            return response()->json([
+                'message' => 'An error occurred during login. Please try again.',
             ], 500);
         }
     }

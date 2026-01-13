@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InstructorStat;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -22,26 +23,64 @@ class InstructorController extends Controller implements HasMiddleware
     {
         $user = $request->user();
 
-        // Get courses where user is instructor
-        $courses = $user->courses;
-        $courseIds = $courses->pluck('id');
+        // Try to get pre-aggregated stats first (much faster)
+        $cachedStats = InstructorStat::latestFor($user->id);
 
-        $totalStudents = 0;
-        $totalRevenue = 0;
-        $totalReviews = 0;
-        $globalRatingSum = 0;
-        $courseCount = $courses->count();
+        if ($cachedStats && $cachedStats->updated_at->gt(now()->subHours(2))) {
+            // Use cached stats if less than 2 hours old
+            $totalStudents = $cachedStats->total_students;
+            $totalRevenue = $cachedStats->total_revenue;
+            $avgRating = $cachedStats->average_rating;
+            $totalReviews = $cachedStats->total_reviews;
+            $courseCount = $cachedStats->course_count;
+            $monthlyStudents = $cachedStats->monthly_students;
+            $monthlyRevenue = $cachedStats->monthly_revenue;
+            $monthlyReviews = $cachedStats->monthly_reviews;
+            $unansweredCount = $cachedStats->unanswered_questions;
+        } else {
+            // Fallback to live calculation
+            $courses = $user->courses;
+            $courseIds = $courses->pluck('id');
 
-        foreach ($courses as $course) {
-            $totalStudents += $course->enrollment_count ?? 0;
-            // Calculate revenue based on enrollments and price (simplified)
-            // Ideally, this should come from a transaction/order table
-            $totalRevenue += (($course->price ?? 0) * ($course->enrollment_count ?? 0));
-            $totalReviews += $course->reviews()->count();
-            $globalRatingSum += $course->rating_avg ?? 0;
+            $totalStudents = 0;
+            $totalRevenue = 0;
+            $totalReviews = 0;
+            $globalRatingSum = 0;
+            $courseCount = $courses->count();
+
+            foreach ($courses as $course) {
+                $totalStudents += $course->enrollment_count ?? 0;
+                $totalRevenue += (($course->price ?? 0) * ($course->enrollment_count ?? 0));
+                $totalReviews += $course->reviews()->count();
+                $globalRatingSum += $course->rating_avg ?? 0;
+            }
+
+            $avgRating = $courseCount > 0 ? $globalRatingSum / $courseCount : 0;
+
+            // Monthly Stats (Real calculation)
+            $startOfMonth = now()->startOfMonth();
+
+            $monthlyStudents = \App\Models\Enrollment::whereIn('course_id', $courseIds)
+                ->where('created_at', '>=', $startOfMonth)
+                ->count();
+
+            $monthlyRevenue = \App\Models\Enrollment::whereIn('enrollments.course_id', $courseIds)
+                ->where('enrollments.created_at', '>=', $startOfMonth)
+                ->join('courses', 'enrollments.course_id', '=', 'courses.id')
+                ->sum('courses.price');
+
+            $monthlyReviews = \App\Models\Review::whereIn('course_id', $courseIds)
+                ->where('created_at', '>=', $startOfMonth)
+                ->count();
+
+            $unansweredCount = \App\Models\CourseQuestion::whereIn('course_id', $courseIds)
+                ->whereDoesntHave('answers')
+                ->count();
         }
 
-        $avgRating = $courseCount > 0 ? $globalRatingSum / $courseCount : 0;
+        // Always load fresh recent data (these are small queries)
+        $courses = $user->courses;
+        $courseIds = $courses->pluck('id');
 
         // Recent Reviews (limit 5)
         $recentReviews = \App\Models\Review::whereIn('course_id', $courseIds)
@@ -79,25 +118,8 @@ class InstructorController extends Controller implements HasMiddleware
                 ];
             });
 
-        $unansweredCount = \App\Models\CourseQuestion::whereIn('course_id', $courseIds)
-            ->whereDoesntHave('answers') // Assuming 'answers' relation exists
-            ->count();
-
-        // Monthly Stats (Real calculation)
-        $startOfMonth = now()->startOfMonth();
-
-        $monthlyStudents = \App\Models\Enrollment::whereIn('course_id', $courseIds)
-            ->where('created_at', '>=', $startOfMonth)
-            ->count();
-
-        $monthlyRevenue = \App\Models\Enrollment::whereIn('enrollments.course_id', $courseIds)
-            ->where('enrollments.created_at', '>=', $startOfMonth)
-            ->join('courses', 'enrollments.course_id', '=', 'courses.id')
-            ->sum('courses.price');
-
-        $monthlyReviews = \App\Models\Review::whereIn('course_id', $courseIds)
-            ->where('created_at', '>=', $startOfMonth)
-            ->count();
+        // Note: $unansweredCount, $monthlyStudents, $monthlyRevenue, $monthlyReviews 
+        // are now calculated earlier (from cache or live)
 
         return response()->json([
             'total_students' => $totalStudents,

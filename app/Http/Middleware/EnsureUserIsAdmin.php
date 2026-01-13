@@ -20,8 +20,8 @@ class EnsureUserIsAdmin
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        // Check if user has admin role
-        $isAdmin = $user->roles()->where('name', 'admin')->exists();
+        // Check if user has admin or superadmin role
+        $isAdmin = $user->roles()->whereIn('name', ['admin', 'superadmin'])->exists();
 
         if (!$isAdmin) {
             return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
