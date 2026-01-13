@@ -38,6 +38,12 @@ class AuthController extends Controller
             // We can use our DB relation if we set it up as standard relation, or direct insert.
             // User model has 'roles' relation.
             $user->roles()->attach($role->id);
+
+            // If registering as instructor, set status to pending
+            if ($role->name === 'instructor') {
+                $user->instructor_verification_status = 'pending';
+                $user->save();
+            }
         }
 
         // Send welcome email

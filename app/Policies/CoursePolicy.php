@@ -11,10 +11,25 @@ class CoursePolicy
     /**
      * Determine whether the user can create models.
      */
+    protected function isVerifiedInstructor(User $user): bool
+    {
+        if ($user->roles()->where('name', 'admin')->exists()) {
+            return true;
+        }
+
+        if ($user->roles()->where('name', 'instructor')->exists()) {
+            return $user->instructor_verification_status === 'approved';
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
     public function create(User $user): bool
     {
-        // Only instructors can create courses
-        return $user->roles()->where('name', 'instructor')->exists() || $user->roles()->where('name', 'admin')->exists();
+        return $this->isVerifiedInstructor($user);
     }
 
     /**
@@ -22,7 +37,6 @@ class CoursePolicy
      */
     public function view(User $user, Course $course): bool
     {
-        // Admin or owner
         if ($user->roles()->where('name', 'admin')->exists()) {
             return true;
         }
@@ -34,11 +48,7 @@ class CoursePolicy
      */
     public function update(User $user, Course $course): bool
     {
-        // Admin or owner
-        if ($user->roles()->where('name', 'admin')->exists()) {
-            return true;
-        }
-        return $user->id === $course->instructor_id;
+        return $this->isVerifiedInstructor($user) && $user->id === $course->instructor_id;
     }
 
     /**
@@ -46,10 +56,6 @@ class CoursePolicy
      */
     public function delete(User $user, Course $course): bool
     {
-        // Admin or owner
-        if ($user->roles()->where('name', 'admin')->exists()) {
-            return true;
-        }
-        return $user->id === $course->instructor_id;
+        return $this->isVerifiedInstructor($user) && $user->id === $course->instructor_id;
     }
 }

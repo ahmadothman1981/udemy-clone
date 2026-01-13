@@ -55,10 +55,18 @@
 
         <div class="mt-8 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">System</div>
 
-        <a href="#" :class="['flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-500 hover:text-slate-400 cursor-not-allowed group']">
-             <Settings class="w-5 h-5 group-hover:text-purple-400 transition-colors" />
-             Settings
-        </a>
+        <router-link to="/admin/settings" custom v-slot="{ href, navigate, isActive }">
+            <a :href="href" @click="navigate" 
+               :class="[
+                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                 isActive 
+                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
+                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+               ]">
+                 <Settings class="w-5 h-5" :class="isActive ? 'text-white' : 'text-slate-500 group-hover:text-purple-400'" />
+                 Settings
+            </a>
+        </router-link>
     </nav>
 
     <!-- User & Logout -->

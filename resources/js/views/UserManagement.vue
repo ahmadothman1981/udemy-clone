@@ -14,9 +14,27 @@
         </header>
 
         <div class="flex-1 overflow-auto p-8">
+            <!-- Tabs -->
+            <div class="flex space-x-1 rounded-xl bg-slate-200 p-1 mb-6 max-w-md">
+                <button 
+                  v-for="tab in ['All Users', 'Instructor Requests']" 
+                  :key="tab"
+                  @click="activeTab = tab"
+                  :class="[
+                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-all',
+                    activeTab === tab
+                      ? 'bg-white text-purple-700 shadow'
+                      : 'text-slate-600 hover:bg-white/[0.12] hover:text-slate-800'
+                  ]"
+                >
+                  {{ tab }}
+                </button>
+            </div>
+
+            <!-- Content -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <!-- Toolbar -->
-                <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <!-- Toolbar (Only for All Users) -->
+                <div v-if="activeTab === 'All Users'" class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="relative w-full sm:w-96">
                         <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input 
@@ -41,7 +59,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <tr v-for="user in users" :key="user.id" :class="{'bg-red-50/50': user.is_banned, 'hover:bg-slate-50': !user.is_banned}" class="transition-colors group">
+                            <tr v-for="user in visibleUsers" :key="user.id" :class="{'bg-red-50/50': user.is_banned, 'hover:bg-slate-50': !user.is_banned}" class="transition-colors group">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-600">
@@ -69,7 +87,8 @@
                                     {{ new Date(user.created_at).toLocaleDateString() }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-3">
+                                    <!-- Actions for All Users -->
+                                    <div v-if="activeTab === 'All Users'" class="flex items-center justify-end gap-3">
                                         <span v-if="user.is_banned" class="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded">Banned</span>
                                         <button 
                                             v-if="user.id !== auth.user.id"
@@ -86,19 +105,29 @@
                                             <CheckCircle class="w-4 h-4" v-else />
                                         </button>
                                     </div>
+
+                                    <!-- Actions for Instructor Requests -->
+                                    <div v-else class="flex items-center justify-end gap-2">
+                                        <button @click="verifyInstructor(user, 'approve')" class="flex items-center gap-1 px-3 py-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded text-xs font-bold transition-colors">
+                                            <CheckCircle class="w-3.5 h-3.5" /> Approve
+                                        </button>
+                                        <button @click="verifyInstructor(user, 'reject')" class="flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 hover:bg-red-200 rounded text-xs font-bold transition-colors">
+                                            <XCircle class="w-3.5 h-3.5" /> Reject
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
-                            <tr v-if="users.length === 0">
+                            <tr v-if="visibleUsers.length === 0">
                                 <td colspan="4" class="px-6 py-12 text-center text-slate-400 italic">
-                                    No users found matching your search.
+                                    {{ activeTab === 'All Users' ? 'No users found matching your search.' : 'No pending instructor requests.' }}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Pagination -->
-                <div class="p-4 border-t border-slate-100 flex items-center justify-between" v-if="pagination.total > 0">
+                <!-- Pagination (Only for All Users) -->
+                <div class="p-4 border-t border-slate-100 flex items-center justify-between" v-if="activeTab === 'All Users' && pagination.total > 0">
                     <span class="text-sm text-slate-500">
                         Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} users
                     </span>
@@ -126,20 +155,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
-import { Search, ShieldAlert, CheckCircle } from 'lucide-vue-next';
+import { Search, ShieldAlert, CheckCircle, XCircle } from 'lucide-vue-next';
 import { debounce } from 'lodash';
 
 const auth = useAuthStore();
 const router = useRouter();
 
+const activeTab = ref('All Users');
 const users = ref([]);
+const pendingInstructors = ref([]);
 const pagination = ref({});
 const searchQuery = ref('');
+
+const visibleUsers = computed(() => {
+    return activeTab.value === 'All Users' ? users.value : pendingInstructors.value;
+});
 
 const fetchUsers = async (page = 1) => {
     try {
@@ -162,6 +197,21 @@ const fetchUsers = async (page = 1) => {
     }
 };
 
+const fetchPendingInstructors = async () => {
+    try {
+        const res = await axios.get('/api/admin/instructors/pending');
+        pendingInstructors.value = res.data;
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+// Refetch when tab changes
+watch(activeTab, (newTab) => {
+    if (newTab === 'All Users') fetchUsers();
+    else fetchPendingInstructors();
+});
+
 const handleSearch = debounce(() => {
     fetchUsers(1);
 }, 300);
@@ -180,6 +230,18 @@ const toggleBan = async (user) => {
         user.is_banned = res.data.is_banned;
     } catch (e) {
         alert(e.response?.data?.message || 'Action failed');
+    }
+};
+
+const verifyInstructor = async (user, action) => {
+    if (!confirm(`Are you sure you want to ${action} this instructor application?`)) return;
+    try {
+        await axios.post(`/api/admin/instructors/${user.id}/verify`, { action });
+        // Remove from list
+        pendingInstructors.value = pendingInstructors.value.filter(u => u.id !== user.id);
+        // Maybe show toast?
+    } catch (e) {
+         alert('Action failed');
     }
 };
 

@@ -68,7 +68,7 @@ class CourseController extends Controller implements HasMiddleware
         $this->authorize('create', Course::class);
 
         $course = $this->courseService->createCourse(
-            $request->validated(),
+            array_merge($request->validated(), ['published' => false]), // Force unpublished
             $request->user()
         );
 
@@ -92,6 +92,10 @@ class CourseController extends Controller implements HasMiddleware
             'thumbnail' => 'nullable|image|max:2048',
             'preview_video' => 'nullable|file|mimes:mp4,mov,avi,mkv,webm|max:512000',
         ]);
+
+        if (!$request->user()->isAdmin()) {
+            unset($validated['published']);
+        }
 
         $course = $this->courseService->updateCourse(
             $course,

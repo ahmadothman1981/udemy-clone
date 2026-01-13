@@ -124,4 +124,32 @@ class AdminController extends Controller implements HasMiddleware
 
         return response()->json(['message' => 'Course updated']);
     }
+
+    // Pending Instructors
+    public function pendingInstructors()
+    {
+        $instructors = User::whereHas('roles', function ($q) {
+            $q->where('name', 'instructor');
+        })->where('instructor_verification_status', 'pending')->get();
+
+        return response()->json($instructors);
+    }
+
+    // Verify Instructor
+    public function verifyInstructor(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:approve,reject'
+        ]);
+
+        if ($validated['action'] === 'approve') {
+            $user->instructor_verification_status = 'approved';
+        } else {
+            $user->instructor_verification_status = 'rejected';
+            // Ideally remove the role or just leave as rejected
+        }
+        $user->save();
+
+        return response()->json(['message' => 'Instructor status updated', 'status' => $user->instructor_verification_status]);
+    }
 }

@@ -193,6 +193,19 @@ class InstructorController extends Controller implements HasMiddleware
     {
         $this->authorize('update', $course);
 
+        $user = $request->user();
+
+        // Only allow verified instructors or admins to publish
+        $isVerified = $user->roles()->where('name', 'admin')->exists() ||
+            ($user->roles()->where('name', 'instructor')->exists() &&
+                $user->instructor_verification_status === 'approved');
+
+        if (!$isVerified) {
+            return response()->json([
+                'message' => 'Your instructor account is pending approval. You cannot publish courses yet.'
+            ], 403);
+        }
+
         $course->published = !$course->published;
         if ($course->published) {
             $course->published_at = now();
