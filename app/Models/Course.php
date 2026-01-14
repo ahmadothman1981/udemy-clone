@@ -10,6 +10,10 @@ class Course extends Model
     use HasFactory;
 
 
+    const STATUS_DRAFT = 'draft';
+    const STATUS_PENDING = 'pending';
+    const STATUS_PUBLISHED = 'published';
+
     protected $fillable = [
         'title',
         'slug',

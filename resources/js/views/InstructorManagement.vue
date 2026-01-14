@@ -4,14 +4,8 @@
     
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Header -->
-      <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-8 sticky top-0 z-30 transition-colors">
-        <h1 class="text-xl font-bold text-slate-800 dark:text-white">Instructor Management</h1>
-        <div class="flex items-center gap-4">
-          <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center font-semibold transition-colors">
-            {{ auth.user?.name?.[0] || 'A' }}
-          </div>
-        </div>
-      </header>
+      <!-- Header -->
+      <AdminHeader title="Instructor Management" @logout="handleLogout" />
 
       <div class="flex-1 overflow-auto p-8">
         <!-- Tabs -->
@@ -244,6 +238,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
+import AdminHeader from '../components/admin/AdminHeader.vue';
 import { Star, CheckCircle, XCircle, BarChart2, Ban } from 'lucide-vue-next';
 import axios from 'axios';
 import { confirmAction, confirmDelete, showSuccess, showError, promptInput } from '../utils/sweetalert';

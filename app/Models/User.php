@@ -117,5 +117,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserActivityLog::class);
     }
+
+    /**
+     * Check if user has a specific role
+     */
+    public function hasRole($role)
+    {
+        return $this->roles->contains('name', $role);
+    }
 }
 

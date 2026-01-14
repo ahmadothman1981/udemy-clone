@@ -3,9 +3,7 @@
     <AdminSidebar @logout="handleLogout" />
     
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-      <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-8 sticky top-0 z-30 transition-colors">
-        <h1 class="text-xl font-bold text-slate-800 dark:text-white">Course Management</h1>
-      </header>
+      <AdminHeader title="Course Management" @logout="handleLogout" />
 
       <div class="flex-1 overflow-auto p-8">
         <!-- Filters -->
@@ -118,7 +116,6 @@
                     </div>
                   </td>
                 </tr>
-                </tr>
                 </template>
               </tbody>
             </table>
@@ -169,6 +166,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
+import AdminHeader from '../components/admin/AdminHeader.vue';
 import SkeletonLoader from '../components/common/SkeletonLoader.vue';
 import { CheckCircle, XCircle, Pencil, EyeOff, Eye, CheckSquare, Trash2 } from 'lucide-vue-next';
 import axios from 'axios';
@@ -329,5 +327,24 @@ const saveEdit = async () => {
 
 const handleLogout = async () => { await auth.logout(); router.push('/login'); };
 
-onMounted(() => { fetchCourses(); fetchCategories(); });
+onMounted(() => { 
+    fetchCourses(); 
+    fetchCategories(); 
+
+    if (window.Echo) {
+        const userId = window.user?.id || document.querySelector('meta[name="user-id"]')?.getAttribute('content');
+        if (userId) {
+             window.Echo.private(`App.Models.User.${userId}`)
+                .notification((notification) => {
+                    if (notification.type === 'course_submission') {
+                        showSuccess(`New Course Submitted: ${notification.title}`);
+                        // Refresh if we are viewing pending or all
+                        if (!statusFilter.value || statusFilter.value === 'pending') {
+                            fetchCourses(pagination.value.current_page);
+                        }
+                    }
+                });
+        }
+    }
+});
 </script>

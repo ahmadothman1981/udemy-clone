@@ -1,8 +1,8 @@
 import { ref, onMounted, watch } from 'vue';
 
-export function useDarkMode() {
-    const isDark = ref(localStorage.getItem('theme') === 'dark');
+const isDark = ref(localStorage.getItem('theme') === 'dark');
 
+export function useDarkMode() {
     const toggleDark = () => {
         isDark.value = !isDark.value;
         updateTheme();

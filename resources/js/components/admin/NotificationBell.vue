@@ -52,10 +52,12 @@ const notifications = ref([
 const unreadCount = ref(2);
 
 // Real-time listener using Laravel Echo
+// Real-time listener using Laravel Echo
 onMounted(() => {
     document.addEventListener('click', closeDropdown);
 
     if (window.Echo) {
+        // Legacy or general admin channel
         window.Echo.private('admin-notifications')
             .listen('AdminNotification', (e) => {
                 addNotification({
@@ -67,6 +69,22 @@ onMounted(() => {
                     timestamp: new Date(e.timestamp)
                 });
             });
+
+        // Standard Laravel Notification Channel
+        const userId = window.user?.id || document.querySelector('meta[name="user-id"]')?.getAttribute('content');
+        if (userId) {
+            window.Echo.private(`App.Models.User.${userId}`)
+                .notification((notification) => {
+                    addNotification({
+                        id: notification.id,
+                        message: notification.message,
+                        type: notification.type === 'course_submission' ? 'info' : 'info',
+                        action_url: notification.action_url, // Maps from database notification data
+                        read: false,
+                        timestamp: new Date()
+                    });
+                });
+        }
     } else {
         console.warn('Laravel Echo not initialized');
     }

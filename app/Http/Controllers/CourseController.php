@@ -107,6 +107,15 @@ class CourseController extends Controller implements HasMiddleware
         return new CourseResource($course);
     }
 
+    public function submit(Course $course)
+    {
+        $this->authorize('update', $course);
+
+        $course = $this->courseService->submitCourse($course);
+
+        return new CourseResource($course);
+    }
+
     public function destroy(Course $course)
     {
         $this->authorize('delete', $course);

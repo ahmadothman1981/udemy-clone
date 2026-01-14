@@ -28,6 +28,22 @@ class CourseService
         });
     }
 
+    public function submitCourse(Course $course): Course
+    {
+        if ($course->status !== Course::STATUS_DRAFT) {
+            // Or throw exception if strict
+            return $course;
+        }
+
+        $course->update(['status' => Course::STATUS_PENDING]);
+
+        \App\Events\CourseSubmitted::dispatch($course);
+
+        $this->clearCache();
+
+        return $course;
+    }
+
     /**
      * Update an existing course.
      */

@@ -7,19 +7,8 @@
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
         
         <!-- Top Header -->
-        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-8 sticky top-0 z-30 transition-colors duration-300">
-            <h1 class="text-xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
-            <div class="flex items-center gap-4">
-                 <NotificationBell />
-                 <div class="flex flex-col items-end mr-2">
-                     <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ auth.user?.name }}</span>
-                     <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Administrator</span>
-                 </div>
-                 <div class="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
-                     {{ auth.user?.name?.[0] || 'A' }}
-                 </div>
-            </div>
-        </header>
+        <!-- Top Header -->
+        <AdminHeader title="Dashboard" @logout="handleLogout" />
 
         <!-- Main Content -->
         <main class="flex-1 overflow-auto p-8">
@@ -294,9 +283,9 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
+import AdminHeader from '../components/admin/AdminHeader.vue';
 import StatCard from '../components/admin/StatCard.vue';
 import SkeletonLoader from '../components/common/SkeletonLoader.vue';
-import NotificationBell from '../components/admin/NotificationBell.vue';
 import DateRangePicker from '../components/admin/DateRangePicker.vue';
 import { Users, BookOpen, DollarSign, Clock, CheckCircle, XCircle, Image as ImageIcon, Download, ChevronDown } from 'lucide-vue-next';
 import { Line } from 'vue-chartjs';

@@ -3,9 +3,7 @@
     <AdminSidebar @logout="handleLogout" />
     
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-      <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-8 sticky top-0 z-30 transition-colors">
-        <h1 class="text-xl font-bold text-slate-800 dark:text-white">Q&A Moderation</h1>
-      </header>
+      <AdminHeader title="Q&A Moderation" @logout="handleLogout" />
 
       <div class="flex-1 overflow-auto p-8">
         <!-- Filters -->
@@ -74,6 +72,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
+import AdminHeader from '../components/admin/AdminHeader.vue';
 import { Trash2 } from 'lucide-vue-next';
 import axios from 'axios';
 import { confirmDelete, showSuccess } from '../utils/sweetalert';

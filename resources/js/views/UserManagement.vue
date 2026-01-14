@@ -4,14 +4,7 @@
       
       <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
         <!-- Top Header -->
-        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-8 sticky top-0 z-30 transition-colors">
-            <h1 class="text-xl font-bold text-slate-800 dark:text-white">User Management</h1>
-            <div class="flex items-center gap-4">
-                 <div class="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold transition-colors">
-                     {{ auth.user?.name?.[0] || 'A' }}
-                 </div>
-            </div>
-        </header>
+      <AdminHeader title="User Management" @logout="handleLogout" />
 
         <div class="flex-1 overflow-auto p-8">
             <!-- Stats Cards -->
@@ -383,11 +376,11 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 
-import { useAuthStore } from '../stores/auth';
-
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
+import AdminHeader from '../components/admin/AdminHeader.vue';
+import StatCard from '../components/admin/StatCard.vue';
 import SkeletonLoader from '../components/common/SkeletonLoader.vue';
-import { Search, ShieldAlert, Pencil, UserCog, Trash2, CheckSquare, Mail, Activity, X, Send } from 'lucide-vue-next';
+import { Users, UserPlus, UserCheck, UserX, Search, Filter, MoreVertical, Shield, Mail, Edit, Trash2, CheckCircle, XCircle, UserCog, ShieldAlert, Activity, X, Send, Pencil } from 'lucide-vue-next';
 import { debounce } from 'lodash';
 import { confirmAction, confirmUpdate, showSuccess, showError } from '../utils/sweetalert';
 

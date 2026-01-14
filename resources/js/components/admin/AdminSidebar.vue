@@ -1,18 +1,18 @@
 <template>
-  <aside class="w-64 bg-slate-900 border-r border-slate-800 text-slate-300 min-h-screen flex flex-col transition-all duration-300 z-50">
+  <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 min-h-screen flex flex-col transition-all duration-300 z-50">
     <!-- Logo -->
-    <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950/50">
+    <div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
         <router-link to="/" class="flex items-center gap-2 group">
              <div class="bg-purple-600 p-1.5 rounded-lg group-hover:bg-purple-500 transition-colors">
                  <LayoutDashboard class="w-5 h-5 text-white" />
              </div>
-             <span class="font-bold text-white text-lg tracking-tight">NetLearn</span>
+             <span class="font-bold text-slate-800 dark:text-white text-lg tracking-tight">NetLearn</span>
         </router-link>
     </div>
 
     <!-- Navigation -->
     <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
-        <div class="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Overview</div>
+        <div class="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Overview</div>
         
         <router-link v-for="item in overviewItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
@@ -20,14 +20,14 @@
                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
                  isActive 
                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
-                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                ]">
                 <component :is="item.icon" class="w-5 h-5" />
                 {{ item.label }}
             </a>
         </router-link>
 
-        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Management</div>
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Management</div>
         
         <router-link v-for="item in managementItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
@@ -35,14 +35,14 @@
                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
                  isActive 
                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
-                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                ]">
                 <component :is="item.icon" class="w-5 h-5" />
                 {{ item.label }}
             </a>
         </router-link>
 
-        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Moderation</div>
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Moderation</div>
         
         <router-link v-for="item in moderationItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
@@ -50,14 +50,14 @@
                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
                  isActive 
                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
-                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                ]">
                 <component :is="item.icon" class="w-5 h-5" />
                 {{ item.label }}
             </a>
         </router-link>
 
-        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">System</div>
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">System</div>
         
         <router-link v-for="item in systemItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
@@ -65,7 +65,7 @@
                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
                  isActive 
                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
-                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                ]">
                 <component :is="item.icon" class="w-5 h-5" />
                 {{ item.label }}
@@ -73,22 +73,6 @@
         </router-link>
     </nav>
 
-    <!-- Theme Toggle -->
-    <div class="px-4 pb-2">
-        <button @click="toggleDark" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-            <Sun v-if="!isDark" class="w-5 h-5 text-yellow-500" />
-            <Moon v-else class="w-5 h-5 text-purple-400" />
-            {{ isDark ? 'Light Mode' : 'Dark Mode' }}
-        </button>
-    </div>
-
-    <!-- User & Logout -->
-    <div class="p-4 border-t border-slate-800 bg-slate-950/30">
-        <button @click="$emit('logout')" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all group">
-            <LogOut class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            Sign Out
-        </button>
-    </div>
   </aside>
 
   <KeyboardHelpModal 
@@ -110,15 +94,10 @@ import {
     MessageSquareMore,
     Tags,
     Settings,
-    LogOut,
-    Sun,
-    Moon
 } from 'lucide-vue-next';
-import { useDarkMode } from '../../composables/useDarkMode';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import KeyboardHelpModal from './KeyboardHelpModal.vue';
 
-const { isDark, toggleDark } = useDarkMode();
 const { showHelpModal, shortcuts } = useKeyboardShortcuts();
 
 defineEmits(['logout']);
