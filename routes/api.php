@@ -152,14 +152,22 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
         // Dashboard & Analytics
         Route::get('/stats', [\App\Http\Controllers\AdminController::class, 'stats']);
         Route::get('/analytics', [\App\Http\Controllers\AdminController::class, 'analytics']);
+        Route::get('/export/analytics', [\App\Http\Controllers\AdminExportController::class, 'exportAnalytics']);
+
+        // Audit Logs
+        Route::get('/audit-logs', [\App\Http\Controllers\AdminController::class, 'auditLogs']);
+        Route::get('/recent-activity', [\App\Http\Controllers\AdminController::class, 'recentActivity']);
 
         // User Management
+        Route::post('/users/bulk', [\App\Http\Controllers\AdminController::class, 'bulkUserAction']);
         Route::get('/users', [\App\Http\Controllers\AdminController::class, 'users']);
         Route::get('/users/{user}', [\App\Http\Controllers\AdminController::class, 'showUser']);
         Route::put('/users/{user}', [\App\Http\Controllers\AdminController::class, 'updateUser']);
         Route::post('/users/{user}/role', [\App\Http\Controllers\AdminController::class, 'updateUserRole']);
         Route::post('/users/{user}/status', [\App\Http\Controllers\AdminController::class, 'toggleUserStatus']);
         Route::post('/users/{user}/ban', [\App\Http\Controllers\AdminController::class, 'toggleBan']);
+        Route::get('/users/{user}/activity', [\App\Http\Controllers\AdminController::class, 'getUserActivity']); // New
+        Route::post('/users/{user}/email', [\App\Http\Controllers\AdminController::class, 'emailUser']); // New
 
         // Instructor Management
         Route::get('/instructors', [\App\Http\Controllers\AdminController::class, 'instructors']);
@@ -169,6 +177,7 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
         Route::post('/instructors/{user}/restrict', [\App\Http\Controllers\AdminController::class, 'restrictInstructor']);
 
         // Course Management
+        Route::post('/courses/bulk', [\App\Http\Controllers\AdminController::class, 'bulkCourseAction']);
         Route::get('/courses', [\App\Http\Controllers\AdminController::class, 'courses']);
         Route::get('/courses/pending', [\App\Http\Controllers\AdminController::class, 'pendingCourses']);
         Route::put('/courses/{course}', [\App\Http\Controllers\AdminController::class, 'updateCourse']);

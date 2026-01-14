@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Mail\WelcomeEmail;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\UserActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -79,6 +80,14 @@ class AuthController extends Controller
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            // Log activity
+            UserActivityLog::create([
+                'user_id' => $user->id,
+                'action' => 'login',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             return response()->json([
                 'user' => new UserResource($user),
                 'token' => $token,
@@ -101,7 +110,16 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if ($user) {
+            UserActivityLog::create([
+                'user_id' => $user->id,
+                'action' => 'logout',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+            $user->currentAccessToken()->delete();
+        }
 
         return response()->json(['message' => 'Logged out successfully']);
     }

@@ -12,16 +12,20 @@ use App\Models\CourseAnswer;
 use App\Models\Section;
 use App\Models\Lecture;
 use App\Models\Role;
+use App\Models\AdminAuditLog;
+use App\Traits\LogsAdminActivity;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class AdminController extends Controller implements HasMiddleware
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, LogsAdminActivity;
 
     public static function middleware(): array
     {
@@ -71,56 +75,128 @@ class AdminController extends Controller implements HasMiddleware
 
     public function analytics(Request $request)
     {
-        $days = $request->get('days', 30);
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
+        $endDate = $request->get('end_date', now()->toDateString());
+        $compare = $request->boolean('compare', false);
 
-        // New users per day
-        $newUsersDaily = User::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
-            ->where('created_at', '>=', now()->subDays($days))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        // Calculate days for cache key
+        $start = \Carbon\Carbon::parse($startDate);
+        $end = \Carbon\Carbon::parse($endDate);
+        $days = $start->diffInDays($end);
 
-        // Enrollments trend
-        $enrollmentsTrend = Enrollment::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
-            ->where('created_at', '>=', now()->subDays($days))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        // Cache key based on date range
+        $cacheKey = "admin_analytics_{$startDate}_{$endDate}";
 
-        // Revenue trend
-        $revenueTrend = Order::select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total) as total'))
-            ->where('created_at', '>=', now()->subDays($days))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        $data = Cache::remember($cacheKey, 300, function () use ($startDate, $endDate) {
+            // New users per day
+            $newUsersDaily = User::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+                ->whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
 
-        // Top selling courses
-        $topCourses = Course::withCount('enrollments')
-            ->orderByDesc('enrollments_count')
-            ->take(10)
-            ->get(['id', 'title', 'price', 'instructor_id']);
+            // Enrollments trend
+            $enrollmentsTrend = Enrollment::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+                ->whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
 
-        // Average ratings by category (from reviews table)
-        $ratingsByCategory = DB::table('reviews')
-            ->join('courses', 'reviews.course_id', '=', 'courses.id')
-            ->join('categories', 'courses.category_id', '=', 'categories.id')
-            ->select('categories.id as category_id', 'categories.name as category_name', DB::raw('AVG(reviews.rating) as avg_rating'))
-            ->groupBy('categories.id', 'categories.name')
-            ->get();
+            // Revenue trend
+            $revenueTrend = Order::select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total) as total'))
+                ->whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
 
-        // Completion rates (based on completed_at)
-        $totalEnrollments = DB::table('enrollments')->count();
-        $completedEnrollments = DB::table('enrollments')->whereNotNull('completed_at')->count();
-        $avgCompletionRate = $totalEnrollments > 0 ? ($completedEnrollments / $totalEnrollments) * 100 : 0;
+            // Top selling courses
+            $topCourses = Course::withCount('enrollments')
+                ->orderByDesc('enrollments_count')
+                ->take(10)
+                ->get(['id', 'title', 'price', 'instructor_id']);
 
-        return response()->json([
-            'new_users_daily' => $newUsersDaily,
-            'enrollments_trend' => $enrollmentsTrend,
-            'revenue_trend' => $revenueTrend,
-            'top_courses' => $topCourses,
-            'ratings_by_category' => $ratingsByCategory,
-            'avg_completion_rate' => round($avgCompletionRate, 1),
-        ]);
+            // Average ratings by category (from reviews table)
+            $ratingsByCategory = DB::table('reviews')
+                ->join('courses', 'reviews.course_id', '=', 'courses.id')
+                ->join('categories', 'courses.category_id', '=', 'categories.id')
+                ->select('categories.id as category_id', 'categories.name as category_name', DB::raw('AVG(reviews.rating) as avg_rating'))
+                ->groupBy('categories.id', 'categories.name')
+                ->get();
+
+            // Completion rates (based on completed_at)
+            $totalEnrollments = DB::table('enrollments')->count();
+            $completedEnrollments = DB::table('enrollments')->whereNotNull('completed_at')->count();
+            $avgCompletionRate = $totalEnrollments > 0 ? ($completedEnrollments / $totalEnrollments) * 100 : 0;
+
+            // Period totals
+            $periodTotals = [
+                'new_users' => User::whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])->count(),
+                'new_enrollments' => Enrollment::whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])->count(),
+                'revenue' => Order::whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])->sum('total'),
+            ];
+
+            return [
+                'new_users_daily' => $newUsersDaily,
+                'enrollments_trend' => $enrollmentsTrend,
+                'revenue_trend' => $revenueTrend,
+                'top_courses' => $topCourses,
+                'ratings_by_category' => $ratingsByCategory,
+                'avg_completion_rate' => round($avgCompletionRate, 1),
+                'period_totals' => $periodTotals,
+            ];
+        });
+
+        // Add comparison data if requested
+        if ($compare) {
+            $prevStart = $start->copy()->subDays($days + 1);
+            $prevEnd = $start->copy()->subDay();
+            $prevCacheKey = "admin_analytics_{$prevStart->toDateString()}_{$prevEnd->toDateString()}";
+
+            $prevData = Cache::remember($prevCacheKey, 300, function () use ($prevStart, $prevEnd) {
+                return [
+                    'new_users' => User::whereBetween('created_at', [$prevStart, $prevEnd->endOfDay()])->count(),
+                    'new_enrollments' => Enrollment::whereBetween('created_at', [$prevStart, $prevEnd->endOfDay()])->count(),
+                    'revenue' => Order::whereBetween('created_at', [$prevStart, $prevEnd->endOfDay()])->sum('total'),
+                ];
+            });
+
+            $data['comparison'] = $prevData;
+        }
+
+        return response()->json($data);
+    }
+
+    // ==========================================
+    // AUDIT LOGS
+    // ==========================================
+
+    public function auditLogs(Request $request)
+    {
+        $limit = $request->get('limit', 50);
+        $page = $request->get('page', 1);
+
+        $logs = AdminAuditLog::with('admin:id,name')
+            ->orderByDesc('created_at')
+            ->paginate($limit);
+
+        return response()->json($logs);
+    }
+
+    public function recentActivity()
+    {
+        $logs = AdminAuditLog::recent(10)->get();
+
+        return response()->json($logs->map(function ($log) {
+            return [
+                'id' => $log->id,
+                'action' => $log->action,
+                'action_label' => $log->action_label,
+                'admin_name' => $log->admin?->name,
+                'target_type' => class_basename($log->target_type ?? ''),
+                'target_id' => $log->target_id,
+                'created_at' => $log->created_at,
+            ];
+        }));
     }
 
     // ==========================================
@@ -173,6 +249,8 @@ class AdminController extends Controller implements HasMiddleware
 
         $user->update($validated);
 
+        $this->logUserAction('profile.update', $user, $validated);
+
         return response()->json([
             'message' => 'User updated successfully',
             'user' => $user->fresh()
@@ -221,6 +299,8 @@ class AdminController extends Controller implements HasMiddleware
                 break;
         }
 
+        $this->logUserAction('role.update', $user, ['action' => $validated['action']]);
+
         return response()->json([
             'message' => 'User role updated successfully',
             'user' => $user->fresh()->load('roles')
@@ -245,6 +325,8 @@ class AdminController extends Controller implements HasMiddleware
         if (in_array($validated['status'], ['banned', 'deactivated'])) {
             $user->tokens()->delete();
         }
+
+        $this->logUserAction('status.update', $user, ['status' => $validated['status']]);
 
         return response()->json([
             'message' => 'User status updated to ' . $validated['status'],
@@ -271,6 +353,94 @@ class AdminController extends Controller implements HasMiddleware
             'message' => $newStatus === 'banned' ? 'User banned successfully' : 'User unbanned successfully',
             'status' => $user->status
         ]);
+    }
+
+    /**
+     * Bulk action on multiple users
+     */
+    public function bulkUserAction(Request $request)
+    {
+        $validated = $request->validate([
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'exists:users,id',
+            'action' => 'required|in:ban,activate,deactivate,delete',
+        ]);
+
+        $userIds = $validated['user_ids'];
+        $action = $validated['action'];
+        $currentUserId = $request->user()->id;
+
+        // Remove current user from the list to prevent self-action
+        $userIds = array_filter($userIds, fn($id) => $id != $currentUserId);
+
+        if (empty($userIds)) {
+            return response()->json(['message' => 'No valid users to process'], 400);
+        }
+
+        $affectedCount = 0;
+
+        switch ($action) {
+            case 'ban':
+                $affectedCount = User::whereIn('id', $userIds)->update(['status' => 'banned']);
+                // Revoke tokens
+                DB::table('personal_access_tokens')->whereIn('tokenable_id', $userIds)->delete();
+                break;
+
+            case 'activate':
+                $affectedCount = User::whereIn('id', $userIds)->update(['status' => 'active']);
+                break;
+
+            case 'deactivate':
+                $affectedCount = User::whereIn('id', $userIds)->update(['status' => 'deactivated']);
+                DB::table('personal_access_tokens')->whereIn('tokenable_id', $userIds)->delete();
+                break;
+
+            case 'delete':
+                $affectedCount = User::whereIn('id', $userIds)->count();
+                User::whereIn('id', $userIds)->delete();
+                break;
+        }
+
+        // Log the bulk action
+        $this->logAction('user.bulk.' . $action, null, null, [
+            'user_ids' => $userIds,
+            'affected_count' => $affectedCount,
+        ]);
+
+        return response()->json([
+            'message' => "Successfully {$action}ed {$affectedCount} users",
+            'affected_count' => $affectedCount,
+        ]);
+    }
+
+    /**
+     * Get user activity logs
+     */
+    public function getUserActivity(User $user)
+    {
+        $logs = $user->activityLogs()->latest()->paginate(20);
+        return response()->json($logs);
+    }
+
+    /**
+     * Send email to user
+     */
+    public function emailUser(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        // In a real app, we would queue this
+        Mail::raw($validated['message'], function ($message) use ($user, $validated) {
+            $message->to($user->email)
+                ->subject($validated['subject']);
+        });
+
+        $this->logUserAction('email.sent', $user, ['subject' => $validated['subject']]);
+
+        return response()->json(['message' => 'Email sent successfully']);
     }
 
     // ==========================================
@@ -402,6 +572,56 @@ class AdminController extends Controller implements HasMiddleware
     // ==========================================
     // COURSE MANAGEMENT
     // ==========================================
+
+    /**
+     * Bulk action on multiple courses
+     */
+    public function bulkCourseAction(Request $request)
+    {
+        $validated = $request->validate([
+            'course_ids' => 'required|array|min:1',
+            'course_ids.*' => 'exists:courses,id',
+            'action' => 'required|in:approve,reject',
+            'reason' => 'required_if:action,reject|nullable|string',
+        ]);
+
+        $courseIds = $validated['course_ids'];
+        $action = $validated['action'];
+        $reason = $validated['reason'] ?? null;
+
+        if (empty($courseIds)) {
+            return response()->json(['message' => 'No valid courses to process'], 400);
+        }
+
+        $affectedCount = 0;
+
+        switch ($action) {
+            case 'approve':
+                $affectedCount = Course::whereIn('id', $courseIds)
+                    ->where('published', false) // Only approve unpublished courses or handle re-approval logic
+                    ->update(['published' => true, 'published_at' => now(), 'status' => 'published']);
+                break;
+
+            case 'reject':
+                // For rejection, we might want to update status to 'draft' or a specific 'rejected' status
+                // Assuming 'draft' for now or keeping unpublished
+                $affectedCount = Course::whereIn('id', $courseIds)
+                    ->update(['published' => false, 'status' => 'draft']); // Or add a rejection reason field if exists
+                break;
+        }
+
+        // Log the bulk action
+        $this->logAction('course.bulk.' . $action, null, null, [
+            'course_ids' => $courseIds,
+            'affected_count' => $affectedCount,
+            'reason' => $reason
+        ]);
+
+        return response()->json([
+            'message' => "Successfully {$action}ed {$affectedCount} courses",
+            'affected_count' => $affectedCount,
+        ]);
+    }
 
     public function courses(Request $request)
     {

@@ -73,6 +73,15 @@
         </router-link>
     </nav>
 
+    <!-- Theme Toggle -->
+    <div class="px-4 pb-2">
+        <button @click="toggleDark" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+            <Sun v-if="!isDark" class="w-5 h-5 text-yellow-500" />
+            <Moon v-else class="w-5 h-5 text-purple-400" />
+            {{ isDark ? 'Light Mode' : 'Dark Mode' }}
+        </button>
+    </div>
+
     <!-- User & Logout -->
     <div class="p-4 border-t border-slate-800 bg-slate-950/30">
         <button @click="$emit('logout')" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all group">
@@ -81,6 +90,12 @@
         </button>
     </div>
   </aside>
+
+  <KeyboardHelpModal 
+    :show="showHelpModal" 
+    :shortcuts="shortcuts" 
+    @close="showHelpModal = false" 
+  />
 </template>
 
 <script setup>
@@ -94,9 +109,17 @@ import {
     Star,
     MessageSquareMore,
     Tags,
-    Settings, 
-    LogOut 
+    Settings,
+    LogOut,
+    Sun,
+    Moon
 } from 'lucide-vue-next';
+import { useDarkMode } from '../../composables/useDarkMode';
+import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
+import KeyboardHelpModal from './KeyboardHelpModal.vue';
+
+const { isDark, toggleDark } = useDarkMode();
+const { showHelpModal, shortcuts } = useKeyboardShortcuts();
 
 defineEmits(['logout']);
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-slate-50 min-h-screen flex font-inter">
+  <div class="bg-slate-50 dark:bg-slate-900 min-h-screen flex font-inter transition-colors duration-300">
     <!-- Sidebar -->
     <AdminSidebar @logout="handleLogout" />
 
@@ -7,12 +7,13 @@
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
         
         <!-- Top Header -->
-        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 sticky top-0 z-30">
-            <h1 class="text-xl font-bold text-slate-800">Dashboard</h1>
+        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-8 sticky top-0 z-30 transition-colors duration-300">
+            <h1 class="text-xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
             <div class="flex items-center gap-4">
+                 <NotificationBell />
                  <div class="flex flex-col items-end mr-2">
-                     <span class="text-sm font-bold text-slate-700">{{ auth.user?.name }}</span>
-                     <span class="text-xs text-slate-500 uppercase tracking-wider">Administrator</span>
+                     <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ auth.user?.name }}</span>
+                     <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Administrator</span>
                  </div>
                  <div class="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
                      {{ auth.user?.name?.[0] || 'A' }}
@@ -22,8 +23,42 @@
 
         <!-- Main Content -->
         <main class="flex-1 overflow-auto p-8">
+            <!-- Date Range Picker & Export -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <DateRangePicker 
+                v-model="selectedDays" 
+                :compare="compareEnabled"
+                @range-change="handleRangeChange"
+                @compare-change="compareEnabled = $event"
+              />
+              <div class="flex items-center gap-2">
+                <div class="relative">
+                  <button @click="exportDropdownOpen = !exportDropdownOpen" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-200 transition-colors">
+                    <Download class="w-4 h-4" /> Export
+                    <ChevronDown class="w-4 h-4" />
+                  </button>
+                  <div v-if="exportDropdownOpen" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50">
+                    <button @click="exportData('summary')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">Summary Report</button>
+                    <button @click="exportData('users')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">New Users</button>
+                    <button @click="exportData('revenue')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">Revenue Data</button>
+                    <button @click="exportData('enrollments')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">Enrollments</button>
+                    <button @click="exportData('courses')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">Top Courses</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div v-if="!stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div v-for="i in 4" :key="i" class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <SkeletonLoader width="40%" height="1rem" />
+                        <SkeletonLoader type="circle" width="3rem" height="3rem" />
+                    </div>
+                    <SkeletonLoader width="60%" height="2rem" />
+                </div>
+            </div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard title="Total Users" :value="stats?.total_users || 0" type="blue">
                     <template #icon><Users class="w-6 h-6" /></template>
                 </StatCard>
@@ -38,23 +73,54 @@
                 </StatCard>
             </div>
 
+            <!-- Period Stats (when comparison enabled) -->
+            <div v-if="analytics?.period_totals" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 transition-colors">
+                <div class="text-sm text-slate-500 dark:text-slate-400">New Users (Selected Period)</div>
+                <div class="text-2xl font-bold text-slate-800 dark:text-white">{{ analytics.period_totals.new_users }}</div>
+                <div v-if="analytics?.comparison" :class="getChangeClass(analytics.period_totals.new_users, analytics.comparison.new_users)" class="text-xs mt-1">
+                  {{ getChangeText(analytics.period_totals.new_users, analytics.comparison.new_users) }}
+                </div>
+              </div>
+              <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 transition-colors">
+                <div class="text-sm text-slate-500 dark:text-slate-400">New Enrollments (Selected Period)</div>
+                <div class="text-2xl font-bold text-slate-800 dark:text-white">{{ analytics.period_totals.new_enrollments }}</div>
+                <div v-if="analytics?.comparison" :class="getChangeClass(analytics.period_totals.new_enrollments, analytics.comparison.new_enrollments)" class="text-xs mt-1">
+                  {{ getChangeText(analytics.period_totals.new_enrollments, analytics.comparison.new_enrollments) }}
+                </div>
+              </div>
+              <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 transition-colors">
+                <div class="text-sm text-slate-500 dark:text-slate-400">Revenue (Selected Period)</div>
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ formatCurrency(analytics.period_totals.revenue) }}</div>
+                <div v-if="analytics?.comparison" :class="getChangeClass(analytics.period_totals.revenue, analytics.comparison.revenue)" class="text-xs mt-1">
+                  {{ getChangeText(analytics.period_totals.revenue, analytics.comparison.revenue) }}
+                </div>
+              </div>
+            </div>
+
             <!-- Charts Row -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <!-- New Users Chart -->
-              <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 class="text-lg font-bold text-slate-800 mb-4">New Users (Last 30 Days)</h3>
+              <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">New Users</h3>
                 <div class="h-64">
                   <Line v-if="chartDataLoaded" :data="newUsersChartData" :options="chartOptions" />
-                  <div v-else class="h-full flex items-center justify-center text-slate-400">Loading chart...</div>
+                  <div v-else class="h-full w-full flex flex-col justify-end space-y-2">
+                     <div class="flex items-end justify-between h-full gap-2">
+                        <SkeletonLoader v-for="n in 12" :key="n" width="8%" :height="`${Math.random() * 80 + 20}%`" className="rounded-t-md" />
+                     </div>
+                  </div>
                 </div>
               </div>
 
               <!-- Revenue Chart -->
-              <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 class="text-lg font-bold text-slate-800 mb-4">Revenue (Last 30 Days)</h3>
+              <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Revenue</h3>
                 <div class="h-64">
                   <Line v-if="chartDataLoaded" :data="revenueChartData" :options="chartOptions" />
-                  <div v-else class="h-full flex items-center justify-center text-slate-400">Loading chart...</div>
+                  <div v-else class="h-full w-full flex flex-col justify-end space-y-2">
+                      <SkeletonLoader width="100%" height="80%" className="rounded-lg" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -63,13 +129,13 @@
              <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                  <!-- Main Table Area -->
                  <div class="lg:col-span-2 space-y-6">
-                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                         <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                         <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center transition-colors">
                              <div>
-                                 <h2 class="text-lg font-bold text-slate-800">Pending Courses</h2>
-                                 <p class="text-sm text-slate-500 mt-1">Review and approve new course submissions</p>
+                                 <h2 class="text-lg font-bold text-slate-800 dark:text-white">Pending Courses</h2>
+                                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Review and approve new course submissions</p>
                              </div>
-                             <span class="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-full border border-amber-100">
+                             <span class="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full border border-amber-100 dark:border-amber-800/50 transition-colors">
                                  {{ pendingCourses.length }} Waiting
                              </span>
                          </div>
@@ -77,42 +143,42 @@
                          <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-100">
+                                    <tr class="bg-slate-50/50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700 transition-colors">
                                         <th class="px-6 py-4 font-semibold">Course Details</th>
                                         <th class="px-6 py-4 font-semibold">Instructor</th>
                                         <th class="px-6 py-4 font-semibold text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    <tr v-for="course in pendingCourses" :key="course.id" class="group hover:bg-slate-50 transition-colors">
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700 transition-colors">
+                                    <tr v-for="course in pendingCourses" :key="course.id" class="group hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-4">
-                                                <div class="h-10 w-16 bg-slate-200 rounded overflow-hidden flex-shrink-0">
+                                                <div class="h-10 w-16 bg-slate-200 dark:bg-slate-700 rounded overflow-hidden flex-shrink-0 transition-colors">
                                                     <img v-if="course.thumbnail" :src="course.thumbnail" class="w-full h-full object-cover" />
                                                     <div v-else class="w-full h-full flex items-center justify-center text-slate-400">
                                                         <ImageIcon class="w-4 h-4" />
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <div class="font-bold text-slate-800 group-hover:text-purple-600 transition-colors">{{ course.title }}</div>
-                                                    <div class="text-xs text-slate-500 mt-0.5">{{ course.category?.name }} • {{ formatCurrency(course.price) }}</div>
+                                                    <div class="font-bold text-slate-800 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{{ course.title }}</div>
+                                                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ course.category?.name }} • {{ formatCurrency(course.price) }}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-2">
-                                                 <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 font-bold">
+                                                 <div class="h-6 w-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs text-slate-600 dark:text-slate-300 font-bold transition-colors">
                                                      {{ course.instructor?.name?.[0] }}
                                                  </div>
-                                                 <span class="text-sm font-medium text-slate-600">{{ course.instructor?.name }}</span>
+                                                 <span class="text-sm font-medium text-slate-600 dark:text-slate-300">{{ course.instructor?.name }}</span>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="flex items-center justify-end gap-2">
-                                                <button @click="approve(course.id)" class="p-2 hover:bg-emerald-50 text-emerald-600 rounded-lg transition-colors" title="Approve">
+                                                <button @click="approve(course.id)" class="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg transition-colors" title="Approve">
                                                     <CheckCircle class="w-5 h-5" />
                                                 </button>
-                                                <button @click="reject(course.id)" class="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors" title="Reject">
+                                                <button @click="reject(course.id)" class="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition-colors" title="Reject">
                                                     <XCircle class="w-5 h-5" />
                                                 </button>
                                             </div>
@@ -132,15 +198,15 @@
                      </div>
 
                      <!-- Top Courses Card -->
-                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                       <h3 class="text-lg font-bold text-slate-800 mb-4">Top Selling Courses</h3>
+                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
+                       <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Top Selling Courses</h3>
                        <div class="space-y-3">
-                         <div v-for="course in analytics?.top_courses?.slice(0, 5)" :key="course.id" class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                         <div v-for="course in analytics?.top_courses?.slice(0, 5)" :key="course.id" class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700 last:border-0 transition-colors">
                            <div>
-                             <div class="font-medium text-slate-800">{{ course.title }}</div>
-                             <div class="text-xs text-slate-500">{{ formatCurrency(course.price) }}</div>
+                             <div class="font-medium text-slate-800 dark:text-white">{{ course.title }}</div>
+                             <div class="text-xs text-slate-500 dark:text-slate-400">{{ formatCurrency(course.price) }}</div>
                            </div>
-                           <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                           <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full transition-colors">
                              {{ course.enrollments_count }} enrolled
                            </span>
                          </div>
@@ -177,38 +243,38 @@
                      </div>
 
                      <!-- Quick Stats -->
-                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                       <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4">Platform Stats</h3>
+                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
+                       <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wide mb-4">Platform Stats</h3>
                        <div class="space-y-4">
                          <div class="flex justify-between items-center">
-                           <span class="text-sm text-slate-600">Avg Completion Rate</span>
-                           <span class="font-bold text-slate-800">{{ (analytics?.avg_completion_rate || 0).toFixed(1) }}%</span>
+                           <span class="text-sm text-slate-600 dark:text-slate-400">Avg Completion Rate</span>
+                           <span class="font-bold text-slate-800 dark:text-white">{{ (analytics?.avg_completion_rate || 0).toFixed(1) }}%</span>
                          </div>
                          <div class="flex justify-between items-center">
-                           <span class="text-sm text-slate-600">Total Instructors</span>
-                           <span class="font-bold text-slate-800">{{ stats?.total_instructors || 0 }}</span>
+                           <span class="text-sm text-slate-600 dark:text-slate-400">Total Instructors</span>
+                           <span class="font-bold text-slate-800 dark:text-white">{{ stats?.total_instructors || 0 }}</span>
                          </div>
                          <div class="flex justify-between items-center">
-                           <span class="text-sm text-slate-600">Pending Instructors</span>
-                           <span class="font-bold text-slate-800">{{ stats?.pending_instructors || 0 }}</span>
+                           <span class="text-sm text-slate-600 dark:text-slate-400">Pending Instructors</span>
+                           <span class="font-bold text-slate-800 dark:text-white">{{ stats?.pending_instructors || 0 }}</span>
                          </div>
                          <div class="flex justify-between items-center">
-                           <span class="text-sm text-slate-600">Total Enrollments</span>
-                           <span class="font-bold text-slate-800">{{ stats?.total_enrollments || 0 }}</span>
+                           <span class="text-sm text-slate-600 dark:text-slate-400">Total Enrollments</span>
+                           <span class="font-bold text-slate-800 dark:text-white">{{ stats?.total_enrollments || 0 }}</span>
                          </div>
                        </div>
                      </div>
 
                      <!-- Recent Activity -->
-                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                         <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4">Recent Signups</h3>
+                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
+                         <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wide mb-4">Recent Signups</h3>
                          <ul class="space-y-4">
                              <li v-for="user in stats?.recent_activity?.users" :key="user.id" class="flex items-center gap-3">
-                                 <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
+                                 <div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-300 transition-colors">
                                      {{ user.name[0] }}
                                  </div>
                                  <div class="text-sm">
-                                     <div class="font-medium text-slate-800">{{ user.name }}</div>
+                                     <div class="font-medium text-slate-800 dark:text-white">{{ user.name }}</div>
                                      <div class="text-xs text-slate-400">Joined {{ new Date(user.created_at).toLocaleDateString() }}</div>
                                  </div>
                              </li>
@@ -223,13 +289,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
 import StatCard from '../components/admin/StatCard.vue';
-import { Users, BookOpen, DollarSign, Clock, CheckCircle, XCircle, Image as ImageIcon } from 'lucide-vue-next';
+import SkeletonLoader from '../components/common/SkeletonLoader.vue';
+import NotificationBell from '../components/admin/NotificationBell.vue';
+import DateRangePicker from '../components/admin/DateRangePicker.vue';
+import { Users, BookOpen, DollarSign, Clock, CheckCircle, XCircle, Image as ImageIcon, Download, ChevronDown } from 'lucide-vue-next';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { confirmAction, showSuccess, showError, promptInput } from '../utils/sweetalert';
@@ -243,6 +312,12 @@ const stats = ref(null);
 const analytics = ref(null);
 const pendingCourses = ref([]);
 const chartDataLoaded = ref(false);
+const exportDropdownOpen = ref(false);
+
+// Date range state
+const selectedDays = ref(30);
+const dateRange = ref({ start_date: '', end_date: '' });
+const compareEnabled = ref(false);
 
 const newUsersChartData = ref({
   labels: [],
@@ -289,31 +364,78 @@ const formatCurrency = (val) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 };
 
-const loadDashboardData = async () => {
+const getChangeClass = (current, previous) => {
+  if (current > previous) return 'text-green-600';
+  if (current < previous) return 'text-red-600';
+  return 'text-slate-500';
+};
+
+const getChangeText = (current, previous) => {
+  if (!previous) return 'N/A';
+  const change = ((current - previous) / previous) * 100;
+  const arrow = change >= 0 ? '↑' : '↓';
+  return `${arrow} ${Math.abs(change).toFixed(1)}% vs previous period`;
+};
+
+const handleRangeChange = (range) => {
+  dateRange.value = range;
+  loadAnalytics();
+};
+
+const loadAnalytics = async () => {
+  chartDataLoaded.value = false;
   try {
-    const [statsRes, pendingRes, analyticsRes] = await Promise.all([
-      axios.get('/api/admin/stats'),
-      axios.get('/api/admin/courses/pending'),
-      axios.get('/api/admin/analytics')
-    ]);
+    const params = new URLSearchParams();
+    if (dateRange.value.start_date) params.append('start_date', dateRange.value.start_date);
+    if (dateRange.value.end_date) params.append('end_date', dateRange.value.end_date);
+    if (compareEnabled.value) params.append('compare', 'true');
     
-    stats.value = statsRes.data;
-    pendingCourses.value = pendingRes.data;
-    analytics.value = analyticsRes.data;
+    const res = await axios.get(`/api/admin/analytics?${params}`);
+    analytics.value = res.data;
 
     // Populate charts
-    if (analytics.value?.new_users_daily) {
-      newUsersChartData.value.labels = analytics.value.new_users_daily.map(d => d.date);
-      newUsersChartData.value.datasets[0].data = analytics.value.new_users_daily.map(d => d.count);
+    if (res.data.new_users_daily) {
+      newUsersChartData.value.labels = res.data.new_users_daily.map(d => d.date);
+      newUsersChartData.value.datasets[0].data = res.data.new_users_daily.map(d => d.count);
     }
-    if (analytics.value?.revenue_trend) {
-      revenueChartData.value.labels = analytics.value.revenue_trend.map(d => d.date);
-      revenueChartData.value.datasets[0].data = analytics.value.revenue_trend.map(d => parseFloat(d.total) || 0);
+    if (res.data.revenue_trend) {
+      revenueChartData.value.labels = res.data.revenue_trend.map(d => d.date);
+      revenueChartData.value.datasets[0].data = res.data.revenue_trend.map(d => parseFloat(d.total) || 0);
     }
     chartDataLoaded.value = true;
   } catch (e) {
     console.error(e);
   }
+};
+
+const loadDashboardData = async () => {
+  try {
+    const [statsRes, pendingRes] = await Promise.all([
+      axios.get('/api/admin/stats'),
+      axios.get('/api/admin/courses/pending')
+    ]);
+    
+    stats.value = statsRes.data;
+    pendingCourses.value = pendingRes.data;
+    
+    // Load analytics with default date range
+    await loadAnalytics();
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const exportData = (type) => {
+  exportDropdownOpen.value = false;
+  const params = new URLSearchParams({ type });
+  if (dateRange.value.start_date) params.append('start_date', dateRange.value.start_date);
+  if (dateRange.value.end_date) params.append('end_date', dateRange.value.end_date);
+  window.open(`/api/admin/export/analytics?${params}`, '_blank');
+};
+
+// Close dropdown when clicking outside
+const closeDropdown = (e) => {
+  if (!e.target.closest('.relative')) exportDropdownOpen.value = false;
 };
 
 const approve = async (id) => {
@@ -347,5 +469,12 @@ const handleLogout = async () => {
     router.push('/login');
 };
 
-onMounted(() => loadDashboardData());
+onMounted(() => {
+  loadDashboardData();
+  document.addEventListener('click', closeDropdown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdown);
+});
 </script>

@@ -112,5 +112,10 @@ class User extends Authenticatable
     {
         return $this->id === $course->instructor_id;
     }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(UserActivityLog::class);
+    }
 }
 
