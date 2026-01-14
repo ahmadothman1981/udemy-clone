@@ -23,6 +23,10 @@ class User extends Authenticatable
         'google_id',
         'facebook_id',
         'github_id',
+        'status',
+        'language',
+        'country',
+        'instructor_restrictions',
     ];
 
     protected $hidden = [
@@ -33,10 +37,44 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'email_verified' => 'boolean',
-        'is_banned' => 'boolean',
         'preferences' => 'array',
+        'instructor_restrictions' => 'array',
         'password' => 'hashed',
     ];
+
+    /**
+     * Check if user is banned
+     */
+    public function isBanned(): bool
+    {
+        return $this->status === 'banned';
+    }
+
+    /**
+     * Check if user is active
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Check if instructor is restricted from creating courses
+     */
+    public function canCreateCourses(): bool
+    {
+        $restrictions = $this->instructor_restrictions ?? [];
+        return !in_array('block_new_courses', $restrictions);
+    }
+
+    /**
+     * Check if instructor is restricted from accepting students
+     */
+    public function canAcceptStudents(): bool
+    {
+        $restrictions = $this->instructor_restrictions ?? [];
+        return !in_array('block_new_students', $restrictions);
+    }
 
     public function roles()
     {

@@ -148,22 +148,70 @@ Route::get('/courses/{course}/questions', [\App\Http\Controllers\CourseQuestionC
 Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     // Admin role check applied to all admin routes
     Route::middleware([\App\Http\Middleware\EnsureUserIsAdmin::class])->group(function () {
+
+        // Dashboard & Analytics
         Route::get('/stats', [\App\Http\Controllers\AdminController::class, 'stats']);
+        Route::get('/analytics', [\App\Http\Controllers\AdminController::class, 'analytics']);
+
+        // User Management
         Route::get('/users', [\App\Http\Controllers\AdminController::class, 'users']);
+        Route::get('/users/{user}', [\App\Http\Controllers\AdminController::class, 'showUser']);
+        Route::put('/users/{user}', [\App\Http\Controllers\AdminController::class, 'updateUser']);
+        Route::post('/users/{user}/role', [\App\Http\Controllers\AdminController::class, 'updateUserRole']);
+        Route::post('/users/{user}/status', [\App\Http\Controllers\AdminController::class, 'toggleUserStatus']);
         Route::post('/users/{user}/ban', [\App\Http\Controllers\AdminController::class, 'toggleBan']);
 
-        // Instructor Verification
+        // Instructor Management
+        Route::get('/instructors', [\App\Http\Controllers\AdminController::class, 'instructors']);
         Route::get('/instructors/pending', [\App\Http\Controllers\AdminController::class, 'pendingInstructors']);
+        Route::get('/instructors/{user}/stats', [\App\Http\Controllers\AdminController::class, 'instructorStats']);
         Route::post('/instructors/{user}/verify', [\App\Http\Controllers\AdminController::class, 'verifyInstructor']);
+        Route::post('/instructors/{user}/restrict', [\App\Http\Controllers\AdminController::class, 'restrictInstructor']);
 
+        // Course Management
+        Route::get('/courses', [\App\Http\Controllers\AdminController::class, 'courses']);
         Route::get('/courses/pending', [\App\Http\Controllers\AdminController::class, 'pendingCourses']);
+        Route::put('/courses/{course}', [\App\Http\Controllers\AdminController::class, 'updateCourse']);
         Route::post('/courses/{course}/approve', [\App\Http\Controllers\AdminController::class, 'approveCourse']);
+        Route::post('/courses/{course}/hide', [\App\Http\Controllers\AdminController::class, 'hideCourse']);
+        Route::post('/courses/{course}/restore', [\App\Http\Controllers\AdminController::class, 'restoreCourse']);
+        Route::post('/courses/{course}/toggle-qna', [\App\Http\Controllers\AdminController::class, 'toggleCourseQnA']);
+        Route::delete('/courses/{course}/sections/{section}', [\App\Http\Controllers\AdminController::class, 'removeSection']);
+        Route::delete('/courses/{course}/lectures/{lecture}', [\App\Http\Controllers\AdminController::class, 'removeLecture']);
+
+        // Enrollment Management
+        Route::get('/enrollments', [\App\Http\Controllers\AdminController::class, 'enrollments']);
+        Route::post('/enrollments', [\App\Http\Controllers\AdminController::class, 'addEnrollment']);
+        Route::delete('/enrollments/{enrollment}', [\App\Http\Controllers\AdminController::class, 'removeEnrollment']);
+        Route::get('/students/activity', [\App\Http\Controllers\AdminController::class, 'studentActivity']);
+
+        // Review & Q&A Moderation
+        Route::get('/reviews', [\App\Http\Controllers\AdminController::class, 'reviews']);
+        Route::delete('/reviews/{review}', [\App\Http\Controllers\AdminController::class, 'removeReview']);
+        Route::get('/questions', [\App\Http\Controllers\AdminController::class, 'questions']);
+        Route::delete('/questions/{question}', [\App\Http\Controllers\AdminController::class, 'removeQuestion']);
+        Route::delete('/answers/{answer}', [\App\Http\Controllers\AdminController::class, 'removeAnswer']);
 
         // Promo Codes (Admin)
         Route::get('/promo-codes', [\App\Http\Controllers\PromoCodeController::class, 'index']);
         Route::post('/promo-codes', [\App\Http\Controllers\PromoCodeController::class, 'store']);
         Route::put('/promo-codes/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'update']);
         Route::delete('/promo-codes/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'destroy']);
+
+        // Settings Management
+        Route::get('/settings/categories', [\App\Http\Controllers\AdminSettingsController::class, 'categories']);
+        Route::post('/settings/categories', [\App\Http\Controllers\AdminSettingsController::class, 'storeCategory']);
+        Route::put('/settings/categories/{category}', [\App\Http\Controllers\AdminSettingsController::class, 'updateCategory']);
+        Route::delete('/settings/categories/{category}', [\App\Http\Controllers\AdminSettingsController::class, 'destroyCategory']);
+
+        Route::get('/settings/platform', [\App\Http\Controllers\AdminSettingsController::class, 'platformSettings']);
+        Route::put('/settings/platform', [\App\Http\Controllers\AdminSettingsController::class, 'updatePlatformSettings']);
+        Route::get('/settings/payment', [\App\Http\Controllers\AdminSettingsController::class, 'paymentSettings']);
+        Route::put('/settings/payment', [\App\Http\Controllers\AdminSettingsController::class, 'updatePaymentSettings']);
+        Route::get('/settings/security', [\App\Http\Controllers\AdminSettingsController::class, 'securitySettings']);
+        Route::put('/settings/security', [\App\Http\Controllers\AdminSettingsController::class, 'updateSecuritySettings']);
+        Route::get('/settings/localization', [\App\Http\Controllers\AdminSettingsController::class, 'localizationSettings']);
+        Route::put('/settings/localization', [\App\Http\Controllers\AdminSettingsController::class, 'updateLocalizationSettings']);
     });
 });
 

@@ -14,20 +14,7 @@
     <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
         <div class="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Overview</div>
         
-        <router-link to="/admin" custom v-slot="{ href, navigate, isActive }">
-            <a :href="href" @click="navigate" 
-               :class="[
-                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-                 isActive 
-                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
-                   : 'hover:bg-slate-800 hover:text-white'
-               ]">
-                <LayoutTemplate class="w-5 h-5" />
-                Dashboard
-            </a>
-        </router-link>
-
-        <router-link to="/admin/users" custom v-slot="{ href, navigate, isActive }">
+        <router-link v-for="item in overviewItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
                :class="[
                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
@@ -35,12 +22,14 @@
                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                ]">
-                 <Users class="w-5 h-5" :class="isActive ? 'text-white' : 'text-slate-500 group-hover:text-purple-400'" />
-                 Users
+                <component :is="item.icon" class="w-5 h-5" />
+                {{ item.label }}
             </a>
         </router-link>
 
-        <router-link to="/admin/promo-codes" custom v-slot="{ href, navigate, isActive }">
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Management</div>
+        
+        <router-link v-for="item in managementItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
                :class="[
                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
@@ -48,14 +37,14 @@
                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                ]">
-                 <Tags class="w-5 h-5" :class="isActive ? 'text-white' : 'text-slate-500 group-hover:text-purple-400'" />
-                 Promo Codes
+                <component :is="item.icon" class="w-5 h-5" />
+                {{ item.label }}
             </a>
         </router-link>
 
-        <div class="mt-8 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">System</div>
-
-        <router-link to="/admin/settings" custom v-slot="{ href, navigate, isActive }">
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Moderation</div>
+        
+        <router-link v-for="item in moderationItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
                :class="[
                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
@@ -63,8 +52,23 @@
                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                ]">
-                 <Settings class="w-5 h-5" :class="isActive ? 'text-white' : 'text-slate-500 group-hover:text-purple-400'" />
-                 Settings
+                <component :is="item.icon" class="w-5 h-5" />
+                {{ item.label }}
+            </a>
+        </router-link>
+
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">System</div>
+        
+        <router-link v-for="item in systemItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
+            <a :href="href" @click="navigate" 
+               :class="[
+                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                 isActive 
+                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20' 
+                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+               ]">
+                <component :is="item.icon" class="w-5 h-5" />
+                {{ item.label }}
             </a>
         </router-link>
     </nav>
@@ -80,9 +84,42 @@
 </template>
 
 <script setup>
-import { LayoutDashboard, LayoutTemplate, Users, BookOpen, Settings, LogOut, Tags } from 'lucide-vue-next';
+import { 
+    LayoutDashboard, 
+    LayoutTemplate, 
+    Users, 
+    GraduationCap,
+    BookOpen, 
+    UserCheck,
+    Star,
+    MessageSquareMore,
+    Tags,
+    Settings, 
+    LogOut 
+} from 'lucide-vue-next';
 
 defineEmits(['logout']);
+
+const overviewItems = [
+    { path: '/admin', label: 'Dashboard', icon: LayoutTemplate },
+];
+
+const managementItems = [
+    { path: '/admin/users', label: 'Users', icon: Users },
+    { path: '/admin/instructors', label: 'Instructors', icon: GraduationCap },
+    { path: '/admin/courses', label: 'Courses', icon: BookOpen },
+    { path: '/admin/enrollments', label: 'Enrollments', icon: UserCheck },
+];
+
+const moderationItems = [
+    { path: '/admin/reviews', label: 'Reviews', icon: Star },
+    { path: '/admin/qna', label: 'Q&A', icon: MessageSquareMore },
+    { path: '/admin/promo-codes', label: 'Promo Codes', icon: Tags },
+];
+
+const systemItems = [
+    { path: '/admin/settings', label: 'Settings', icon: Settings },
+];
 </script>
 
 <style scoped>

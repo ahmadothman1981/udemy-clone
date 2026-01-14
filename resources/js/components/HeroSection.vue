@@ -24,23 +24,7 @@
             {{ $t('home.hero.subtitle') }}
           </p>
           
-          <!-- Search bar -->
-          <div class="relative max-w-xl mx-auto lg:mx-0 mb-8">
-            <div class="hero-search-container">
-              <input 
-                type="text" 
-                v-model="searchQuery"
-                @keyup.enter="handleSearch"
-                :placeholder="$t('home.search_placeholder')"
-                class="hero-search-input"
-              >
-              <button @click="handleSearch" class="hero-search-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rtl:mirror" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-            </div>
-          </div>
+
           
           <!-- Stats -->
           <div class="flex flex-wrap justify-center lg:justify-start gap-8 text-center">
@@ -104,19 +88,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const router = useRouter();
-const searchQuery = ref('');
 
-const handleSearch = () => {
-  if (searchQuery.value.trim()) {
-    router.push({ path: '/', query: { search: searchQuery.value } });
-  }
-};
 </script>
 
 <style scoped>
@@ -163,46 +139,7 @@ const handleSearch = () => {
   50% { transform: translateY(-20px) rotate(5deg); }
 }
 
-.hero-search-container {
-  display: flex;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 9999px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
 
-.hero-search-container:focus-within {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
-}
-
-.hero-search-input {
-  flex: 1;
-  padding: 1rem 1.5rem;
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 1rem;
-  outline: none;
-}
-
-.hero-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.hero-search-btn {
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #a855f7, #ec4899);
-  color: white;
-  transition: all 0.3s ease;
-}
-
-.hero-search-btn:hover {
-  background: linear-gradient(135deg, #9333ea, #db2777);
-}
 
 .stat-item {
   padding: 0.5rem 1rem;
