@@ -156,6 +156,12 @@ class CourseService
             $query->orderBy('created_at', 'desc');
         }
 
+        if (auth('sanctum')->check()) {
+            $query->withExists(['enrollments as is_enrolled' => function ($q) {
+                $q->where('user_id', auth('sanctum')->id());
+            }]);
+        }
+
         return $query->with(['instructor', 'category', 'level'])->paginate(15);
     }
 

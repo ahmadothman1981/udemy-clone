@@ -133,6 +133,12 @@ class Course extends Model
         if (!$user) {
             return false;
         }
+
+        // Optimization: Check for eager loaded existence attribute first
+        if ($this->getAttribute('is_enrolled') !== null) {
+            return (bool) $this->is_enrolled;
+        }
+
         return $this->enrollments()->where('user_id', $user->id)->exists();
     }
 }

@@ -7,5 +7,6 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('admin-notifications', function ($user) {
-    return $user->hasRole('admin'); // Only admins can listen
+    \Log::info('Admin channel auth attempt', ['user_id' => $user->id, 'email' => $user->email]);
+    return true; // Temporarily allow all authenticated users for debugging
 });

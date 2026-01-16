@@ -1,4 +1,5 @@
 import Echo from 'laravel-echo';
+import axios from 'axios';
 
 import Pusher from 'pusher-js';
 window.Pusher = Pusher;
@@ -11,4 +12,26 @@ window.Echo = new Echo({
     wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
+    authorizer: (channel, options) => {
+        return {
+            authorize: (socketId, callback) => {
+                const token = localStorage.getItem('token');
+                axios.post('/broadcasting/auth', {
+                    socket_id: socketId,
+                    channel_name: channel.name
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                    .then(response => {
+                        callback(null, response.data);
+                    })
+                    .catch(error => {
+                        callback(error);
+                    });
+            }
+        };
+    },
 });
+
