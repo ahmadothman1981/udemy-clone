@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Pion\Laravel\ChunkUpload\Exceptions\UploadMissingFileException;
 use Pion\Laravel\ChunkUpload\Handler\HandlerFactory;
 use Pion\Laravel\ChunkUpload\Receiver\FileReceiver;
@@ -58,10 +59,22 @@ class UploadController extends Controller
         // Use 'local' (private) to prevent direct public access to temp files.
         $disk = Storage::disk('local');
 
-        // Validate Extension
-        $allowed = ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm'];
+        // Validate Extension & Mime Type
+        $allowedExtensions = ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm'];
+        $allowedMimeTypes = [
+            'video/mp4', 
+            'video/quicktime', 
+            'video/x-msvideo', 
+            'video/x-ms-wmv', 
+            'video/x-flv', 
+            'video/x-matroska', 
+            'video/webm'
+        ];
+
         $extension = strtolower($file->getClientOriginalExtension());
-        if (!in_array($extension, $allowed)) {
+        $mimeType = $file->getMimeType();
+
+        if (!in_array($extension, $allowedExtensions) || !in_array($mimeType, $allowedMimeTypes)) {
             abort(422, 'Invalid video format');
         }
 
@@ -69,23 +82,22 @@ class UploadController extends Controller
         $path = $disk->putFileAs('tmp', $file, $fileName);
 
         // Delete the chunk file from the chunks folder (pion stores it in storage/app/chunks by default)
-        unlink($file->getPathname());
+        // Ensure we don't return the path if we failed to save (although putFileAs usually throws or returns false)
+        if ($path) {
+            @unlink($file->getPathname());
+        }
 
         return response()->json([
             'path' => $path, // Relative path for storage, e.g. "tmp/xyz.mp4"
             'name' => $fileName,
-            'mime_type' => $file->getMimeType(),
+            'mime_type' => $mimeType,
         ]);
     }
 
     protected function createFilename(UploadedFile $file)
     {
         $extension = $file->getClientOriginalExtension();
-        $filename = str_replace('.' . $extension, '', $file->getClientOriginalName()); // Filename without extension
-
-        // Add timestamp hash
-        $filename .= '_' . md5(time()) . '.' . $extension;
-
-        return $filename;
+        // Use UUID for secure filename
+        return Str::uuid() . '.' . $extension;
     }
 }

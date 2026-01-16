@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 
 // Aggregate instructor stats every hour for fast dashboard loading
 Schedule::job(new AggregateInstructorStats)->hourly();
+
+// Cleanup old temp files
+Schedule::command('cleanup:temp-files')->daily();

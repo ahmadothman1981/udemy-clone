@@ -27,12 +27,14 @@ class SecurityHeaders
         // Referrer policy - don't leak URLs to third parties
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        // Content Security Policy (adjust as needed)
+        // Content Security Policy
         if (!app()->environment('local')) {
+            $nonce = csp_nonce();
+            
             $csp = implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                "script-src 'self' 'nonce-{$nonce}' https://js.stripe.com",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", 
                 "font-src 'self' https://fonts.gstatic.com",
                 "img-src 'self' data: blob: https:",
                 "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",

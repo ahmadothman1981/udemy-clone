@@ -20,6 +20,7 @@ window.Echo = new Echo({
                     socket_id: socketId,
                     channel_name: channel.name
                 }, {
+                    withCredentials: false,
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

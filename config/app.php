@@ -123,4 +123,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'aliases' => [
+        'Auth' => Illuminate\Support\Facades\Auth::class,
+        'DB' => Illuminate\Support\Facades\DB::class,
+        'Log' => Illuminate\Support\Facades\Log::class,
+        'Redis' => Illuminate\Support\Facades\Redis::class,
+        'Route' => Illuminate\Support\Facades\Route::class,
+        'Schema' => Illuminate\Support\Facades\Schema::class,
+        'Storage' => Illuminate\Support\Facades\Storage::class,
+    ],
+
 ];
