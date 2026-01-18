@@ -1,5 +1,18 @@
 <template>
   <div class="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-900">
+    <!-- Language Switcher -->
+    <div class="absolute top-4 right-4 z-50">
+      <button 
+        @click="toggleLanguage" 
+        class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 transition-all text-white text-sm"
+      >
+        <span class="uppercase">{{ currentLang }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+        </svg>
+      </button>
+    </div>
+
     <!-- Animated Background Shapes -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
       <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-30 animate-blob"></div>
@@ -16,10 +29,10 @@
             <img :src="'/images/logo.png'" alt="NetLearn" class="h-12 w-auto drop-shadow-lg mx-auto" />
           </router-link>
           <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200">
-            Create Account
+            {{ $t('auth.create_account') }}
           </h2>
           <p class="text-purple-200 mt-2 text-sm">
-            Join thousands of learners today
+            {{ $t('auth.join_thousands') }}
           </p>
         </div>
 
@@ -28,7 +41,7 @@
           <div class="space-y-4">
             <!-- Name -->
             <div class="group relative">
-              <label for="name" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">Full Name</label>
+              <label for="name" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">{{ $t('auth.full_name_label') }}</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400 group-focus-within:text-purple-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -42,14 +55,14 @@
                   type="text"
                   required
                   class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 hover:bg-white/10"
-                  placeholder="Enter your full name"
+                  :placeholder="$t('auth.placeholders.name')"
                 />
               </div>
             </div>
 
             <!-- Email -->
             <div class="group relative">
-              <label for="email" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">Email Address</label>
+              <label for="email" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">{{ $t('auth.email_label') }}</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400 group-focus-within:text-purple-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -64,14 +77,14 @@
                   type="email"
                   required
                   class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 hover:bg-white/10"
-                  placeholder="Enter your email"
+                  :placeholder="$t('auth.placeholders.email')"
                 />
               </div>
             </div>
 
             <!-- Password -->
             <div class="group relative">
-              <label for="password" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">Password</label>
+              <label for="password" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">{{ $t('auth.password_label') }}</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400 group-focus-within:text-purple-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -85,14 +98,14 @@
                   type="password"
                   required
                   class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 hover:bg-white/10"
-                  placeholder="Create a password"
+                  :placeholder="$t('auth.placeholders.create_password')"
                 />
               </div>
             </div>
 
              <!-- Confirm Password -->
             <div class="group relative">
-              <label for="password_confirmation" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">Confirm Password</label>
+              <label for="password_confirmation" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">{{ $t('auth.confirm_password_label') }}</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400 group-focus-within:text-purple-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -106,7 +119,7 @@
                   type="password"
                   required
                   class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 hover:bg-white/10"
-                  placeholder="Confirm your password"
+                  :placeholder="$t('auth.placeholders.confirm_password')"
                 />
               </div>
             </div>
@@ -127,7 +140,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </span>
-            {{ loading ? 'Creating Account...' : 'Sign Up' }}
+            {{ loading ? $t('auth.creating_account') : $t('auth.sign_up') }}
           </button>
         </form>
 
@@ -138,7 +151,7 @@
               <div class="w-full border-t border-white/10"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-transparent text-gray-400">Or sign up with</span>
+              <span class="px-2 bg-transparent text-gray-400">{{ $t('auth.or_sign_up_with') }}</span>
             </div>
           </div>
 
@@ -169,9 +182,9 @@
 
         <!-- Login Link -->
         <p class="mt-8 text-center text-sm text-gray-400">
-          Already have an account?
+          {{ $t('auth.already_have_account') }}
           <router-link to="/login" class="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
-            Login
+            {{ $t('auth.login') }}
           </router-link>
         </p>
       </div>
@@ -180,12 +193,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { t, locale } = useI18n();
+
+const currentLang = computed(() => locale.value);
+
+const toggleLanguage = () => {
+    const newLang = locale.value === 'en' ? 'ar' : 'en';
+    locale.value = newLang;
+    document.dir = newLang === 'ar' ? 'rtl' : 'ltr';
+    localStorage.setItem('locale', newLang);
+};
 
 const form = ref({
     name: '',
@@ -219,10 +243,14 @@ const handleSignup = async () => {
              const errors = e.response.data.errors;
              error.value = Object.values(errors).flat().join(', ');
         } else {
-             error.value = 'Registration failed. Please try again.';
+             error.value = t('common.error');
         }
     } finally {
         loading.value = false;
     }
 };
+
+onMounted(() => {
+    document.dir = locale.value === 'ar' ? 'rtl' : 'ltr';
+});
 </script>

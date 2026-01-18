@@ -1,5 +1,18 @@
 <template>
   <div class="min-h-screen flex items-center justify-center relative overflow-hidden bg-gray-900">
+    <!-- Language Switcher -->
+    <div class="absolute top-4 right-4 z-50">
+      <button 
+        @click="toggleLanguage" 
+        class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 transition-all text-white text-sm"
+      >
+        <span class="uppercase">{{ currentLang }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+        </svg>
+      </button>
+    </div>
+
     <!-- Animated Background Shapes -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
       <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-30 animate-blob"></div>
@@ -16,10 +29,10 @@
             <img :src="'/images/logo.png'" alt="NetLearn" class="h-12 w-auto drop-shadow-lg mx-auto" />
           </router-link>
           <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200">
-            Welcome Back
+            {{ $t('auth.welcome_back') }}
           </h2>
           <p class="text-purple-200 mt-2 text-sm">
-            Sign in to continue your learning journey
+            {{ $t('auth.sign_in_subtitle') }}
           </p>
         </div>
 
@@ -36,7 +49,7 @@
           <div class="space-y-4">
             <!-- Email -->
             <div class="group relative">
-              <label for="email" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">Email Address</label>
+              <label for="email" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">{{ $t('auth.email_label') }}</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400 group-focus-within:text-purple-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -51,14 +64,14 @@
                   type="email"
                   required
                   class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 hover:bg-white/10"
-                  placeholder="Enter your email"
+                  :placeholder="$t('auth.placeholders.email')"
                 />
               </div>
             </div>
 
             <!-- Password -->
             <div class="group relative">
-              <label for="password" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">Password</label>
+              <label for="password" class="block text-xs font-medium text-purple-200 mb-1 uppercase tracking-wider">{{ $t('auth.password_label') }}</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400 group-focus-within:text-purple-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -72,7 +85,7 @@
                   type="password"
                   required
                   class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 hover:bg-white/10"
-                  placeholder="Enter your password"
+                  :placeholder="$t('auth.placeholders.password')"
                 />
               </div>
             </div>
@@ -87,13 +100,13 @@
                 class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded bg-white/10 border-white/20"
               />
               <label for="remember-me" class="ml-2 block text-sm text-gray-300">
-                Remember me
+                {{ $t('auth.remember_me') }}
               </label>
             </div>
 
             <div class="text-sm">
               <router-link to="/forgot-password" class="font-medium text-purple-300 hover:text-purple-200 transition-colors">
-                Forgot password?
+                {{ $t('auth.forgot_password') }}
               </router-link>
             </div>
           </div>
@@ -109,7 +122,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </span>
-            {{ loading ? 'Signing in...' : 'Sign In' }}
+            {{ loading ? $t('auth.signing_in') : $t('auth.sign_in') }}
           </button>
         </form>
 
@@ -120,7 +133,7 @@
               <div class="w-full border-t border-white/10"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-transparent text-gray-400">Or continue with</span>
+              <span class="px-2 bg-transparent text-gray-400">{{ $t('auth.or_continue_with') }}</span>
             </div>
           </div>
 
@@ -151,9 +164,9 @@
 
         <!-- Sign Up Link -->
         <p class="mt-8 text-center text-sm text-gray-400">
-          Don't have an account?
+          {{ $t('auth.dont_have_account') }}
           <router-link to="/signup" class="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
-            Sign up for free
+            {{ $t('auth.sign_up_free') }}
           </router-link>
         </p>
       </div>
@@ -162,15 +175,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from 'vue-i18n';
 
 const email = ref('');
 const password = ref('');
 const loading = ref(false);
 const auth = useAuthStore();
 const router = useRouter();
+const { t, locale } = useI18n();
+
+const currentLang = computed(() => locale.value);
+
+const toggleLanguage = () => {
+    const newLang = locale.value === 'en' ? 'ar' : 'en';
+    locale.value = newLang;
+    document.dir = newLang === 'ar' ? 'rtl' : 'ltr';
+    localStorage.setItem('locale', newLang);
+};
 
 // Determine redirect path based on user role
 const getRedirectPath = (user) => {
@@ -209,12 +233,12 @@ const handleLogin = async () => {
                 // Combine all errors into a single string or specifically show the email error which is common for auth
                  errorMessage.value = Object.values(e.response.data.errors).flat().join(' ');
             } else {
-                 errorMessage.value = e.response.data.message || 'Invalid credentials.';
+                 errorMessage.value = e.response.data.message || t('common.error');
             }
         } else if (e.response && e.response.status === 401) {
-            errorMessage.value = 'Invalid credentials.';
+            errorMessage.value = t('common.error'); // Or specific message for 401 if needed
         } else {
-            errorMessage.value = 'An error occurred. Please try again.';
+            errorMessage.value = t('common.error');
         }
     } finally {
         loading.value = false;
@@ -230,5 +254,7 @@ onMounted(async () => {
         const redirectPath = getRedirectPath(auth.user);
         router.replace(redirectPath);
     }
+    // Set initial direction
+    document.dir = locale.value === 'ar' ? 'rtl' : 'ltr';
 });
 </script>

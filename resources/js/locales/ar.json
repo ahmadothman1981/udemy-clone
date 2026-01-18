@@ -688,58 +688,92 @@
             "active_label": "نشط",
             "save_error": "فشل حفظ الرمز الترويجي",
             "delete_error": "فشل حذف الرمز الترويجي"
+        }
+    },
+    "auth": {
+        "welcome_back": "مرحباً بعودتك",
+        "sign_in_subtitle": "سجل الدخول لمتابعة رحلة تعلمك",
+        "email_label": "البريد الإلكتروني",
+        "password_label": "كلمة المرور",
+        "remember_me": "تذكرني",
+        "forgot_password": "نسيت كلمة المرور؟",
+        "sign_in": "تسجيل الدخول",
+        "signing_in": "جاري تسجيل الدخول...",
+        "or_continue_with": "أو تابع باستخدام",
+        "dont_have_account": "ليس لديك حساب؟",
+        "sign_up_free": "سجل مجاناً",
+        "create_account": "إنشاء حساب",
+        "join_thousands": "انضم إلى آلاف المتعلمين اليوم",
+        "full_name_label": "الاسم الكامل",
+        "confirm_password_label": "تأكيد كلمة المرور",
+        "sign_up": "اشتراك",
+        "creating_account": "جاري إنشاء الحساب...",
+        "or_sign_up_with": "أو سجل باستخدام",
+        "already_have_account": "لديك حساب بالفعل؟",
+        "login": "تسجيل الدخول",
+        "become_instructor": "كن مدرساً",
+        "share_knowledge": "شارك معرفتك واربح المال",
+        "sign_up_instructor": "سجل كمدرس",
+        "registering": "جاري التسجيل...",
+        "already_instructor": "هل أنت مدرس بالفعل؟",
+        "placeholders": {
+            "email": "أدخل بريدك الإلكتروني",
+            "password": "أدخل كلمة المرور",
+            "name": "أدخل اسمك الكامل",
+            "create_password": "أنشئ كلمة مرور",
+            "confirm_password": "أكد كلمة المرور"
+        }
+    },
+    "settings": {
+        "title": "إعدادات المنصة",
+        "tabs": {
+            "categories": "الفئات",
+            "payment": "الدفع",
+            "security": "الأمان",
+            "localization": "التعريب"
         },
-        "settings": {
-            "title": "إعدادات المنصة",
-            "tabs": {
-                "categories": "الفئات",
-                "payment": "الدفع",
-                "security": "الأمان",
-                "localization": "التعريب"
-            },
-            "categories": {
-                "title": "الفئات",
-                "subtitle": "إدارة فئات الدورات",
-                "add": "إضافة فئة",
-                "th_name": "الاسم",
-                "th_slug": "الاسم اللطيف (Slug)",
-                "th_courses": "الدورات",
-                "th_actions": "إجراءات",
-                "edit_modal_title": "تعديل الفئة",
-                "add_modal_title": "إضافة فئة",
-                "form_name": "الاسم",
-                "form_slug": "الاسم اللطيف (يتم إنشاؤه تلقائياً إذا كان فارغاً)",
-                "form_desc": "الوصف",
-                "cancel": "إلغاء",
-                "save": "حفظ",
-                "created": "تم إنشاء الفئة",
-                "updated": "تم تحديث الفئة",
-                "deleted": "تم حذف الفئة",
-                "confirm_delete": "هل أنت متأكد أنك تريد حذف هذه الفئة؟"
-            },
-            "payment": {
-                "title": "إعدادات الدفع",
-                "commission_label": "عمولة المنصة (%)",
-                "commission_desc": "النسبة المئوية المحتفظ بها من كل عملية بيع",
-                "payout_label": "الحد الأدنى للدفع ($)",
-                "payout_desc": "الحد الأدنى للرصيد المطلوب لدفع مستحقات المدربين",
-                "save": "حفظ إعدادات الدفع",
-                "saved": "تم حفظ إعدادات الدفع"
-            },
-            "security": {
-                "title": "إعدادات الأمان",
-                "password_label": "الحد الأدنى لطول كلمة المرور",
-                "timeout_label": "مهلة الجلسة (دقائق)",
-                "save": "حفظ إعدادات الأمان",
-                "saved": "تم حفظ إعدادات الأمان"
-            },
-            "localization": {
-                "title": "إعدادات التعريب",
-                "default_label": "اللغة الافتراضية",
-                "enabled_label": "الغات المفعلة",
-                "save": "حفظ إعدادات التعريب",
-                "saved": "تم حفظ إعدادات التعريب"
-            }
+        "categories": {
+            "title": "الفئات",
+            "subtitle": "إدارة فئات الدورات",
+            "add": "إضافة فئة",
+            "th_name": "الاسم",
+            "th_slug": "الاسم اللطيف (Slug)",
+            "th_courses": "الدورات",
+            "th_actions": "إجراءات",
+            "edit_modal_title": "تعديل الفئة",
+            "add_modal_title": "إضافة فئة",
+            "form_name": "الاسم",
+            "form_slug": "الاسم اللطيف (يتم إنشاؤه تلقائياً إذا كان فارغاً)",
+            "form_desc": "الوصف",
+            "cancel": "إلغاء",
+            "save": "حفظ",
+            "created": "تم إنشاء الفئة",
+            "updated": "تم تحديث الفئة",
+            "deleted": "تم حذف الفئة",
+            "confirm_delete": "هل أنت متأكد أنك تريد حذف هذه الفئة؟"
+        },
+        "payment": {
+            "title": "إعدادات الدفع",
+            "commission_label": "عمولة المنصة (%)",
+            "commission_desc": "النسبة المئوية المحتفظ بها من كل عملية بيع",
+            "payout_label": "الحد الأدنى للدفع ($)",
+            "payout_desc": "الحد الأدنى للرصيد المطلوب لدفع مستحقات المدربين",
+            "save": "حفظ إعدادات الدفع",
+            "saved": "تم حفظ إعدادات الدفع"
+        },
+        "security": {
+            "title": "إعدادات الأمان",
+            "password_label": "الحد الأدنى لطول كلمة المرور",
+            "timeout_label": "مهلة الجلسة (دقائق)",
+            "save": "حفظ إعدادات الأمان",
+            "saved": "تم حفظ إعدادات الأمان"
+        },
+        "localization": {
+            "title": "إعدادات التعريب",
+            "default_label": "اللغة الافتراضية",
+            "enabled_label": "الغات المفعلة",
+            "save": "حفظ إعدادات التعريب",
+            "saved": "تم حفظ إعدادات التعريب"
         }
     }
 }

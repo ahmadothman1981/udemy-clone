@@ -738,5 +738,39 @@
             "save_error": "Failed to save promo code",
             "delete_error": "Failed to delete promo code"
         }
+    },
+    "auth": {
+        "welcome_back": "Welcome Back",
+        "sign_in_subtitle": "Sign in to continue your learning journey",
+        "email_label": "Email Address",
+        "password_label": "Password",
+        "remember_me": "Remember me",
+        "forgot_password": "Forgot password?",
+        "sign_in": "Sign In",
+        "signing_in": "Signing in...",
+        "or_continue_with": "Or continue with",
+        "dont_have_account": "Don't have an account?",
+        "sign_up_free": "Sign up for free",
+        "create_account": "Create Account",
+        "join_thousands": "Join thousands of learners today",
+        "full_name_label": "Full Name",
+        "confirm_password_label": "Confirm Password",
+        "sign_up": "Sign Up",
+        "creating_account": "Creating Account...",
+        "or_sign_up_with": "Or sign up with",
+        "already_have_account": "Already have an account?",
+        "login": "Login",
+        "become_instructor": "Become an Instructor",
+        "share_knowledge": "Share your knowledge and earn money",
+        "sign_up_instructor": "Sign Up as Instructor",
+        "registering": "Registering...",
+        "already_instructor": "Already an instructor?",
+        "placeholders": {
+            "email": "Enter your email",
+            "password": "Enter your password",
+            "name": "Enter your full name",
+            "create_password": "Create a password",
+            "confirm_password": "Confirm your password"
+        }
     }
 }
