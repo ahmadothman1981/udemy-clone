@@ -9,7 +9,7 @@ export default {
         login: "Log In",
         signup: "Sign Up",
         logout: "Log Out",
-        teach: "Teach on Udemy",
+        teach: "Teach on NetLearn",
         instructor: "Instructor",
         dashboard: "Dashboard",
         notifications: "Notifications",
@@ -168,7 +168,7 @@ export default {
             terms: "Terms",
             privacy: "Privacy Policy",
             cookie: "Cookie Settings",
-            rights: "© 2026 Udemy Clone. All rights reserved.",
+            rights: "© 2026 NetLearn. All rights reserved.",
         },
 
         newsletter: {

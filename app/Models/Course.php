@@ -52,15 +52,18 @@ class Course extends Model
         });
 
         // Ensure slug is generated if title changes or on create
+        // Ensure slug is generated if title changes or on create
         static::creating(function ($course) {
-            $course->slug = \Illuminate\Support\Str::slug($course->title);
-            // Verify uniqueness or append ID/random in real world, 
-            // but for now simple slug. To be safe, maybe append random if exists?
-            // Simplest: just slug. If duplicate, DB throws error (unique constraint).
-            // Let's rely on simple slug for now, or append uniqid if needed.
-            // User requested "slug course name".
-            // We can tackle duplicates if they arise, or append a short random string.
-            // Re-saving to append ID is tricky on 'creating' since ID is null.
+            $slug = \Illuminate\Support\Str::slug($course->title);
+            $original = $slug;
+            $count = 1;
+
+            // Check for uniqueness
+            while (static::where('slug', $slug)->exists()) {
+                $slug = "{$original}-" . $count++;
+            }
+
+            $course->slug = $slug;
         });
 
         static::created(function ($course) {

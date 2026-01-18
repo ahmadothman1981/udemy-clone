@@ -4,7 +4,7 @@
       <!-- Left Side -->
       <div class="flex items-center gap-4">
           <!-- Logo -->
-          <router-link to="/" class="text-2xl font-bold text-gray-800 flex-shrink-0">UdemyClone</router-link>
+          <router-link to="/" class="text-2xl font-bold text-gray-800 flex-shrink-0">NetLearn</router-link>
 
           <!-- Categories -->
           <div class="relative hidden md:block" ref="categoriesRef">
@@ -99,9 +99,6 @@
         
         <router-link v-if="auth.isAuthenticated" to="/dashboard" class="text-gray-600 hover:text-gray-900 text-sm">
            {{ $t('student_dashboard.title') }}
-        </router-link>
-        <router-link v-else to="/my-courses" class="text-gray-600 hover:text-gray-900 text-sm">
-           {{ $t('nav.my_learning') }}
         </router-link>
 
         <div v-if="!auth.isAuthenticated" class="flex items-center space-x-4">

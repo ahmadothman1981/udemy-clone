@@ -34,7 +34,7 @@
             "terms": "Terms of use",
             "privacy": "Privacy policy",
             "cookie": "Cookie policy",
-            "rights": "All rights reserved."
+            "rights": "© 2026 NetLearn. All rights reserved."
         }
     },
     "nav": {
@@ -53,7 +53,7 @@
         "messages": "Messages",
         "account_settings": "Account settings",
         "payment_methods": "Payment methods",
-        "teach": "Teach on Udemy",
+        "teach": "Teach on NetLearn",
         "categories": "Categories",
         "settings": "Settings"
     },
@@ -76,6 +76,9 @@
         "clear_filters": "Clear filters",
         "filters": {
             "all_categories": "All Categories",
+            "all_levels": "All Levels",
+            "min_price": "Min $",
+            "max_price": "Max $",
             "sort_by": "Sort By",
             "most_popular": "Most Popular",
             "newest": "Newest",
@@ -156,6 +159,91 @@
             "rating": "Rating",
             "revenue": "Revenue",
             "status": "Status"
+        }
+    },
+    "pages": {
+        "about": {
+            "title": "About Us",
+            "welcome": "Welcome to NetLearn, a leading destination for online learning.",
+            "mission": "Our mission is to improve lives through learning. We enable anyone anywhere to create and share educational content (instructors) and to access that educational content to learn (students)."
+        },
+        "careers": {
+            "title": "Careers at NetLearn",
+            "subtitle": "Join our team and help us shape the future of learning.",
+            "text": "We are always looking for talented individuals to join our engineering, product, and support teams. Check back soon for open positions!"
+        },
+        "blog": {
+            "title": "NetLearn Blog",
+            "post_title": "The Future of Online Learning",
+            "post_date": "January 15, 2026",
+            "post_excerpt": "Discover how technology is transforming education and making learning more accessible than ever before..."
+        },
+        "affiliate": {
+            "title": "Affiliate Program",
+            "earn": "Earn money by recommending courses you love!",
+            "desc": "Our affiliate program is free to join and easy to use. As a NetLearn affiliate, you'll have access to our vast library of courses to promote.",
+            "join": "Join Now"
+        },
+        "partners": {
+            "title": "Our Partners",
+            "desc": "We partner with leading organizations to bring you the best content."
+        },
+        "help": {
+            "title": "Help & Support",
+            "search_placeholder": "Search for a solution...",
+            "how_help": "How can we help you?",
+            "student_support": "Student Support",
+            "student_desc": "Get help with course taking, payments, and account issues.",
+            "instructor_support": "Instructor Support",
+            "instructor_desc": "Get help with course creation, marketing, and payments.",
+            "trust_safety": "Trust & Safety",
+            "trust_desc": "Report policy violations and learn about our guidelines."
+        },
+        "contact": {
+            "title": "Contact Us",
+            "name": "Name",
+            "email": "Email",
+            "message": "Message",
+            "send": "Send Message"
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "q1": "How do I take a course?",
+            "a1": "Once you enroll in a course, you can access it anytime from your \"My Learning\" dashboard.",
+            "q2": "Do courses expire?",
+            "a2": "No! Once you purchase a course, you have lifetime access to it.",
+            "q3": "How do I become an instructor?",
+            "a3": "Click on \"Teach on NetLearn\" in the navigation bar to sign up as an instructor and start creating your course."
+        },
+        "terms": {
+            "title": "Terms of Use",
+            "last_updated": "Last Updated: January 1, 2026",
+            "intro": "Welcome to NetLearn. By accessing or using our website, you agree to be bound by these Terms of Use.",
+            "accounts": "1. Accounts",
+            "accounts_desc": "You need an account for most activities on our platform. Keep your password safe.",
+            "enrollment": "2. Content Enrollment and Lifetime Access",
+            "enrollment_desc": "When you enroll in a course, you get a license from us to view it via the NetLearn Services and no other use."
+        },
+        "privacy": {
+            "title": "Privacy Policy",
+            "last_updated": "Last Updated: January 1, 2026",
+            "intro": "At NetLearn, we respect your privacy and are committed to protecting your personal data.",
+            "collect": "1. Data We Collect",
+            "collect_desc": "We collect certain data from you directly, like information you enter yourself, data about your participation in courses, and data from third-party platforms you connect with NetLearn.",
+            "use": "2. How We Use Your Data",
+            "use_desc": "We use your data to provide our Services, communicate with you, troubleshoot issues, secure against fraud and abuse, improve and update our Services, analyze how people use our Services, serve personalized advertising, and as required by law or necessary for safety and integrity."
+        },
+        "cookie": {
+            "title": "Cookie Settings",
+            "intro": "We use cookies and similar tracking technologies to track the activity on our Service and hold certain information.",
+            "what_are": "What are Cookies?",
+            "what_are_desc": "Cookies are small files placed on your device. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.",
+            "manage": "Manage Preferences",
+            "essential": "Essential Cookies",
+            "essential_desc": "Required for the site to function",
+            "analytics": "Analytics Cookies",
+            "analytics_desc": "Help us improve our website",
+            "save": "Save Preferences"
         }
     }
 }

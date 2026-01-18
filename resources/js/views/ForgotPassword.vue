@@ -3,7 +3,7 @@
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <div class="flex justify-center mb-2">
                 <router-link to="/">
-                    <img :src="'/images/logo.png'" alt="UdemyClone" class="h-12 w-auto">
+                    <img :src="'/images/logo.png'" alt="NetLearn" class="h-12 w-auto">
                 </router-link>
             </div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">

@@ -72,7 +72,7 @@ class DatabaseSeeder extends Seeder
         // Admin User
         $admin = User::factory()->create([
             'name' => 'Admin User',
-            'email' => 'admin@udemyclone.com',
+            'email' => 'admin@netlearn.com',
         ]);
         DB::table('user_roles')->insert([
             'user_id' => $admin->id,

@@ -38,7 +38,7 @@
               @change="applyFilters"
               class="filter-select"
             >
-              <option value="">All Levels</option>
+              <option value="">{{ $t('home.filters.all_levels') }}</option>
               <option v-for="level in courseStore.levels" :key="level.id" :value="level.slug || level.id">
                 {{ level.name }}
               </option>
@@ -48,7 +48,7 @@
               <input 
                 v-model="priceMin" 
                 type="number" 
-                placeholder="Min $" 
+                :placeholder="$t('home.filters.min_price')" 
                 min="0"
                 class="filter-input w-20"
                 @change="applyFilters"
@@ -57,7 +57,7 @@
               <input 
                 v-model="priceMax" 
                 type="number" 
-                placeholder="Max $" 
+                :placeholder="$t('home.filters.max_price')" 
                 min="0"
                 class="filter-input w-20"
                 @change="applyFilters"
@@ -138,39 +138,39 @@
           <div>
             <h4 class="text-white font-semibold mb-4">{{ $t('common.footer.company') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.about') }}</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.careers') }}</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.blog') }}</a></li>
+              <li><router-link to="/about" class="hover:text-white transition-colors">{{ $t('common.footer.about') }}</router-link></li>
+              <li><router-link to="/careers" class="hover:text-white transition-colors">{{ $t('common.footer.careers') }}</router-link></li>
+              <li><router-link to="/blog" class="hover:text-white transition-colors">{{ $t('common.footer.blog') }}</router-link></li>
             </ul>
           </div>
           <div>
             <h4 class="text-white font-semibold mb-4">{{ $t('common.footer.community') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.become_instructor') }}</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.affiliate') }}</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.partners') }}</a></li>
+              <li><router-link to="/instructor/signup" class="hover:text-white transition-colors">{{ $t('common.footer.become_instructor') }}</router-link></li>
+              <li><router-link to="/affiliate" class="hover:text-white transition-colors">{{ $t('common.footer.affiliate') }}</router-link></li>
+              <li><router-link to="/partners" class="hover:text-white transition-colors">{{ $t('common.footer.partners') }}</router-link></li>
             </ul>
           </div>
           <div>
             <h4 class="text-white font-semibold mb-4">{{ $t('common.footer.support') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.help') }}</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.contact') }}</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.faq') }}</a></li>
+              <li><router-link to="/help" class="hover:text-white transition-colors">{{ $t('common.footer.help') }}</router-link></li>
+              <li><router-link to="/contact" class="hover:text-white transition-colors">{{ $t('common.footer.contact') }}</router-link></li>
+              <li><router-link to="/faq" class="hover:text-white transition-colors">{{ $t('common.footer.faq') }}</router-link></li>
             </ul>
           </div>
           <div>
             <h4 class="text-white font-semibold mb-4">{{ $t('common.footer.legal') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.terms') }}</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.privacy') }}</a></li>
-              <li><a href="#" class="hover:text-white transition-colors">{{ $t('common.footer.cookie') }}</a></li>
+              <li><router-link to="/terms" class="hover:text-white transition-colors">{{ $t('common.footer.terms') }}</router-link></li>
+              <li><router-link to="/privacy" class="hover:text-white transition-colors">{{ $t('common.footer.privacy') }}</router-link></li>
+              <li><router-link to="/cookie-settings" class="hover:text-white transition-colors">{{ $t('common.footer.cookie') }}</router-link></li>
             </ul>
           </div>
         </div>
         <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div class="text-2xl font-bold text-white">UdemyClone</div>
-          <p class="text-sm">© 2026 UdemyClone. {{ $t('common.footer.rights') }}</p>
+          <div class="text-2xl font-bold text-white">NetLearn</div>
+          <p class="text-sm">{{ $t('common.footer.rights') }}</p>
         </div>
       </div>
     </footer>

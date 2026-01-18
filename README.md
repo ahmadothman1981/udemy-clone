@@ -1,4 +1,4 @@
-# Udemy Clone
+# NetLearn
 
 A full-featured Learning Management System (LMS) inspired by Udemy, built with **Laravel 11** (Backend) and **Vue 3** (Frontend).
 

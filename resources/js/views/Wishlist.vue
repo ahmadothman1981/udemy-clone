@@ -58,7 +58,7 @@ const moveToCart = (item) => {
     cartStore.addItem(item);
     // Optional: remove from wishlist after adding to cart? 
     // Usually wishlist items stay unless explicitly removed, or moved.
-    // Udemy moves it.
+    // NetLearn moves it.
     wishlistStore.removeItem(item.id);
 };
 </script>

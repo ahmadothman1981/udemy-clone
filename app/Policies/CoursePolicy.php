@@ -40,7 +40,7 @@ class CoursePolicy
         if ($user->roles()->where('name', 'admin')->exists()) {
             return true;
         }
-        return $user->id === $course->instructor_id;
+        return (int)$user->id === (int)$course->instructor_id;
     }
 
     /**
@@ -48,7 +48,7 @@ class CoursePolicy
      */
     public function update(User $user, Course $course): bool
     {
-        return $this->isVerifiedInstructor($user) && $user->id === $course->instructor_id;
+        return $this->isVerifiedInstructor($user) && (int)$user->id === (int)$course->instructor_id;
     }
 
     /**
@@ -56,6 +56,6 @@ class CoursePolicy
      */
     public function delete(User $user, Course $course): bool
     {
-        return $this->isVerifiedInstructor($user) && $user->id === $course->instructor_id;
+        return $this->isVerifiedInstructor($user) && (int)$user->id === (int)$course->instructor_id;
     }
 }

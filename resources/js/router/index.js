@@ -12,6 +12,19 @@ const InstructorDashboard = () => import('../views/InstructorDashboard.vue');
 const AdminDashboard = () => import('../views/AdminDashboard.vue');
 const SearchResults = () => import('../views/SearchResults.vue');
 
+// Footer Pages
+const About = () => import('../views/About.vue');
+const Careers = () => import('../views/Careers.vue');
+const Blog = () => import('../views/Blog.vue');
+const Affiliate = () => import('../views/Affiliate.vue');
+const Partners = () => import('../views/Partners.vue');
+const Help = () => import('../views/Help.vue');
+const Contact = () => import('../views/Contact.vue');
+const FAQ = () => import('../views/FAQ.vue');
+const Terms = () => import('../views/Terms.vue');
+const Privacy = () => import('../views/Privacy.vue');
+const Cookie = () => import('../views/Cookie.vue');
+
 const routes = [
     { path: '/', component: Home },
     { path: '/search', component: SearchResults },
@@ -70,11 +83,20 @@ const routes = [
         component: () => import('../views/CheckoutSuccess.vue'),
         meta: { requiresAuth: true }
     },
-    {
-        path: '/course/:courseId/quiz/:quizId',
-        component: () => import('../views/QuizPlayer.vue'),
-        meta: { requiresAuth: true }
-    }
+    { path: '/course/:courseId/quiz/:quizId', component: () => import('../views/QuizPlayer.vue'), meta: { requiresAuth: true } },
+
+    // Footer Routes
+    { path: '/about', component: About },
+    { path: '/careers', component: Careers },
+    { path: '/blog', component: Blog },
+    { path: '/affiliate', component: Affiliate },
+    { path: '/partners', component: Partners },
+    { path: '/help', component: Help },
+    { path: '/contact', component: Contact },
+    { path: '/faq', component: FAQ },
+    { path: '/terms', component: Terms },
+    { path: '/privacy', component: Privacy },
+    { path: '/cookie-settings', component: Cookie }
 ];
 
 const router = createRouter({

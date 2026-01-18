@@ -13,7 +13,7 @@
         <!-- Header -->
         <div class="text-center mb-8">
           <router-link to="/" class="inline-block mb-4 transition-transform hover:scale-105">
-            <img :src="'/images/logo.png'" alt="UdemyClone" class="h-12 w-auto drop-shadow-lg mx-auto" />
+            <img :src="'/images/logo.png'" alt="NetLearn" class="h-12 w-auto drop-shadow-lg mx-auto" />
           </router-link>
           <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200">
             Create Account
