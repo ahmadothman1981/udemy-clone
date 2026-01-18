@@ -53,7 +53,7 @@
         "messages": "الرسائل",
         "account_settings": "إعدادات الحساب",
         "payment_methods": "طرق الدفع",
-        "teach": "درّس على يوديمي",
+        "teach": "درّس على نت ليرن",
         "categories": "التصنيفات",
         "settings": "الإعدادات"
     },
@@ -245,5 +245,9 @@
             "analytics_desc": "تساعدنا على تحسين موقعنا",
             "save": "حفظ التفضيلات"
         }
+    },
+    "course": {
+        "bestseller": "الأكثر مبيعاً",
+        "new": "جديد"
     }
 }

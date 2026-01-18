@@ -2,6 +2,11 @@
 @import "./rtl.css";
 @plugin "@tailwindcss/typography";
 
+/* Arabic Font */
+html[lang="ar"] {
+    font-family: "Cairo", sans-serif;
+}
+
 /* Custom Animations */
 @keyframes blob {
   0% {

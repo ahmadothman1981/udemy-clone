@@ -103,7 +103,7 @@
 
         <div v-if="!auth.isAuthenticated" class="flex items-center space-x-4">
              <router-link to="/instructor/signup" class="text-sm font-medium text-gray-700 hover:text-purple-600 px-2">
-                Teach on NetLearn
+                {{ $t('nav.teach') }}
             </router-link>
             <router-link to="/login" class="px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-sm">
                 {{ $t('nav.login') }}

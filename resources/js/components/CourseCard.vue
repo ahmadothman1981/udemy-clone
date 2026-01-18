@@ -6,10 +6,10 @@
     <!-- Badges -->
     <div class="absolute top-3 left-3 z-10 flex flex-col gap-1">
       <span v-if="isBestseller" class="badge badge-bestseller">
-        Bestseller
+        {{ $t('course.bestseller') }}
       </span>
       <span v-if="isNew" class="badge badge-new">
-        New
+        {{ $t('course.new') }}
       </span>
     </div>
     

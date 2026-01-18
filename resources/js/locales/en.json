@@ -245,5 +245,9 @@
             "analytics_desc": "Help us improve our website",
             "save": "Save Preferences"
         }
+    },
+    "course": {
+        "bestseller": "Bestseller",
+        "new": "New"
     }
 }
