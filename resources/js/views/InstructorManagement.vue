@@ -5,7 +5,7 @@
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Header -->
       <!-- Header -->
-      <AdminHeader title="Instructor Management" @logout="handleLogout" />
+      <AdminHeader :title="$t('admin.instructors.title')" @logout="handleLogout" />
 
       <div class="flex-1 overflow-auto p-8">
         <!-- Tabs -->
@@ -21,26 +21,26 @@
                 : 'text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200'
             ]"
           >
-            {{ tab }}
+            {{ tab === 'All Instructors' ? $t('admin.instructors.tab_all') : $t('admin.instructors.tab_pending') }}
           </button>
         </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" v-if="activeTab === 'All Instructors'">
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 transition-colors">
-            <div class="text-sm text-slate-500 dark:text-slate-400">Total Instructors</div>
+            <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.instructors.total') }}</div>
             <div class="text-2xl font-bold text-slate-800 dark:text-white">{{ pagination.total || 0 }}</div>
           </div>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 transition-colors">
-            <div class="text-sm text-slate-500 dark:text-slate-400">Pending Approval</div>
+            <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.instructors.pending') }}</div>
             <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-500">{{ pendingInstructors.length }}</div>
           </div>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 transition-colors">
-            <div class="text-sm text-slate-500 dark:text-slate-400">Verified</div>
+            <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.instructors.verified') }}</div>
             <div class="text-2xl font-bold text-green-600 dark:text-green-500">{{ verifiedCount }}</div>
           </div>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 transition-colors">
-            <div class="text-sm text-slate-500 dark:text-slate-400">Restricted</div>
+            <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.instructors.restricted') }}</div>
             <div class="text-2xl font-bold text-red-600 dark:text-red-500">{{ restrictedCount }}</div>
           </div>
         </div>
@@ -54,15 +54,15 @@
                 v-model="searchQuery" 
                 @input="debouncedSearch"
                 type="text" 
-                placeholder="Search instructors..." 
+                :placeholder="$t('admin.instructors.search_placeholder')" 
                 class="w-full max-w-md px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
               >
             </div>
             <select v-model="statusFilter" @change="fetchInstructors" class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white transition-colors">
-              <option value="">All Status</option>
-              <option value="approved">Verified</option>
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
+              <option value="">{{ $t('admin.instructors.all_status') }}</option>
+              <option value="approved">{{ $t('admin.instructors.verified') }}</option>
+              <option value="pending">{{ $t('admin.instructors.pending_status') }}</option>
+              <option value="rejected">{{ $t('admin.instructors.rejected') }}</option>
             </select>
           </div>
 
@@ -71,12 +71,12 @@
             <table class="w-full text-left border-collapse">
               <thead class="bg-slate-50/50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700 transition-colors">
                 <tr>
-                  <th class="px-6 py-4 font-semibold">Instructor</th>
-                  <th class="px-6 py-4 font-semibold">Courses</th>
-                  <th class="px-6 py-4 font-semibold">Students</th>
-                  <th class="px-6 py-4 font-semibold">Rating</th>
-                  <th class="px-6 py-4 font-semibold">Status</th>
-                  <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                  <th class="px-6 py-4 font-semibold">{{ $t('admin.instructors.th_instructor') }}</th>
+                  <th class="px-6 py-4 font-semibold">{{ $t('admin.instructors.th_courses') }}</th>
+                  <th class="px-6 py-4 font-semibold">{{ $t('admin.instructors.th_students') }}</th>
+                  <th class="px-6 py-4 font-semibold">{{ $t('admin.instructors.th_rating') }}</th>
+                  <th class="px-6 py-4 font-semibold">{{ $t('admin.instructors.th_status') }}</th>
+                  <th class="px-6 py-4 font-semibold text-right">{{ $t('admin.instructors.th_actions') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-700 transition-colors">
@@ -110,7 +110,7 @@
                       {{ instructor.instructor_verification_status }}
                     </span>
                     <span v-if="(instructor.instructor_restrictions?.length || 0) > 0" class="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                      Restricted
+                      {{ $t('admin.instructors.restricted_badge') }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right">
@@ -118,10 +118,10 @@
                       <!-- For Pending Tab -->
                       <template v-if="activeTab === 'Pending Approval'">
                         <button @click="verifyInstructor(instructor, 'approve')" class="px-3 py-1.5 text-xs font-medium text-white bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 rounded-lg flex items-center gap-1 transition-colors">
-                          <CheckCircle class="w-3.5 h-3.5" /> Approve
+                          <CheckCircle class="w-3.5 h-3.5" /> {{ $t('admin.instructors.approve') }}
                         </button>
                         <button @click="verifyInstructor(instructor, 'reject')" class="px-3 py-1.5 text-xs font-medium text-white bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg flex items-center gap-1 transition-colors">
-                          <XCircle class="w-3.5 h-3.5" /> Reject
+                          <XCircle class="w-3.5 h-3.5" /> {{ $t('admin.instructors.reject') }}
                         </button>
                       </template>
                       <!-- For All Instructors Tab -->
@@ -138,7 +138,7 @@
                 </tr>
                 <tr v-if="visibleInstructors.length === 0">
                   <td colspan="6" class="px-6 py-12 text-center text-slate-400 italic">
-                    {{ activeTab === 'All Instructors' ? 'No instructors found.' : 'No pending instructor requests.' }}
+                    {{ activeTab === 'All Instructors' ? $t('admin.instructors.no_instructors') : $t('admin.instructors.no_pending') }}
                   </td>
                 </tr>
               </tbody>
@@ -148,14 +148,14 @@
           <!-- Pagination -->
           <div class="p-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between transition-colors" v-if="activeTab === 'All Instructors' && pagination.total > 0">
             <span class="text-sm text-slate-500 dark:text-slate-400">
-              Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }}
+              {{ $t('admin.instructors.showing', {from: pagination.from, to: pagination.to, total: pagination.total}) }}
             </span>
             <div class="flex gap-2">
               <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-3 py-1 text-sm border border-slate-200 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                Previous
+                {{ $t('admin.instructors.previous') }}
               </button>
               <button @click="changePage(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-3 py-1 text-sm border border-slate-200 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                Next
+                {{ $t('admin.instructors.next') }}
               </button>
             </div>
           </div>
@@ -205,28 +205,28 @@
     <div v-if="restrictModalVisible" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="restrictModalVisible = false">
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transition-colors">
         <div class="p-6 border-b border-slate-100 dark:border-slate-700 transition-colors">
-          <h3 class="text-lg font-bold text-slate-800 dark:text-white">Manage Restrictions: {{ selectedInstructor?.name }}</h3>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white">{{ $t('admin.instructors.modal_restrict_title', {name: selectedInstructor?.name}) }}</h3>
         </div>
         <div class="p-6 space-y-4">
           <button @click="restrictInstructor('block_new_courses')" class="w-full p-4 text-left bg-slate-50 dark:bg-slate-700/30 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-200 dark:hover:border-orange-800 border border-slate-200 dark:border-slate-600 transition-colors">
-            <div class="font-medium text-slate-800 dark:text-white">Block New Courses</div>
-            <div class="text-sm text-slate-500 dark:text-slate-400">Prevent instructor from creating new courses</div>
+            <div class="font-medium text-slate-800 dark:text-white">{{ $t('admin.instructors.block_new_courses') }}</div>
+            <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.instructors.block_new_courses_desc') }}</div>
           </button>
           <button @click="restrictInstructor('block_new_students')" class="w-full p-4 text-left bg-slate-50 dark:bg-slate-700/30 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-200 dark:hover:border-orange-800 border border-slate-200 dark:border-slate-600 transition-colors">
-            <div class="font-medium text-slate-800 dark:text-white">Block New Students</div>
-            <div class="text-sm text-slate-500 dark:text-slate-400">Stop accepting new enrollments</div>
+            <div class="font-medium text-slate-800 dark:text-white">{{ $t('admin.instructors.block_new_students') }}</div>
+            <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.instructors.block_new_students_desc') }}</div>
           </button>
           <button @click="restrictInstructor('full_restrict')" class="w-full p-4 text-left bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-800 transition-colors">
-            <div class="font-medium text-red-700 dark:text-red-400">Full Restriction</div>
-            <div class="text-sm text-red-500 dark:text-red-300">Block all instructor activities</div>
+            <div class="font-medium text-red-700 dark:text-red-400">{{ $t('admin.instructors.full_restriction') }}</div>
+            <div class="text-sm text-red-500 dark:text-red-300">{{ $t('admin.instructors.full_restriction_desc') }}</div>
           </button>
           <button @click="restrictInstructor('unrestrict')" class="w-full p-4 text-left bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 transition-colors">
-            <div class="font-medium text-green-700 dark:text-green-400">Remove All Restrictions</div>
-            <div class="text-sm text-green-500 dark:text-green-300">Restore full instructor access</div>
+            <div class="font-medium text-green-700 dark:text-green-400">{{ $t('admin.instructors.remove_restrictions') }}</div>
+            <div class="text-sm text-green-500 dark:text-green-300">{{ $t('admin.instructors.restore_access') }}</div>
           </button>
         </div>
         <div class="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-end transition-colors">
-          <button @click="restrictModalVisible = false" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Cancel</button>
+          <button @click="restrictModalVisible = false" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">{{ $t('admin.instructors.cancel') }}</button>
         </div>
       </div>
     </div>
@@ -243,6 +243,8 @@ import { Star, CheckCircle, XCircle, BarChart2, Ban } from 'lucide-vue-next';
 import axios from 'axios';
 import { confirmAction, confirmDelete, showSuccess, showError, promptInput } from '../utils/sweetalert';
 import debounce from 'lodash/debounce';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -282,7 +284,7 @@ const fetchInstructors = async (page = 1) => {
       to: res.data.to,
     };
   } catch (e) {
-    showError('Failed to load instructors');
+    showError(t('admin.instructors.load_error'));
   }
 };
 
@@ -305,21 +307,21 @@ const changePage = (page) => {
 const verifyInstructor = async (instructor, action) => {
   let reason = '';
   if (action === 'reject') {
-    const result = await promptInput({ title: 'Rejection Reason', inputPlaceholder: 'Enter reason for rejection...' });
+    const result = await promptInput({ title: t('admin.instructors.reject_reason'), inputPlaceholder: t('admin.instructors.enter_reason') });
     if (!result.isConfirmed) return;
     reason = result.value;
   } else {
-    const result = await confirmAction({ title: 'Approve Instructor?', text: `Approve ${instructor.name} as an instructor?`, confirmButtonText: 'Yes, approve!' });
+    const result = await confirmAction({ title: t('admin.instructors.approve_title'), text: t('admin.instructors.approve_confirm', {name: instructor.name}), confirmButtonText: t('admin.instructors.approve') });
     if (!result.isConfirmed) return;
   }
 
   try {
     await axios.post(`/api/admin/instructors/${instructor.id}/verify`, { action, reason });
-    showSuccess(`Instructor ${action}d successfully`);
+    showSuccess(t('admin.instructors.status_updated'));
     fetchPendingInstructors();
     fetchInstructors();
   } catch (e) {
-    showError('Failed to update instructor status');
+    showError(t('admin.instructors.update_error'));
   }
 };
 
@@ -330,7 +332,7 @@ const showStatsModal = async (instructor) => {
     selectedStats.value = res.data;
     statsModalVisible.value = true;
   } catch (e) {
-    showError('Failed to load stats');
+    showError(t('admin.instructors.load_stats_error'));
   }
 };
 
@@ -341,19 +343,19 @@ const showRestrictModal = (instructor) => {
 
 const restrictInstructor = async (action) => {
   const result = await confirmAction({ 
-    title: 'Confirm Action', 
-    text: `Apply "${action.replace(/_/g, ' ')}" to ${selectedInstructor.value.name}?`,
-    confirmButtonText: 'Yes, proceed!'
+    title: t('admin.instructors.confirm_action'), 
+    text: t('admin.instructors.apply_restriction', {action: action.replace(/_/g, ' '), name: selectedInstructor.value.name}),
+    confirmButtonText: t('admin.instructors.yes_proceed')
   });
   if (!result.isConfirmed) return;
 
   try {
     await axios.post(`/api/admin/instructors/${selectedInstructor.value.id}/restrict`, { action });
-    showSuccess('Restriction updated');
+    showSuccess(t('admin.instructors.restriction_updated'));
     restrictModalVisible.value = false;
     fetchInstructors();
   } catch (e) {
-    showError('Failed to update restrictions');
+    showError(t('admin.instructors.update_error'));
   }
 };
 

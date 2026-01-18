@@ -1,23 +1,23 @@
 <template>
   <div class="mt-8">
-    <h3 class="text-xl font-bold mb-4">Reviews</h3>
+    <h3 class="text-xl font-bold mb-4">{{ $t('reviews.title') }}</h3>
     
     <!-- Write Review Form -->
     <div v-if="canReview" class="bg-gray-50 p-4 rounded-lg mb-6">
-       <h4 class="font-bold mb-2">Write a Review</h4>
+       <h4 class="font-bold mb-2">{{ $t('reviews.write_title') }}</h4>
        <div class="flex space-x-2 mb-2">
            <button v-for="star in 5" :key="star" @click="rating = star" class="text-2xl focus:outline-none" :class="star <= rating ? 'text-yellow-400' : 'text-gray-300'">
                ★
            </button>
        </div>
-       <textarea v-model="content" class="w-full border border-gray-300 rounded p-2 mb-2" rows="3" placeholder="Tell us about your experience..."></textarea>
+       <textarea v-model="content" class="w-full border border-gray-300 rounded p-2 mb-2" rows="3" :placeholder="$t('reviews.placeholder')"></textarea>
        <button @click="submitReview" class="bg-purple-600 text-white px-4 py-2 rounded font-bold disabled:opacity-50" :disabled="!content || !rating">
-           Post Review
+           {{ $t('reviews.submit') }}
        </button>
     </div>
 
     <!-- Review List -->
-    <div v-if="loading">Loading reviews...</div>
+    <div v-if="loading">{{ $t('reviews.loading') }}</div>
     <div v-else class="space-y-6">
         <div v-for="review in reviews" :key="review.id" class="border-b border-gray-100 pb-6">
             <div class="flex items-center space-x-3 mb-2">
@@ -31,12 +31,12 @@
                      </div>
                 </div>
                 <div class="ml-auto text-xs text-gray-400">
-                    {{ new Date(review.created_at).toLocaleDateString() }}
+                    {{ new Date(review.created_at).toLocaleDateString($i18n.locale === 'ar' ? 'ar-EG' : 'en-US') }}
                 </div>
             </div>
             <p class="text-gray-700">{{ review.content }}</p>
         </div>
-        <div v-if="reviews.length === 0" class="text-gray-500 italic">No reviews yet.</div>
+        <div v-if="reviews.length === 0" class="text-gray-500 italic">{{ $t('reviews.no_reviews') }}</div>
     </div>
   </div>
 </template>

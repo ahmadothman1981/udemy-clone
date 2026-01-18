@@ -8,7 +8,7 @@
         
         <!-- Top Header -->
         <!-- Top Header -->
-        <AdminHeader title="Dashboard" @logout="handleLogout" />
+        <AdminHeader :title="$t('admin.dashboard.title')" @logout="handleLogout" />
 
         <!-- Main Content -->
         <main class="flex-1 overflow-auto p-8">
@@ -23,15 +23,15 @@
               <div class="flex items-center gap-2">
                 <div class="relative">
                   <button @click="exportDropdownOpen = !exportDropdownOpen" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-200 transition-colors">
-                    <Download class="w-4 h-4" /> Export
+                    <Download class="w-4 h-4" /> {{ $t('admin.dashboard.export') }}
                     <ChevronDown class="w-4 h-4" />
                   </button>
                   <div v-if="exportDropdownOpen" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50">
-                    <button @click="exportData('summary')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">Summary Report</button>
-                    <button @click="exportData('users')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">New Users</button>
-                    <button @click="exportData('revenue')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">Revenue Data</button>
-                    <button @click="exportData('enrollments')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">Enrollments</button>
-                    <button @click="exportData('courses')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">Top Courses</button>
+                    <button @click="exportData('summary')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">{{ $t('admin.dashboard.summary_report') }}</button>
+                    <button @click="exportData('users')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">{{ $t('admin.dashboard.new_users_report') }}</button>
+                    <button @click="exportData('revenue')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">{{ $t('admin.dashboard.revenue_report') }}</button>
+                    <button @click="exportData('enrollments')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">{{ $t('admin.dashboard.enrollments_report') }}</button>
+                    <button @click="exportData('courses')" class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300">{{ $t('admin.dashboard.top_courses_report') }}</button>
                   </div>
                 </div>
               </div>
@@ -48,16 +48,16 @@
                 </div>
             </div>
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard title="Total Users" :value="stats?.total_users || 0" type="blue">
+                <StatCard :title="$t('admin.dashboard.total_users')" :value="stats?.total_users || 0" type="blue">
                     <template #icon><Users class="w-6 h-6" /></template>
                 </StatCard>
-                <StatCard title="Total Courses" :value="stats?.total_courses || 0" type="purple">
+                <StatCard :title="$t('admin.dashboard.total_courses')" :value="stats?.total_courses || 0" type="purple">
                      <template #icon><BookOpen class="w-6 h-6" /></template>
                 </StatCard>
-                <StatCard title="Total Revenue" :value="formatCurrency(stats?.total_revenue || 0)" type="success">
+                <StatCard :title="$t('admin.dashboard.total_revenue')" :value="formatCurrency(stats?.total_revenue || 0)" type="success">
                      <template #icon><DollarSign class="w-6 h-6" /></template>
                 </StatCard>
-                <StatCard title="Pending Approval" :value="stats?.pending_courses || 0" type="warning">
+                <StatCard :title="$t('admin.dashboard.pending_approval')" :value="stats?.pending_courses || 0" type="warning">
                      <template #icon><Clock class="w-6 h-6" /></template>
                 </StatCard>
             </div>
@@ -65,21 +65,21 @@
             <!-- Period Stats (when comparison enabled) -->
             <div v-if="analytics?.period_totals" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 transition-colors">
-                <div class="text-sm text-slate-500 dark:text-slate-400">New Users (Selected Period)</div>
+                <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.dashboard.period_new_users') }}</div>
                 <div class="text-2xl font-bold text-slate-800 dark:text-white">{{ analytics.period_totals.new_users }}</div>
                 <div v-if="analytics?.comparison" :class="getChangeClass(analytics.period_totals.new_users, analytics.comparison.new_users)" class="text-xs mt-1">
                   {{ getChangeText(analytics.period_totals.new_users, analytics.comparison.new_users) }}
                 </div>
               </div>
               <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 transition-colors">
-                <div class="text-sm text-slate-500 dark:text-slate-400">New Enrollments (Selected Period)</div>
+                <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.dashboard.period_new_enrollments') }}</div>
                 <div class="text-2xl font-bold text-slate-800 dark:text-white">{{ analytics.period_totals.new_enrollments }}</div>
                 <div v-if="analytics?.comparison" :class="getChangeClass(analytics.period_totals.new_enrollments, analytics.comparison.new_enrollments)" class="text-xs mt-1">
                   {{ getChangeText(analytics.period_totals.new_enrollments, analytics.comparison.new_enrollments) }}
                 </div>
               </div>
               <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 transition-colors">
-                <div class="text-sm text-slate-500 dark:text-slate-400">Revenue (Selected Period)</div>
+                <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.dashboard.period_revenue') }}</div>
                 <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ formatCurrency(analytics.period_totals.revenue) }}</div>
                 <div v-if="analytics?.comparison" :class="getChangeClass(analytics.period_totals.revenue, analytics.comparison.revenue)" class="text-xs mt-1">
                   {{ getChangeText(analytics.period_totals.revenue, analytics.comparison.revenue) }}
@@ -91,7 +91,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <!-- New Users Chart -->
               <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
-                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">New Users</h3>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">{{ $t('admin.dashboard.chart_new_users') }}</h3>
                 <div class="h-64">
                   <Line v-if="chartDataLoaded" :data="newUsersChartData" :options="chartOptions" />
                   <div v-else class="h-full w-full flex flex-col justify-end space-y-2">
@@ -104,7 +104,7 @@
 
               <!-- Revenue Chart -->
               <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
-                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Revenue</h3>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">{{ $t('admin.dashboard.chart_revenue') }}</h3>
                 <div class="h-64">
                   <Line v-if="chartDataLoaded" :data="revenueChartData" :options="chartOptions" />
                   <div v-else class="h-full w-full flex flex-col justify-end space-y-2">
@@ -121,11 +121,11 @@
                      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
                          <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center transition-colors">
                              <div>
-                                 <h2 class="text-lg font-bold text-slate-800 dark:text-white">Pending Courses</h2>
-                                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Review and approve new course submissions</p>
+                                 <h2 class="text-lg font-bold text-slate-800 dark:text-white">{{ $t('admin.dashboard.pending_courses_title') }}</h2>
+                                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $t('admin.dashboard.pending_courses_desc') }}</p>
                              </div>
                              <span class="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full border border-amber-100 dark:border-amber-800/50 transition-colors">
-                                 {{ pendingCourses.length }} Waiting
+                                 {{ pendingCourses.length }} {{ $t('admin.dashboard.waiting') }}
                              </span>
                          </div>
                          
@@ -133,9 +133,9 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50/50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700 transition-colors">
-                                        <th class="px-6 py-4 font-semibold">Course Details</th>
-                                        <th class="px-6 py-4 font-semibold">Instructor</th>
-                                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                                        <th class="px-6 py-4 font-semibold">{{ $t('admin.dashboard.th_course') }}</th>
+                                        <th class="px-6 py-4 font-semibold">{{ $t('admin.dashboard.th_instructor') }}</th>
+                                        <th class="px-6 py-4 font-semibold text-right">{{ $t('admin.dashboard.th_actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700 transition-colors">
@@ -164,10 +164,10 @@
                                         </td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="flex items-center justify-end gap-2">
-                                                <button @click="approve(course.id)" class="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg transition-colors" title="Approve">
+                                                <button @click="approve(course.id)" class="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg transition-colors" :title="$t('admin.dashboard.approve')">
                                                     <CheckCircle class="w-5 h-5" />
                                                 </button>
-                                                <button @click="reject(course.id)" class="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition-colors" title="Reject">
+                                                <button @click="reject(course.id)" class="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition-colors" :title="$t('admin.dashboard.reject')">
                                                     <XCircle class="w-5 h-5" />
                                                 </button>
                                             </div>
@@ -177,7 +177,7 @@
                                         <td colspan="3" class="px-6 py-12 text-center">
                                             <div class="flex flex-col items-center justify-center text-slate-400">
                                                 <CheckCircle class="w-12 h-12 mb-3 opacity-20" />
-                                                <p class="text-sm font-medium">All caught up! No pending courses.</p>
+                                                <p class="text-sm font-medium">{{ $t('admin.dashboard.no_pending') }}</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -188,7 +188,7 @@
 
                      <!-- Top Courses Card -->
                      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
-                       <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Top Selling Courses</h3>
+                       <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">{{ $t('admin.dashboard.top_selling_title') }}</h3>
                        <div class="space-y-3">
                          <div v-for="course in analytics?.top_courses?.slice(0, 5)" :key="course.id" class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700 last:border-0 transition-colors">
                            <div>
@@ -196,10 +196,10 @@
                              <div class="text-xs text-slate-500 dark:text-slate-400">{{ formatCurrency(course.price) }}</div>
                            </div>
                            <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full transition-colors">
-                             {{ course.enrollments_count }} enrolled
+                             {{ course.enrollments_count }} {{ $t('admin.dashboard.enrolled') }}
                            </span>
                          </div>
-                         <div v-if="!analytics?.top_courses?.length" class="text-sm text-slate-400 italic py-4 text-center">No courses yet</div>
+                         <div v-if="!analytics?.top_courses?.length" class="text-sm text-slate-400 italic py-4 text-center">{{ $t('admin.dashboard.no_courses') }}</div>
                        </div>
                      </div>
                  </div>
@@ -207,14 +207,14 @@
                  <!-- Right Column -->
                  <div class="space-y-6">
                      <div class="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl p-6 text-white shadow-lg">
-                         <h3 class="text-lg font-bold mb-2">System Status</h3>
+                         <h3 class="text-lg font-bold mb-2">{{ $t('admin.dashboard.system_status') }}</h3>
                          <div class="flex items-center gap-2 text-purple-100 text-sm mb-6">
                              <div :class="['w-2 h-2 rounded-full animate-pulse', stats?.system_health?.database ? 'bg-emerald-400' : 'bg-red-400']"></div>
-                             {{ stats?.system_health?.database ? 'All systems operational' : 'Database Error' }}
+                             {{ stats?.system_health?.database ? $t('admin.dashboard.all_systems_operational') : $t('admin.dashboard.database_error') }}
                          </div>
                          <div class="space-y-3">
                               <div class="flex justify-between text-xs opacity-80 mb-1">
-                                  <span>Disk Usage</span>
+                                  <span>{{ $t('admin.dashboard.disk_usage') }}</span>
                                   <span>{{ diskUsage }}%</span>
                               </div>
                               <div class="h-1.5 bg-purple-900/30 rounded-full overflow-hidden">
@@ -222,7 +222,7 @@
                               </div>
                               
                               <div class="flex justify-between text-xs opacity-80 mb-1 mt-4">
-                                  <span>Server Load</span>
+                                  <span>{{ $t('admin.dashboard.server_load') }}</span>
                                   <span>{{ stats?.system_health?.server_load || 0 }}</span>
                               </div>
                               <div class="h-1.5 bg-purple-900/30 rounded-full overflow-hidden">
@@ -233,22 +233,22 @@
 
                      <!-- Quick Stats -->
                      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
-                       <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wide mb-4">Platform Stats</h3>
+                       <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wide mb-4">{{ $t('admin.dashboard.platform_stats') }}</h3>
                        <div class="space-y-4">
                          <div class="flex justify-between items-center">
-                           <span class="text-sm text-slate-600 dark:text-slate-400">Avg Completion Rate</span>
+                           <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('admin.dashboard.avg_completion') }}</span>
                            <span class="font-bold text-slate-800 dark:text-white">{{ (analytics?.avg_completion_rate || 0).toFixed(1) }}%</span>
                          </div>
                          <div class="flex justify-between items-center">
-                           <span class="text-sm text-slate-600 dark:text-slate-400">Total Instructors</span>
+                           <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('admin.dashboard.total_instructors') }}</span>
                            <span class="font-bold text-slate-800 dark:text-white">{{ stats?.total_instructors || 0 }}</span>
                          </div>
                          <div class="flex justify-between items-center">
-                           <span class="text-sm text-slate-600 dark:text-slate-400">Pending Instructors</span>
+                           <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('admin.dashboard.pending_instructors') }}</span>
                            <span class="font-bold text-slate-800 dark:text-white">{{ stats?.pending_instructors || 0 }}</span>
                          </div>
                          <div class="flex justify-between items-center">
-                           <span class="text-sm text-slate-600 dark:text-slate-400">Total Enrollments</span>
+                           <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('admin.dashboard.total_enrollments') }}</span>
                            <span class="font-bold text-slate-800 dark:text-white">{{ stats?.total_enrollments || 0 }}</span>
                          </div>
                        </div>
@@ -256,7 +256,7 @@
 
                      <!-- Recent Activity -->
                      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
-                         <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wide mb-4">Recent Signups</h3>
+                         <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wide mb-4">{{ $t('admin.dashboard.recent_signups') }}</h3>
                          <ul class="space-y-4">
                              <li v-for="user in stats?.recent_activity?.users" :key="user.id" class="flex items-center gap-3">
                                  <div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-300 transition-colors">
@@ -264,10 +264,10 @@
                                  </div>
                                  <div class="text-sm">
                                      <div class="font-medium text-slate-800 dark:text-white">{{ user.name }}</div>
-                                     <div class="text-xs text-slate-400">Joined {{ new Date(user.created_at).toLocaleDateString() }}</div>
+                                     <div class="text-xs text-slate-400">{{ $t('admin.dashboard.joined') }} {{ new Date(user.created_at).toLocaleDateString() }}</div>
                                  </div>
                              </li>
-                             <li v-if="!stats?.recent_activity?.users?.length" class="text-sm text-slate-400 italic">No recent activity</li>
+                             <li v-if="!stats?.recent_activity?.users?.length" class="text-sm text-slate-400 italic">{{ $t('admin.dashboard.no_activity') }}</li>
                          </ul>
                      </div>
                  </div>
@@ -282,6 +282,9 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
 import AdminHeader from '../components/admin/AdminHeader.vue';
 import StatCard from '../components/admin/StatCard.vue';
@@ -363,7 +366,7 @@ const getChangeText = (current, previous) => {
   if (!previous) return 'N/A';
   const change = ((current - previous) / previous) * 100;
   const arrow = change >= 0 ? '↑' : '↓';
-  return `${arrow} ${Math.abs(change).toFixed(1)}% vs previous period`;
+  return `${arrow} ${Math.abs(change).toFixed(1)}% ${t('admin.dashboard.vs_previous')}`;
 };
 
 const handleRangeChange = (range) => {

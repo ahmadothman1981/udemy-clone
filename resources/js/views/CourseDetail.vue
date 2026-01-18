@@ -2,7 +2,7 @@
     <div>
         <Navbar />
         <div v-if="courseStore.loading" class="text-center py-20 text-gray-500">
-            Loading course details...
+            {{ $t('course_page.loading') }}
         </div>
         <div v-else-if="course" class="relative">
             <!-- Dark Header Section -->
@@ -13,33 +13,33 @@
                     <div class="lg:w-2/3 lg:pr-8">
                          <!-- Breadcrumbs -->
                          <div class="text-[#cec0fc] text-sm font-bold mb-4 flex items-center space-x-2">
-                             <span>{{ course.category?.name || 'Category' }}</span>
+                             <span>{{ course.category?.name || $t('course_page.category') }}</span>
                              <span class="text-xs">›</span>
-                             <span>{{ course.level?.name || 'General' }}</span> 
+                             <span>{{ course.level?.name || $t('course_page.general') }}</span> 
                          </div>
 
                         <h1 class="text-4xl font-bold mb-4 leading-tight">{{ course.title }}</h1>
                         <p class="text-lg text-gray-200 mb-6 max-w-4xl">{{ course.subtitle }}</p>
 
                         <div class="flex flex-wrap items-center gap-4 mb-4 text-sm">
-                            <span class="bg-[#eceb98] text-[#3d3c0a] px-2 py-1 rounded-sm font-bold text-xs">Bestseller</span>
+                            <span class="bg-[#eceb98] text-[#3d3c0a] px-2 py-1 rounded-sm font-bold text-xs">{{ $t('course.bestseller') }}</span>
                             <div class="flex items-center text-[#f69c08] space-x-1">
                                 <span class="font-bold text-base">{{ course.rating_avg.toFixed(1) }}</span>
                                 <div class="flex text-xs">
                                      <span v-for="n in 5" :key="n">{{ n <= Math.round(course.rating_avg) ? '★' : '☆' }}</span>
                                 </div>
                             </div>
-                            <span class="text-[#c0c4fc] underline">({{ Math.floor(Math.random() * 5000) + 100 }} ratings)</span>
-                            <span class="text-white">{{ course.enrollment_count.toLocaleString() }} students</span>
+                            <span class="text-[#c0c4fc] underline">({{ Math.floor(Math.random() * 5000) + 100 }} {{ $t('course_page.ratings') }})</span>
+                            <span class="text-white">{{ course.enrollment_count.toLocaleString() }} {{ $t('course_page.students') }}</span>
                         </div>
 
                         <div class="mb-4 text-sm">
-                            Created by <span class="text-[#c0c4fc] underline cursor-pointer">{{ course.instructor?.name }}</span>
+                            {{ $t('course_page.created_by') }} <span class="text-[#c0c4fc] underline cursor-pointer">{{ course.instructor?.name }}</span>
                         </div>
 
                         <div class="flex items-center space-x-4 text-sm text-gray-200">
                              <div class="flex items-center space-x-1">
-                                 <span>Last updated {{ new Date(course.updated_at).toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' }) }}</span>
+                                 <span>{{ $t('course_page.last_updated') }} {{ new Date(course.updated_at).toLocaleDateString($i18n.locale === 'ar' ? 'ar-EG' : 'en-US', { month: '2-digit', year: 'numeric' }) }}</span>
                              </div>
                              <div class="flex items-center space-x-1">
                                  <span>🌐</span>
@@ -75,15 +75,15 @@
 
                     <div class="flex flex-row gap-3 w-full">
                         <button @click="addToCart" class="flex-1 bg-[#a435f0] text-white font-bold py-3 text-sm sm:text-base rounded-md hover:bg-[#8710d8] transition text-center whitespace-nowrap flex items-center justify-center">
-                            Add to cart
+                            {{ $t('course_page.add_to_cart') }}
                         </button>
                         <button @click="buyNow" class="flex-1 bg-white border border-black text-black font-bold py-3 text-sm sm:text-base rounded-md hover:bg-gray-50 transition text-center whitespace-nowrap flex items-center justify-center">
-                            Buy now
+                            {{ $t('course_page.buy_now') }}
                         </button>
                     </div>
 
                     <div class="text-center text-xs text-gray-500 mt-4">
-                        30-Day Money-Back Guarantee • Full Lifetime Access
+                        {{ $t('course_page.money_back') }} • {{ $t('course_page.lifetime_access') }}
                     </div>
                  </div>
             </div>
@@ -104,14 +104,14 @@
                                  </div>
                              </div>
                              <div @click="playPreview" class="absolute inset-0 cursor-pointer"></div>
-                             <div class="absolute bottom-4 left-0 right-0 text-center text-white font-bold mb-2">Preview this course</div>
+                             <div class="absolute bottom-4 left-0 right-0 text-center text-white font-bold mb-2">{{ $t('course_page.preview_course') }}</div>
                         </div>
 
                         <div class="p-6">
                             <!-- Tabs (Visual Only) -->
                             <div class="flex border-b border-gray-200 mb-4 text-center">
-                                <div class="flex-1 py-2 border-b-2 border-black font-bold cursor-pointer">Personal</div>
-                                <div class="flex-1 py-2 text-gray-600 hover:text-gray-900 cursor-pointer">Teams</div>
+                                <div class="flex-1 py-2 border-b-2 border-black font-bold cursor-pointer">{{ $t('course_page.personal') }}</div>
+                                <div class="flex-1 py-2 text-gray-600 hover:text-gray-900 cursor-pointer">{{ $t('course_page.teams') }}</div>
                             </div>
 
                             <div class="flex items-baseline space-x-2 mb-4">
@@ -125,10 +125,10 @@
 
                             <div class="flex flex-row gap-2 w-full mb-4">
                                 <button @click="addToCart" class="flex-1 bg-[#a435f0] text-white font-bold py-3 text-sm rounded-md hover:bg-[#8710d8] transition text-center whitespace-nowrap flex items-center justify-center">
-                                    Add to cart
+                                    {{ $t('course_page.add_to_cart') }}
                                 </button>
                                 <button @click="buyNow" class="flex-1 bg-white border border-black text-black font-bold py-3 text-sm rounded-md hover:bg-gray-50 transition text-center whitespace-nowrap flex items-center justify-center">
-                                    Buy now
+                                    {{ $t('course_page.buy_now') }}
                                 </button>
                             </div>
                             
@@ -137,22 +137,22 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" :fill="wishlistStore.hasItem(course.id) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
-                                    {{ wishlistStore.hasItem(course.id) ? 'Wishlisted' : 'Add to Wishlist' }}
+                                    {{ wishlistStore.hasItem(course.id) ? $t('course_page.wishlisted') : $t('course_page.add_to_wishlist') }}
                                 </button>
                             </div>
 
                             <div class="text-center text-xs text-gray-500 mb-4">
-                                30-Day Money-Back Guarantee
+                                {{ $t('course_page.money_back') }}
                             </div>
                             
                             <div class="text-xs text-gray-900 space-y-2">
-                                <div class="font-bold mb-1">This course includes:</div>
-                                <div class="flex items-center"><span class="w-5">📺</span> {{ course.estimated_hours || 12 }} hours on-demand video</div>
-                                <div class="flex items-center"><span class="w-5">📄</span> 5 articles</div>
-                                <div class="flex items-center"><span class="w-5">⬇️</span> 10 downloadable resources</div>
-                                <div class="flex items-center"><span class="w-5">♾️</span> Full lifetime access</div>
-                                <div class="flex items-center"><span class="w-5">📱</span> Access on mobile and TV</div>
-                                <div class="flex items-center"><span class="w-5">🏆</span> Certificate of completion</div>
+                                <div class="font-bold mb-1">{{ $t('course_page.includes') }}</div>
+                                <div class="flex items-center"><span class="w-5">📺</span> {{ course.estimated_hours || 12 }} {{ $t('course_page.hours_video') }}</div>
+                                <div class="flex items-center"><span class="w-5">📄</span> 5 {{ $t('course_page.articles') }}</div>
+                                <div class="flex items-center"><span class="w-5">⬇️</span> 10 {{ $t('course_page.resources') }}</div>
+                                <div class="flex items-center"><span class="w-5">♾️</span> {{ $t('course_page.full_access') }}</div>
+                                <div class="flex items-center"><span class="w-5">📱</span> {{ $t('course_page.mobile_access') }}</div>
+                                <div class="flex items-center"><span class="w-5">🏆</span> {{ $t('course_page.certificate') }}</div>
                             </div>
                         </div>
                      </div>
@@ -164,7 +164,7 @@
                 <div class="lg:w-2/3 lg:pr-8">
                      <!-- What you'll learn (Mock) -->
                      <div class="border border-gray-300 p-6 mb-8 mt-4">
-                         <h2 class="text-xl font-bold mb-4 text-gray-900">What you'll learn</h2>
+                         <h2 class="text-xl font-bold mb-4 text-gray-900">{{ $t('course_page.what_learn') }}</h2>
                          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
                              <div class="flex"><span class="mr-2">✓</span> Understand Agentic AI fundamentals</div>
                              <div class="flex"><span class="mr-2">✓</span> Build autonomous AI agents</div>
@@ -173,12 +173,12 @@
                          </div>
                      </div>
 
-                    <h2 class="text-2xl font-bold mb-4 text-gray-900">Course content</h2>
-                    <div class="border border-gray-200 rounded-sm mb-8 text-sm">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-900">{{ $t('course_page.content') }}</h2>
+                    <div class="border border-gray-200 rounded-lg mb-8 text-sm">
                          <!-- Stats Header -->
                          <div class="bg-gray-50 p-3 border-b border-gray-200 flex justify-between text-gray-600">
-                             <span>{{ course.sections?.length || 0 }} sections • {{ course.sections?.reduce((acc, s) => acc + (s.lectures?.length || 0), 0) }} lectures • 12h 42m total length</span>
-                             <span class="text-[#a435f0] font-bold cursor-pointer">Expand all sections</span>
+                             <span>{{ course.sections?.length || 0 }} {{ $t('course_page.sections') }} • {{ course.sections?.reduce((acc, s) => acc + (s.lectures?.length || 0), 0) }} {{ $t('course_page.lectures') }} • 12h 42m {{ $t('course_page.total_length') }}</span>
+                             <span class="text-[#a435f0] font-bold cursor-pointer">{{ $t('course_page.expand_all') }}</span>
                          </div>
                          <!-- Sections -->
                          <!-- Sections -->
@@ -188,7 +188,7 @@
                                     <span class="mr-3 text-xs w-4 transition-transform duration-200" :class="{'rotate-180': isExpanded(section.id)}">▼</span>
                                     {{ section.title }}
                                 </span>
-                                <span class="text-xs text-gray-600">{{ section.lectures?.length || 0 }} lectures</span>
+                                <span class="text-xs text-gray-600">{{ section.lectures?.length || 0 }} {{ $t('course_page.lectures') }}</span>
                             </div>
                             
                             <!-- Lectures List -->
@@ -216,13 +216,13 @@
                                     </div>
                                 </div>
                                 <div v-if="(!section.lectures || section.lectures.length === 0)" class="p-4 pl-10 text-xs text-gray-400 italic">
-                                    No lectures available.
+                                    {{ $t('course_page.no_lectures') }}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <h2 class="text-2xl font-bold mb-4 text-gray-900">Description</h2>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-900">{{ $t('course_page.description') }}</h2>
                     <div class="prose max-w-none text-gray-800 text-sm leading-relaxed mb-8" v-html="course.description"></div>
                     
                     <!-- Social Features -->
@@ -233,7 +233,7 @@
         </div>
         
         <div v-else class="text-center py-20 text-red-500">
-            Course not found.
+            {{ $t('course_page.not_found') }}
         </div>
 
         <!-- Preview Video Modal -->

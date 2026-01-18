@@ -1,0 +1,29 @@
+
+> build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 43 modules transformed.
+x Build failed in 939ms
+error during build:
+[vite:vue] [vue/compiler-sfc] Unexpected token (178:16)
+
+E:/netlearning/udemy/resources/js/views/CourseManagement.vue
+339|                  .notification((notification) => {
+340|                      if (notification.type === 'course_submission') {
+341|                  .notification((notification) => {
+   |                  ^
+342|                      if (notification.type === 'course_submission') {
+343|                          showSuccess(t('admin.courses.new_submission', {title: notification.title}));
+file: E:/netlearning/udemy/resources/js/views/CourseManagement.vue:178:16
+    at constructor (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:367:19)
+    at Parser.raise (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:6624:19)
+    at Parser.unexpected (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:6644:16)
+    at Parser.parseExprAtom (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:11508:22)
+    at Parser.parseExprSubscripts (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:11145:23)
+    at Parser.parseUpdate (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:11130:21)
+    at Parser.parseMaybeUnary (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:11110:23)
+    at Parser.parseMaybeUnaryOrPrivate (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:10963:61)
+    at Parser.parseExprOps (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:10968:23)
+    at Parser.parseMaybeConditional (E:\netlearning\udemy\node_modules\@babel\parser\lib\index.js:10945:23)

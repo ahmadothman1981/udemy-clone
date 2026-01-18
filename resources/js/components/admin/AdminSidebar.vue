@@ -12,7 +12,7 @@
 
     <!-- Navigation -->
     <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
-        <div class="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Overview</div>
+        <div class="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ $t('admin.sidebar.overview') }}</div>
         
         <router-link v-for="item in overviewItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
@@ -27,7 +27,7 @@
             </a>
         </router-link>
 
-        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Management</div>
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ $t('admin.sidebar.management') }}</div>
         
         <router-link v-for="item in managementItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
@@ -42,7 +42,7 @@
             </a>
         </router-link>
 
-        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Moderation</div>
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ $t('admin.sidebar.moderation') }}</div>
         
         <router-link v-for="item in moderationItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
@@ -57,7 +57,7 @@
             </a>
         </router-link>
 
-        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">System</div>
+        <div class="mt-6 px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ $t('admin.sidebar.system') }}</div>
         
         <router-link v-for="item in systemItems" :key="item.path" :to="item.path" custom v-slot="{ href, navigate, isActive }">
             <a :href="href" @click="navigate" 
@@ -97,31 +97,34 @@ import {
 } from 'lucide-vue-next';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import KeyboardHelpModal from './KeyboardHelpModal.vue';
+import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 
+const { t } = useI18n();
 const { showHelpModal, shortcuts } = useKeyboardShortcuts();
 
 defineEmits(['logout']);
 
-const overviewItems = [
-    { path: '/admin', label: 'Dashboard', icon: LayoutTemplate },
-];
+const overviewItems = computed(() => [
+    { path: '/admin', label: t('admin.sidebar.dashboard'), icon: LayoutTemplate },
+]);
 
-const managementItems = [
-    { path: '/admin/users', label: 'Users', icon: Users },
-    { path: '/admin/instructors', label: 'Instructors', icon: GraduationCap },
-    { path: '/admin/courses', label: 'Courses', icon: BookOpen },
-    { path: '/admin/enrollments', label: 'Enrollments', icon: UserCheck },
-];
+const managementItems = computed(() => [
+    { path: '/admin/users', label: t('admin.sidebar.users'), icon: Users },
+    { path: '/admin/instructors', label: t('admin.sidebar.instructors'), icon: GraduationCap },
+    { path: '/admin/courses', label: t('admin.sidebar.courses'), icon: BookOpen },
+    { path: '/admin/enrollments', label: t('admin.sidebar.enrollments'), icon: UserCheck },
+]);
 
-const moderationItems = [
-    { path: '/admin/reviews', label: 'Reviews', icon: Star },
-    { path: '/admin/qna', label: 'Q&A', icon: MessageSquareMore },
-    { path: '/admin/promo-codes', label: 'Promo Codes', icon: Tags },
-];
+const moderationItems = computed(() => [
+    { path: '/admin/reviews', label: t('admin.sidebar.reviews'), icon: Star },
+    { path: '/admin/qna', label: t('admin.sidebar.qna'), icon: MessageSquareMore },
+    { path: '/admin/promo-codes', label: t('admin.sidebar.promo_codes'), icon: Tags },
+]);
 
-const systemItems = [
-    { path: '/admin/settings', label: 'Settings', icon: Settings },
-];
+const systemItems = computed(() => [
+    { path: '/admin/settings', label: t('admin.sidebar.settings'), icon: Settings },
+]);
 </script>
 
 <style scoped>

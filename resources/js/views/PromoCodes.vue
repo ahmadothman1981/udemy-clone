@@ -5,11 +5,11 @@
       <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
         <!-- Top Header -->
         <!-- Top Header -->
-        <AdminHeader title="Promo Codes" @logout="handleLogout">
+        <AdminHeader :title="$t('admin.promo_codes.title')" @logout="handleLogout">
             <template #actions>
                  <button @click="openModal()" class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm shadow-purple-200 dark:shadow-none">
                      <Plus class="w-4 h-4" />
-                     New Promo Code
+                     {{ $t('admin.promo_codes.new_code') }}
                  </button>
             </template>
         </AdminHeader>
@@ -21,11 +21,11 @@
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50/50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100 dark:border-slate-700 transition-colors">
                             <tr>
-                                <th class="px-6 py-4 font-semibold">Code</th>
-                                <th class="px-6 py-4 font-semibold">Discount</th>
-                                <th class="px-6 py-4 font-semibold">Usage</th>
-                                <th class="px-6 py-4 font-semibold">Status</th>
-                                <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                                <th class="px-6 py-4 font-semibold">{{ $t('admin.promo_codes.th_code') }}</th>
+                                <th class="px-6 py-4 font-semibold">{{ $t('admin.promo_codes.th_discount') }}</th>
+                                <th class="px-6 py-4 font-semibold">{{ $t('admin.promo_codes.th_usage') }}</th>
+                                <th class="px-6 py-4 font-semibold">{{ $t('admin.promo_codes.th_status') }}</th>
+                                <th class="px-6 py-4 font-semibold text-right">{{ $t('admin.promo_codes.th_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-700 transition-colors">
@@ -33,7 +33,7 @@
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
                                         <span class="font-bold text-slate-900 dark:text-white font-mono tracking-wide transition-colors">{{ promo.code }}</span>
-                                        <span class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px] transition-colors">{{ promo.description || 'No description' }}</span>
+                                        <span class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px] transition-colors">{{ promo.description || $t('admin.promo_codes.no_desc') }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -50,18 +50,18 @@
                                     <div class="text-sm text-slate-600 dark:text-slate-300 transition-colors">
                                         <span class="font-bold">{{ promo.used_count }}</span>
                                         <span class="text-slate-400 dark:text-slate-500" v-if="promo.max_uses"> / {{ promo.max_uses }}</span>
-                                        uses
+                                        {{ $t('admin.promo_codes.uses') }}
                                     </div>
                                     <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5 transition-colors" v-if="promo.min_purchase > 0">
-                                        Min. ${{ promo.min_purchase }}
+                                        {{ $t('admin.promo_codes.min_purchase_display', {amount: promo.min_purchase}) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
                                      <span :class="['px-2.5 py-1 rounded-full text-xs font-medium border', isActive(promo) ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600']">
-                                        {{ isActive(promo) ? 'Active' : 'Inactive' }}
+                                        {{ isActive(promo) ? $t('admin.promo_codes.active') : $t('admin.promo_codes.inactive') }}
                                      </span>
                                      <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 transition-colors" v-if="promo.expires_at">
-                                         Exp: {{ new Date(promo.expires_at).toLocaleDateString() }}
+                                         {{ $t('admin.promo_codes.exp') }}: {{ new Date(promo.expires_at).toLocaleDateString() }}
                                      </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -77,7 +77,7 @@
                             </tr>
                             <tr v-if="promoCodes.length === 0">
                                 <td colspan="5" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500 italic transition-colors">
-                                    No promo codes found. Create one to get started.
+                                    {{ $t('admin.promo_codes.no_codes') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -91,7 +91,7 @@
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" @click.self="closeModal">
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 transition-colors">
               <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 transition-colors">
-                  <h3 class="font-bold text-slate-800 dark:text-white transition-colors">{{ isEditing ? 'Edit Promo Code' : 'New Promo Code' }}</h3>
+                  <h3 class="font-bold text-slate-800 dark:text-white transition-colors">{{ isEditing ? $t('admin.promo_codes.edit_title') : $t('admin.promo_codes.new_title') }}</h3>
                   <button @click="closeModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                       <X class="w-5 h-5" />
                   </button>
@@ -99,54 +99,54 @@
               
               <form @submit.prevent="savePromo" class="p-6 space-y-4">
                   <div>
-                      <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">Code</label>
+                      <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">{{ $t('admin.promo_codes.code_label') }}</label>
                       <input v-model="form.code" type="text" required placeholder="SUMMER2026" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase font-mono transition-colors" :disabled="isEditing">
                   </div>
                   
                   <div>
-                      <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">Description</label>
+                      <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">{{ $t('admin.promo_codes.desc_label') }}</label>
                       <input v-model="form.description" type="text" placeholder="Summer Sale Discount" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
                   </div>
 
                   <div class="grid grid-cols-2 gap-4">
                        <div>
-                          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">Type</label>
+                          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">{{ $t('admin.promo_codes.type_label') }}</label>
                           <select v-model="form.discount_type" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
-                              <option value="percentage">Percentage (%)</option>
-                              <option value="fixed">Fixed Amount ($)</option>
+                              <option value="percentage">{{ $t('admin.promo_codes.type_percentage') }}</option>
+                              <option value="fixed">{{ $t('admin.promo_codes.type_fixed') }}</option>
                           </select>
                       </div>
                       <div>
-                          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">Value</label>
+                          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">{{ $t('admin.promo_codes.value_label') }}</label>
                           <input v-model.number="form.discount_value" type="number" min="0" step="0.01" required class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
                       </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-4">
                        <div>
-                          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">Min. Purchase ($)</label>
+                          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">{{ $t('admin.promo_codes.min_purchase_label') }}</label>
                           <input v-model.number="form.min_purchase" type="number" min="0" step="0.01" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
                       </div>
                       <div>
-                          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">Max Uses</label>
-                          <input v-model.number="form.max_uses" type="number" min="1" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Unlimited">
+                          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">{{ $t('admin.promo_codes.max_uses_label') }}</label>
+                          <input v-model.number="form.max_uses" type="number" min="1" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" :placeholder="$t('admin.promo_codes.unlimited')">
                       </div>
                   </div>
 
                    <div>
-                      <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">Expires At</label>
+                      <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 transition-colors">{{ $t('admin.promo_codes.expires_label') }}</label>
                       <input v-model="form.expires_at" type="date" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
                   </div>
 
                   <div class="flex items-center gap-2 pt-2">
                       <input v-model="form.active" type="checkbox" id="active" class="w-4 h-4 text-purple-600 border-gray-300 dark:border-slate-600 rounded focus:ring-purple-500 dark:bg-slate-700">
-                      <label for="active" class="text-sm text-slate-700 dark:text-slate-300 font-medium transition-colors">Active</label>
+                      <label for="active" class="text-sm text-slate-700 dark:text-slate-300 font-medium transition-colors">{{ $t('admin.promo_codes.active_label') }}</label>
                   </div>
 
                   <div class="pt-4 flex justify-end gap-3">
-                      <button type="button" @click="closeModal" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm font-medium transition-colors">Cancel</button>
+                      <button type="button" @click="closeModal" class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm font-medium transition-colors">{{ $t('admin.promo_codes.cancel') }}</button>
                       <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
-                          {{ isEditing ? 'Update Code' : 'Create Code' }}
+                          {{ isEditing ? $t('admin.promo_codes.update') : $t('admin.promo_codes.create') }}
                       </button>
                   </div>
               </form>
@@ -162,6 +162,8 @@ import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
 import { Plus, Percent, DollarSign, Edit2, Trash2, X } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -244,17 +246,17 @@ const savePromo = async () => {
         }
         closeModal();
     } catch (e) {
-        alert(e.response?.data?.message || 'Failed to save promo code');
+        alert(e.response?.data?.message || t('admin.promo_codes.save_error'));
     }
 };
 
 const deletePromo = async (id) => {
-    if (!confirm('Are you sure you want to delete this promo code?')) return;
+    if (!confirm(t('admin.promo_codes.confirm_delete'))) return;
     try {
         await axios.delete(`/api/admin/promo-codes/${id}`);
         promoCodes.value = promoCodes.value.filter(p => p.id !== id);
     } catch (e) {
-        alert('Failed to delete promo code');
+        alert(t('admin.promo_codes.delete_error'));
     }
 };
 

@@ -3,21 +3,21 @@
     <AdminSidebar @logout="handleLogout" />
     
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-      <AdminHeader title="Course Management" @logout="handleLogout" />
+      <AdminHeader :title="$t('admin.courses.title')" @logout="handleLogout" />
 
       <div class="flex-1 overflow-auto p-8">
         <!-- Filters -->
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6 flex flex-wrap items-center gap-4 transition-colors">
-          <input v-model="searchQuery" @input="debouncedSearch" type="text" placeholder="Search courses..." 
+          <input v-model="searchQuery" @input="debouncedSearch" type="text" :placeholder="$t('admin.courses.search_placeholder')" 
             class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-purple-500 w-64 text-slate-800 dark:text-white placeholder-slate-400 transition-colors">
           <select v-model="statusFilter" @change="fetchCourses" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-white transition-colors">
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="published">Published</option>
-            <option value="rejected">Rejected</option>
+            <option value="">{{ $t('admin.courses.all_status') }}</option>
+            <option value="pending">{{ $t('admin.courses.pending') }}</option>
+            <option value="published">{{ $t('admin.courses.published') }}</option>
+            <option value="rejected">{{ $t('admin.courses.rejected') }}</option>
           </select>
           <select v-model="categoryFilter" @change="fetchCourses" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-white transition-colors">
-            <option value="">All Categories</option>
+            <option value="">{{ $t('admin.courses.all_categories') }}</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
           </select>
         </div>
@@ -25,18 +25,18 @@
         <!-- Bulk Actions Toolbar -->
         <div v-if="selectedCourses.length > 0" class="bg-purple-50 dark:bg-purple-900/20 p-4 border-b border-purple-100 dark:border-purple-800/50 flex items-center justify-between mb-4 rounded-xl animate-in fade-in slide-in-from-top-2 transition-colors">
             <div class="flex items-center gap-4">
-                <span class="text-sm font-bold text-purple-700 dark:text-purple-300">{{ selectedCourses.length }} courses selected</span>
+                <span class="text-sm font-bold text-purple-700 dark:text-purple-300">{{ $t('admin.courses.selected_courses', {count: selectedCourses.length}) }}</span>
                 <div class="h-4 w-px bg-purple-200 dark:bg-purple-800"></div>
                 <button @click="selectedCourses = []; selectAll = false" class="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline">
-                    Deselect All
+                    {{ $t('admin.courses.deselect_all') }}
                 </button>
             </div>
             <div class="flex items-center gap-2">
                 <button @click="handleBulkAction('approve')" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-purple-200 dark:border-slate-600 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium hover:bg-green-50 dark:hover:bg-green-900/20 shadow-sm transition-colors flex items-center gap-2">
-                    <CheckCircle class="w-4 h-4" /> Approve
+                    <CheckCircle class="w-4 h-4" /> {{ $t('admin.courses.approve') }}
                 </button>
                 <button @click="handleBulkAction('reject')" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-purple-200 dark:border-slate-600 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm transition-colors flex items-center gap-2">
-                    <XCircle class="w-4 h-4" /> Reject
+                    <XCircle class="w-4 h-4" /> {{ $t('admin.courses.reject') }}
                 </button>
             </div>
         </div>
@@ -50,11 +50,11 @@
                   <th class="px-6 py-4 w-12">
                     <input type="checkbox" v-model="selectAll" class="rounded border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-purple-600 focus:ring-purple-500 w-4 h-4 transition-colors" />
                   </th>
-                  <th class="px-6 py-4">Course</th>
-                  <th class="px-6 py-4">Instructor</th>
-                  <th class="px-6 py-4">Price</th>
-                  <th class="px-6 py-4">Status</th>
-                  <th class="px-6 py-4 text-right">Actions</th>
+                  <th class="px-6 py-4">{{ $t('admin.courses.th_course') }}</th>
+                  <th class="px-6 py-4">{{ $t('admin.courses.th_instructor') }}</th>
+                  <th class="px-6 py-4">{{ $t('admin.courses.th_price') }}</th>
+                  <th class="px-6 py-4">{{ $t('admin.courses.th_status') }}</th>
+                  <th class="px-6 py-4 text-right">{{ $t('admin.courses.th_actions') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-700 transition-colors">
@@ -98,19 +98,19 @@
                   </td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2">
-                      <button v-if="course.status === 'pending'" @click="approveCourse(course, 'approve')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg" title="Approve">
+                      <button v-if="course.status === 'pending'" @click="approveCourse(course, 'approve')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg" :title="$t('admin.courses.approve')">
                         <CheckCircle class="w-4 h-4" />
                       </button>
-                      <button v-if="course.status === 'pending'" @click="approveCourse(course, 'reject')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Reject">
+                      <button v-if="course.status === 'pending'" @click="approveCourse(course, 'reject')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg" :title="$t('admin.courses.reject')">
                         <XCircle class="w-4 h-4" />
                       </button>
-                      <button @click="openEditModal(course)" class="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg" title="Edit">
+                      <button @click="openEditModal(course)" class="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg" :title="$t('admin.courses.edit')">
                         <Pencil class="w-4 h-4" />
                       </button>
-                      <button v-if="!course.admin_hidden" @click="hideCourse(course)" class="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg" title="Hide">
+                      <button v-if="!course.admin_hidden" @click="hideCourse(course)" class="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg" :title="$t('admin.courses.hide')">
                         <EyeOff class="w-4 h-4" />
                       </button>
-                      <button v-else @click="restoreCourse(course)" class="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg" title="Restore">
+                      <button v-else @click="restoreCourse(course)" class="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg" :title="$t('admin.courses.restore')">
                         <Eye class="w-4 h-4" />
                       </button>
                     </div>
@@ -122,10 +122,10 @@
           </div>
           <!-- Pagination -->
           <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center transition-colors">
-            <span class="text-sm text-slate-500 dark:text-slate-400">{{ pagination.from }} - {{ pagination.to }} of {{ pagination.total }}</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.courses.showing', {from: pagination.from, to: pagination.to, total: pagination.total}) }}</span>
             <div class="flex gap-2">
-              <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Previous</button>
-              <button @click="changePage(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Next</button>
+              <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">{{ $t('admin.courses.previous') }}</button>
+              <button @click="changePage(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">{{ $t('admin.courses.next') }}</button>
             </div>
           </div>
         </div>
@@ -135,26 +135,26 @@
     <!-- Edit Modal -->
     <div v-if="editModalVisible" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="editModalVisible = false">
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 transition-colors">
-        <div class="p-6 border-b border-slate-200 dark:border-slate-700"><h3 class="text-lg font-bold text-slate-800 dark:text-white">Edit Course</h3></div>
+        <div class="p-6 border-b border-slate-200 dark:border-slate-700"><h3 class="text-lg font-bold text-slate-800 dark:text-white">{{ $t('admin.courses.modal_edit_title') }}</h3></div>
         <div class="p-6 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Title</label>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ $t('admin.courses.course_title') }}</label>
             <input v-model="editForm.title" class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Price</label>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ $t('admin.courses.course_price') }}</label>
             <input v-model="editForm.price" type="number" class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ $t('admin.courses.category') }}</label>
             <select v-model="editForm.category_id" class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
           </div>
         </div>
         <div class="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-2 rounded-b-2xl">
-          <button @click="editModalVisible = false" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Cancel</button>
-          <button @click="saveEdit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">Save</button>
+          <button @click="editModalVisible = false" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">{{ $t('admin.courses.cancel') }}</button>
+          <button @click="saveEdit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">{{ $t('admin.courses.save') }}</button>
         </div>
       </div>
     </div>
@@ -172,6 +172,8 @@ import { CheckCircle, XCircle, Pencil, EyeOff, Eye, CheckSquare, Trash2 } from '
 import axios from 'axios';
 import { confirmAction, confirmUpdate, showSuccess, showError, promptInput } from '../utils/sweetalert';
 import debounce from 'lodash/debounce';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -245,21 +247,20 @@ const handleBulkAction = async (action) => {
     if (selectedCourses.value.length === 0) return;
     
     const count = selectedCourses.value.length;
-    let confirmText = `Are you sure you want to ${action} ${count} selected courses?`;
     let reason = null;
     
     if (action === 'reject') {
         const result = await promptInput({ 
-            title: `Bulk Reject ${count} Courses`, 
-            inputPlaceholder: 'Enter rejection reason...' 
+            title: t('admin.courses.bulk_reject_title', {count}), 
+            inputPlaceholder: t('admin.courses.reject_reason') 
         });
         if (!result.isConfirmed) return;
         reason = result.value;
     } else {
         const result = await confirmAction({ 
-            title: `Bulk ${action.charAt(0).toUpperCase() + action.slice(1)}`, 
-            text: confirmText, 
-            confirmButtonText: `Yes, ${action} them!` 
+            title: t('admin.courses.bulk_action_title', {action: action}), 
+            text: t('admin.courses.bulk_action_confirm', {action: action, count}), 
+            confirmButtonText: t('admin.courses.yes_proceed') 
         });
         if (!result.isConfirmed) return;
     }
@@ -270,43 +271,43 @@ const handleBulkAction = async (action) => {
             action: action,
             reason: reason
         });
-        showSuccess(`Successfully ${action}ed ${count} courses`);
+        showSuccess(t('admin.courses.bulk_success', {action: action, count}));
         selectedCourses.value = [];
         selectAll.value = false;
         fetchCourses(pagination.value.current_page);
     } catch (e) {
-        showError('Failed to perform bulk action');
+        showError(t('admin.courses.bulk_error'));
     }
 };
 
 const approveCourse = async (course, action) => {
   let reason = '';
   if (action === 'reject') {
-    const result = await promptInput({ title: 'Rejection Reason' });
+    const result = await promptInput({ title: t('admin.courses.reject_reason') });
     if (!result.isConfirmed) return;
     reason = result.value;
   } else {
-    const result = await confirmAction({ title: 'Approve Course?', text: `Approve "${course.title}"?`, confirmButtonText: 'Approve' });
+    const result = await confirmAction({ title: t('admin.courses.approve_title'), text: t('admin.courses.approve_confirm', {title: course.title}), confirmButtonText: t('admin.courses.approve') });
     if (!result.isConfirmed) return;
   }
   await axios.post(`/api/admin/courses/${course.id}/approve`, { action, reason });
-  showSuccess(`Course ${action}d`);
+  showSuccess(t('admin.courses.status_updated'));
   fetchCourses();
 };
 
 const hideCourse = async (course) => {
-  const result = await promptInput({ title: 'Hide Course', inputPlaceholder: 'Enter reason for hiding...' });
+  const result = await promptInput({ title: t('admin.courses.hide_course'), inputPlaceholder: t('admin.courses.hide_reason') });
   if (!result.isConfirmed) return;
   await axios.post(`/api/admin/courses/${course.id}/hide`, { reason: result.value });
-  showSuccess('Course hidden');
+  showSuccess(t('admin.courses.course_hidden'));
   fetchCourses();
 };
 
 const restoreCourse = async (course) => {
-  const result = await confirmAction({ title: 'Restore Course?', text: 'Make this course visible again?', confirmButtonText: 'Restore' });
+  const result = await confirmAction({ title: t('admin.courses.restore_title'), text: t('admin.courses.restore_confirm'), confirmButtonText: t('admin.courses.restore') });
   if (!result.isConfirmed) return;
   await axios.post(`/api/admin/courses/${course.id}/restore`);
-  showSuccess('Course restored');
+  showSuccess(t('admin.courses.course_restored'));
   fetchCourses();
 };
 
@@ -317,10 +318,10 @@ const openEditModal = (course) => {
 };
 
 const saveEdit = async () => {
-  const result = await confirmUpdate('course details');
+  const result = await confirmUpdate(t('admin.courses.course_details'));
   if (!result.isConfirmed) return;
   await axios.put(`/api/admin/courses/${selectedCourse.value.id}`, editForm.value);
-  showSuccess('Course updated');
+  showSuccess(t('admin.courses.course_updated'));
   editModalVisible.value = false;
   fetchCourses();
 };
@@ -337,7 +338,7 @@ onMounted(() => {
              window.Echo.private(`App.Models.User.${userId}`)
                 .notification((notification) => {
                     if (notification.type === 'course_submission') {
-                        showSuccess(`New Course Submitted: ${notification.title}`);
+                        showSuccess(t('admin.courses.new_submission', {title: notification.title}));
                         // Refresh if we are viewing pending or all
                         if (!statusFilter.value || statusFilter.value === 'pending') {
                             fetchCourses(pagination.value.current_page);

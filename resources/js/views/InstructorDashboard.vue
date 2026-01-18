@@ -325,7 +325,7 @@
                   </div>
                 </div>
                 <div v-if="!earningsData.recent_earnings?.length" class="p-8 text-center text-gray-500">
-                  No earnings yet. Start selling courses to earn!
+                  {{ $t('instructor_dashboard.no_earnings') }}
                 </div>
               </div>
             </div>
@@ -353,7 +353,7 @@
                   </span>
                 </div>
                 <div v-if="!payoutHistory.length" class="p-8 text-center text-gray-500">
-                  No payout history yet.
+                  {{ $t('instructor_dashboard.no_payout_history') }}
                 </div>
               </div>
             </div>
@@ -371,36 +371,36 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Create New Course</h2>
-        <p class="text-gray-500 mb-6">Start by giving your course a title. You can change it later.</p>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ $t('instructor_dashboard.create_course_modal.title') }}</h2>
+        <p class="text-gray-500 mb-6">{{ $t('instructor_dashboard.create_course_modal.subtitle') }}</p>
         
         <form @submit.prevent="createCourse">
           <div class="mb-4">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Course Title</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('instructor_dashboard.create_course_modal.fields.title') }}</label>
             <input 
               v-model="newCourseTitle" 
               type="text" 
-              placeholder="e.g., Complete Python Bootcamp"
+              :placeholder="$t('instructor_dashboard.create_course_modal.placeholders.title')"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               required
             >
           </div>
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('instructor_dashboard.create_course_modal.fields.category') }}</label>
             <select v-model="newCourseCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
-              <option value="">Select a category</option>
-              <option value="development">Development</option>
-              <option value="business">Business</option>
-              <option value="design">Design</option>
-              <option value="marketing">Marketing</option>
+              <option value="">{{ $t('instructor_dashboard.create_course_modal.placeholders.category') }}</option>
+              <option value="development">{{ $t('instructor_dashboard.create_course_modal.options.development') }}</option>
+              <option value="business">{{ $t('instructor_dashboard.create_course_modal.options.business') }}</option>
+              <option value="design">{{ $t('instructor_dashboard.create_course_modal.options.design') }}</option>
+              <option value="marketing">{{ $t('instructor_dashboard.create_course_modal.options.marketing') }}</option>
             </select>
           </div>
           <div class="flex gap-3">
             <button type="button" @click="showCreateCourse = false" class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
-              Cancel
+              {{ $t('common.cancel') }}
             </button>
             <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all">
-              Create Course
+              {{ $t('instructor_dashboard.create_course_modal.submit') }}
             </button>
           </div>
         </form>

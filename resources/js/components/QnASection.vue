@@ -1,13 +1,13 @@
 <template>
   <div class="mt-8">
-    <h3 class="text-xl font-bold mb-4">Q&A</h3>
+    <h3 class="text-xl font-bold mb-4">{{ $t('qna.title') }}</h3>
     
     <!-- Ask Form -->
     <div class="mb-6">
-        <input v-model="title" class="w-full border border-gray-300 rounded p-2 mb-2" placeholder="Question Title">
-        <textarea v-model="content" class="w-full border border-gray-300 rounded p-2 mb-2" rows="2" placeholder="Describe your question..."></textarea>
+        <input v-model="title" class="w-full border border-gray-300 rounded p-2 mb-2" :placeholder="$t('qna.placeholder_title')">
+        <textarea v-model="content" class="w-full border border-gray-300 rounded p-2 mb-2" rows="2" :placeholder="$t('qna.placeholder_content')"></textarea>
         <button @click="askQuestion" class="bg-gray-800 text-white px-4 py-2 rounded font-bold text-sm" :disabled="!title || !content">
-            Ask Question
+            {{ $t('qna.ask') }}
         </button>
     </div>
 
@@ -17,7 +17,7 @@
             <h4 class="font-bold cursor-pointer" @click="q.expanded = !q.expanded">{{ q.title }}</h4>
             <div v-if="q.expanded" class="mt-2">
                 <p class="text-gray-700 mb-4">{{ q.content }}</p>
-                <div class="text-xs text-gray-500 mb-2">Asked by {{ q.user.name }}</div>
+                <div class="text-xs text-gray-500 mb-2">{{ $t('qna.asked_by') }} {{ q.user.name }}</div>
                 
                 <!-- Answers -->
                 <div class="bg-gray-50 p-3 rounded space-y-3 mb-3" v-if="q.answers.length">
@@ -28,12 +28,12 @@
                 
                 <!-- Reply -->
                 <div class="flex">
-                    <input v-model="q.newReply" class="flex-1 border border-gray-300 rounded-l p-1 text-sm" placeholder="Write a reply...">
-                    <button @click="reply(q)" class="bg-purple-600 text-white px-3 py-1 rounded-r text-sm">Reply</button>
+                    <input v-model="q.newReply" class="flex-1 border border-gray-300 rounded-l p-1 text-sm" :placeholder="$t('qna.reply_placeholder')">
+                    <button @click="reply(q)" class="bg-purple-600 text-white px-3 py-1 rounded-r text-sm">{{ $t('qna.reply_btn') }}</button>
                 </div>
             </div>
              <div v-else class="text-sm text-gray-500 mt-1">
-                 {{ q.answers.length }} replies
+                 {{ q.answers.length }} {{ $t('qna.replies') }}
              </div>
         </div>
     </div>
