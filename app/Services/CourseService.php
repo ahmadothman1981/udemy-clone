@@ -18,6 +18,19 @@ class CourseService
     public function createCourse(array $data, User $instructor): Course
     {
         return DB::transaction(function () use ($data, $instructor) {
+            // Assign defaults if missing
+            $levelId = \App\Models\CourseLevel::first()->id ?? 1;
+            
+            $defaults = [
+                'description' => 'Draft Course Description',
+                'price' => 0.00,
+                'language' => 'English',
+                'level_id' => $levelId,
+                'published' => false,
+            ];
+            
+            $data = array_merge($defaults, array_filter($data, fn($value) => !is_null($value))) + $data;
+
             $course = new Course($data);
             $course->instructor_id = $instructor->id;
             $course->save();

@@ -5,17 +5,17 @@
       <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
         <!-- Top Header -->
         <!-- Top Header -->
-        <AdminHeader :title="$t('admin.promo_codes.title')" @logout="handleLogout">
-            <template #actions>
-                 <button @click="openModal()" class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm shadow-purple-200 dark:shadow-none">
-                     <Plus class="w-4 h-4" />
-                     {{ $t('admin.promo_codes.new_code') }}
-                 </button>
-            </template>
-        </AdminHeader>
+        <AdminHeader :title="$t('admin.promo_codes.title')" @logout="handleLogout" />
 
         <div class="flex-1 overflow-auto p-8">
             <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                <!-- Toolbar -->
+                <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-end transition-colors">
+                    <button @click="openModal()" class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm shadow-purple-200 dark:shadow-none">
+                        <Plus class="w-4 h-4" />
+                        {{ $t('admin.promo_codes.new_code') }}
+                    </button>
+                </div>
                 <!-- Table -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -161,6 +161,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
+import AdminHeader from '../components/admin/AdminHeader.vue';
 import { Plus, Percent, DollarSign, Edit2, Trash2, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();

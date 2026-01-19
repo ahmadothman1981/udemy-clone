@@ -20,6 +20,12 @@
             <option value="">{{ $t('admin.courses.all_categories') }}</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
           </select>
+          <div class="ml-auto">
+            <button @click="createModalVisible = true" class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                <Plus class="w-4 h-4" />
+                {{ $t('instructor_dashboard.create_course_modal.submit') }}
+            </button>
+          </div>
         </div>
 
         <!-- Bulk Actions Toolbar -->
@@ -158,6 +164,33 @@
         </div>
       </div>
     </div>
+
+    <!-- Create Course Modal -->
+    <div v-if="createModalVisible" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="createModalVisible = false">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 transition-colors">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white">{{ $t('instructor_dashboard.create_course_modal.title') }}</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $t('instructor_dashboard.create_course_modal.subtitle') }}</p>
+        </div>
+        <form @submit.prevent="createCourse" class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ $t('instructor_dashboard.create_course_modal.fields.title') }}</label>
+            <input v-model="newCourseTitle" required :placeholder="$t('instructor_dashboard.create_course_modal.placeholders.title')" class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ $t('instructor_dashboard.create_course_modal.fields.category') }}</label>
+            <select v-model="newCourseCategory" required class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
+              <option value="">{{ $t('instructor_dashboard.create_course_modal.placeholders.category') }}</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+          <div class="pt-4 flex justify-end gap-2">
+            <button type="button" @click="createModalVisible = false" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">{{ $t('admin.courses.cancel') }}</button>
+            <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">{{ $t('instructor_dashboard.create_course_modal.submit') }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -168,7 +201,7 @@ import { useAuthStore } from '../stores/auth';
 import AdminSidebar from '../components/admin/AdminSidebar.vue';
 import AdminHeader from '../components/admin/AdminHeader.vue';
 import SkeletonLoader from '../components/common/SkeletonLoader.vue';
-import { CheckCircle, XCircle, Pencil, EyeOff, Eye, CheckSquare, Trash2 } from 'lucide-vue-next';
+import { CheckCircle, XCircle, Pencil, EyeOff, Eye, CheckSquare, Trash2, Plus } from 'lucide-vue-next';
 import axios from 'axios';
 import { confirmAction, confirmUpdate, showSuccess, showError, promptInput } from '../utils/sweetalert';
 import debounce from 'lodash/debounce';
@@ -188,6 +221,11 @@ const pagination = ref({});
 const editModalVisible = ref(false);
 const editForm = ref({});
 const selectedCourse = ref(null);
+
+// Create Course
+const createModalVisible = ref(false);
+const newCourseTitle = ref('');
+const newCourseCategory = ref('');
 
 // Bulk Selection
 const selectedCourses = ref([]);
@@ -236,7 +274,7 @@ const fetchCourses = async (page = 1) => {
 
 const fetchCategories = async () => {
   const res = await axios.get('/api/categories');
-  categories.value = res.data;
+  categories.value = res.data.data;
 };
 
 const debouncedSearch = debounce(() => fetchCourses(1), 300);
@@ -324,6 +362,22 @@ const saveEdit = async () => {
   showSuccess(t('admin.courses.course_updated'));
   editModalVisible.value = false;
   fetchCourses();
+};
+
+const createCourse = async () => {
+    try {
+        await axios.post('/api/courses', {
+            title: newCourseTitle.value,
+            category_id: newCourseCategory.value
+        });
+        showSuccess(t('instructor_dashboard.create_course_modal.submit') + ' ' + t('admin.courses.bulk_success', {action: 'success', count: 1}));
+        createModalVisible.value = false;
+        newCourseTitle.value = '';
+        newCourseCategory.value = '';
+        fetchCourses();
+    } catch (e) {
+        showError(e.response?.data?.message || t('common.error'));
+    }
 };
 
 const handleLogout = async () => { await auth.logout(); router.push('/login'); };
